@@ -33,7 +33,7 @@ export default function ShoppingPage() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               <div className="absolute bottom-4 left-6 flex items-center gap-3">
                 {store.budgetFriendly && (
-                  <Badge className="bg-green-500/90 text-white">
+                  <Badge className="bg-green-500/90 text-white border-none px-4 py-1.5 font-black uppercase text-[10px] tracking-widest">
                     Budget Match
                   </Badge>
                 )}
@@ -50,7 +50,7 @@ export default function ShoppingPage() {
                   <Clock className="h-3 w-3" /> {store.hours}
                 </span>
               </div>
-              <CardTitle className="text-3xl font-black mt-2">{store.name}</CardTitle>
+              <CardTitle className="text-3xl font-black mt-2 leading-tight">{store.name}</CardTitle>
               <div className="flex items-center gap-1 font-bold text-muted-foreground text-xs mt-3">
                 <MapPin className="h-3 w-3 text-primary" /> {store.location}
               </div>
@@ -58,8 +58,8 @@ export default function ShoppingPage() {
             
             <CardContent className="pt-6 pb-8 px-8 mt-auto">
               <div className="flex justify-between items-center pt-6 border-t">
-                <div className="text-xs text-muted-foreground flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" /> Personalized choice
+                <div className="text-xs text-muted-foreground flex items-center gap-2 font-bold italic">
+                  <CheckCircle2 className="h-4 w-4 text-primary" /> Personalized
                 </div>
                 <Button variant="outline" className="border-2 rounded-2xl px-6 h-10 font-bold hover:bg-primary hover:text-primary-foreground transition-all shadow-sm">
                   Visit Store
