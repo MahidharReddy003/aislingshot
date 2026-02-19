@@ -30,7 +30,7 @@ const GenerateExplanationOutputSchema = z.object({
   explanation: z
     .string()
     .describe(
-      'A natural language explanation of why this recommendation was made, detailing how it aligns with budget, preferences, accessibility, and diversity. Example: "Within your ₹120 budget. Matches your vegetarian preference. Adds variety to recent choices. Highly rated by students."
+      'A natural language explanation of why this recommendation was made, detailing how it aligns with budget, preferences, accessibility, and diversity. Example: "Within your ₹120 budget. Matches your vegetarian preference. Adds variety to recent choices. Highly rated by students."'
     ),
 });
 export type GenerateExplanationOutput = z.infer<typeof GenerateExplanationOutputSchema>;
