@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Send, Loader2, Sparkles, UserCircle } from 'lucide-react';
+import { Send, Loader2, Sparkles, UserCircle, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface Message {
@@ -76,34 +76,31 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="container max-w-3xl mx-auto py-12 px-4 h-[calc(100vh-10rem)] flex flex-col">
-      <div className="mb-6 flex items-center gap-3">
-        <div className="p-2 rounded-xl bg-primary/10">
-          <Sparkles className="h-6 w-6 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold">AI Assistant Chat</h1>
-          <p className="text-xs text-muted-foreground">Always personalized to your persona, health, and budget.</p>
-        </div>
+    <div className="container max-w-6xl mx-auto py-12 px-4 pb-24 h-[calc(100vh-10rem)] flex flex-col">
+      <div className="mb-12">
+        <h1 className="text-4xl font-black tracking-tight flex items-center gap-3">
+          <MessageSquare className="text-pink-500 h-8 w-8" /> AI Chat
+        </h1>
+        <p className="text-muted-foreground mt-2 text-lg">Always personalized to your persona, health, and budget.</p>
       </div>
 
-      <Card className="flex-1 overflow-hidden border-2 flex flex-col shadow-xl">
-        <ScrollArea className="flex-1 p-6">
-          <div className="space-y-6">
+      <Card className="flex-1 overflow-hidden border-2 rounded-[2.5rem] flex flex-col shadow-xl bg-card">
+        <ScrollArea className="flex-1 p-8">
+          <div className="space-y-8">
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`flex gap-3 max-w-[85%] ${m.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                  <Avatar className="h-8 w-8 border">
+                <div className={`flex gap-4 max-w-[85%] ${m.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                  <Avatar className="h-10 w-10 border-2 shadow-sm">
                     {m.role === 'assistant' ? (
-                      <AvatarFallback className="bg-primary text-primary-foreground"><Sparkles className="h-4 w-4" /></AvatarFallback>
+                      <AvatarFallback className="bg-primary text-primary-foreground font-black"><Sparkles className="h-5 w-5" /></AvatarFallback>
                     ) : (
-                      <AvatarFallback><UserCircle className="h-5 w-5" /></AvatarFallback>
+                      <AvatarFallback className="bg-muted"><UserCircle className="h-6 w-6" /></AvatarFallback>
                     )}
                   </Avatar>
-                  <div className={`rounded-2xl px-4 py-2.5 text-sm shadow-sm ${
+                  <div className={`rounded-3xl px-6 py-4 text-sm font-medium leading-relaxed shadow-sm ${
                     m.role === 'user' 
                       ? 'bg-primary text-primary-foreground rounded-tr-none' 
-                      : 'bg-muted rounded-tl-none border'
+                      : 'bg-muted rounded-tl-none border-2'
                   }`}>
                     {m.content}
                   </div>
@@ -112,7 +109,7 @@ export default function ChatPage() {
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="flex gap-3 items-center text-muted-foreground text-xs italic">
+                <div className="flex gap-4 items-center text-muted-foreground text-xs font-black uppercase tracking-widest italic animate-pulse">
                   <Loader2 className="h-4 w-4 animate-spin" /> Thinking...
                 </div>
               </div>
@@ -120,17 +117,17 @@ export default function ChatPage() {
             <div ref={scrollRef} />
           </div>
         </ScrollArea>
-        <div className="p-4 border-t bg-muted/20">
-          <div className="flex gap-2">
+        <div className="p-6 border-t bg-muted/20">
+          <div className="flex gap-4">
             <Input 
-              placeholder="Type your message here..." 
+              placeholder="Describe your needs or ask for a plan..." 
               value={input} 
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSend()}
-              className="bg-background h-12 border-2"
+              className="bg-background h-14 border-2 rounded-2xl px-6 text-lg"
             />
-            <Button onClick={handleSend} disabled={loading || !input.trim()} className="h-12 w-12 rounded-full p-0">
-              <Send className="h-5 w-5" />
+            <Button onClick={handleSend} disabled={loading || !input.trim()} className="h-14 w-14 rounded-2xl p-0 shadow-lg transition-transform hover:scale-105 shrink-0">
+              <Send className="h-6 w-6" />
             </Button>
           </div>
         </div>
