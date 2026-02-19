@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { doc, serverTimestamp } from 'firebase/firestore';
-import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
+import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking, useAuth } from '@/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,7 +38,8 @@ const INTERESTS = ['Food', 'Events', 'Shopping', 'Travel', 'Tech', 'Music', 'Out
 const HEALTH_TAGS = ['Diabetes', 'Vegan', 'Gluten-Free', 'Knee Pain', 'Asthma', 'Peanut Allergy'];
 
 export default function SettingsPage() {
-  const { user, auth } = useUser();
+  const { user } = useUser();
+  const auth = useAuth();
   const db = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
@@ -90,9 +91,12 @@ export default function SettingsPage() {
   };
 
   const handleLogout = async () => {
-    if (!auth) return;
-    await signOut(auth);
-    router.replace('/login');
+    try {
+      await signOut(auth);
+      router.replace('/login');
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   if (isLoading || !profile) return <div className="flex items-center justify-center h-screen"><Loader2 className="animate-spin text-primary h-8 w-8" /></div>;
@@ -270,7 +274,6 @@ export default function SettingsPage() {
               <CardDescription>Manage dietary needs and health conditions for precise AI filtering.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-8 py-6">
-              {/* HEALTH MANAGEMENT SECTION */}
               <div className="space-y-4">
                 <Label className="font-bold flex items-center gap-2">
                   <Activity className="h-4 w-4 text-primary" /> Health & Dietary Constraints

@@ -24,7 +24,7 @@ import {
   Info,
   Wrench
 } from "lucide-react";
-import { useUser } from "@/firebase";
+import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
 import {
   DropdownMenu,
@@ -43,13 +43,17 @@ import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { user, auth } = useUser();
+  const { user } = useUser();
+  const auth = useAuth();
   const router = useRouter();
 
   const handleLogout = async () => {
-    if (!auth) return;
-    await signOut(auth);
-    router.replace('/login');
+    try {
+      await signOut(auth);
+      router.replace('/login');
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   return (
@@ -112,7 +116,7 @@ export default function Navbar() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   
-                  {/* EXPERIENCES QUICK NAV (Visible only in profile dropdown for clarity) */}
+                  {/* EXPERIENCES QUICK NAV */}
                   <DropdownMenuGroup className="md:hidden">
                     <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Core Modules</DropdownMenuLabel>
                     <DropdownMenuItem asChild><Link href="/experiences/recommender"><Sparkles className="mr-2 h-4 w-4" /> Recommender</Link></DropdownMenuItem>
