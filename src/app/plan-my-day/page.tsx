@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -35,7 +34,6 @@ export default function PlanMyDayPage() {
   const { data: profile, isLoading: isProfileLoading } = useDoc(profileRef);
   const { toast } = useToast();
 
-  // INTERCONNECTED DATA: Initialize with profile values
   const [budget, setBudget] = useState(0);
   const [time, setTime] = useState(120);
   const [loading, setLoading] = useState(false);
@@ -44,7 +42,7 @@ export default function PlanMyDayPage() {
   useEffect(() => {
     if (profile) {
       if (profile.budgetPreference !== undefined) setBudget(profile.budgetPreference);
-      if (profile.availableTime !== undefined) setTime(profile.availableTime * 60); // Assuming profile.availableTime is in hours
+      if (profile.availableTime !== undefined) setTime(profile.availableTime * 60);
     }
   }, [profile]);
 
@@ -137,7 +135,7 @@ export default function PlanMyDayPage() {
           {result ? (
             <div className="space-y-12 animate-in fade-in slide-in-from-right-4 duration-500">
               <Card className="border-primary border-4 shadow-2xl rounded-[3rem] overflow-hidden bg-primary text-primary-foreground relative">
-                <div className="absolute top-0 right-0 p-8 opacity-10"><Sparkles className="h-32 w-32" /></div>
+                <div className="absolute top-0 right-0 p-10 opacity-10"><Sparkles className="h-32 w-32" /></div>
                 <CardContent className="p-10">
                   <h3 className="text-3xl font-black mb-4 tracking-tight">Today's AI Strategy</h3>
                   <p className="text-lg opacity-80 italic leading-relaxed">"{result.summary}"</p>
@@ -203,11 +201,6 @@ export default function PlanMyDayPage() {
                         </div>
                         <h3 className="text-3xl font-black mb-3 group-hover:text-primary transition-colors">{act.title}</h3>
                         <p className="text-muted-foreground leading-relaxed flex-1">{act.description}</p>
-                        
-                        <div className="mt-8 pt-6 border-t flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-primary">
-                           <span>Selected for: {profile?.role || 'User'}</span>
-                           <span className="text-muted-foreground opacity-60">Phase {idx + 1} of Day</span>
-                        </div>
                       </div>
                     </CardContent>
                   </Card>
