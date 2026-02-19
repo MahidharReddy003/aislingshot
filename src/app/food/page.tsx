@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Utensils, Star, MapPin, Sparkles, Loader2, Clock, Info, CheckCircle2, XCircle } from 'lucide-react';
 import mockData from '@/app/lib/mock-data.json';
 import { useToast } from '@/hooks/use-toast';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { getPlaceholderImageUrl } from '@/lib/placeholder-images';
 import {
   Dialog,
   DialogContent,
@@ -32,11 +32,6 @@ export default function FoodPage() {
       setLoading(false);
       toast({ title: 'AI Suggestion Ready!', description: `Try ${option.name} today.` });
     }, 1500);
-  };
-
-  const getRestaurantImage = (imageId: string) => {
-    const img = PlaceHolderImages.find(p => p.id === imageId);
-    return img?.imageUrl || "https://picsum.photos/seed/food/600/400";
   };
 
   return (
@@ -72,7 +67,7 @@ export default function FoodPage() {
           <Card key={item.id} className="hover:shadow-xl transition-all border-2 rounded-[2.5rem] overflow-hidden flex flex-col group">
             <div className="relative h-64 w-full overflow-hidden">
               <Image 
-                src={getRestaurantImage(item.imageId || '')} 
+                src={getPlaceholderImageUrl(item.imageId || 'restaurant-street')} 
                 alt={item.name} 
                 fill 
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -121,7 +116,7 @@ export default function FoodPage() {
                   <DialogContent className="sm:max-w-[600px] rounded-[2rem] p-0 overflow-hidden border-2">
                     <div className="relative h-48 w-full">
                        <Image 
-                        src={getRestaurantImage(item.imageId || '')} 
+                        src={getPlaceholderImageUrl(item.imageId || 'restaurant-street')} 
                         alt={item.name} 
                         fill 
                         className="object-cover"
@@ -143,7 +138,7 @@ export default function FoodPage() {
                             <div className="flex gap-4">
                               <div className="relative h-20 w-20 shrink-0 rounded-2xl overflow-hidden bg-muted">
                                 <Image 
-                                  src={`https://picsum.photos/seed/${menuItem.item}/200/200`} 
+                                  src={getPlaceholderImageUrl('hero-abstract')} 
                                   alt={menuItem.item}
                                   fill
                                   className="object-cover"

@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Clock, DollarSign, Sparkles, Loader2, Target, CheckCircle, FileText, Share2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { getPlaceholderImageUrl } from '@/lib/placeholder-images';
 
 export default function PlanMyDayPage() {
   const { user } = useUser();
@@ -130,7 +131,7 @@ export default function PlanMyDayPage() {
                     <CardContent className="p-0 flex flex-col md:flex-row">
                       <div className="relative w-full md:w-56 h-48 md:h-auto shrink-0 bg-muted">
                         <Image 
-                          src={`https://picsum.photos/seed/${act.imageHint}/400/400`} 
+                          src={getPlaceholderImageUrl(act.imageHint || 'hero-abstract')} 
                           alt={act.title} 
                           fill 
                           className="object-cover group-hover:scale-105 transition-transform duration-500"

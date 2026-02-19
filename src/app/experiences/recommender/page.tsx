@@ -30,6 +30,7 @@ import {
   Image as ImageIcon
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { getPlaceholderImageUrl } from "@/lib/placeholder-images";
 
 export default function RecommenderPage() {
   const { toast } = useToast();
@@ -164,7 +165,7 @@ export default function RecommenderPage() {
                 <Card className="border-primary border-2 shadow-xl overflow-hidden rounded-3xl">
                   <div className="relative h-64 w-full bg-muted">
                     <Image 
-                      src={`https://picsum.photos/seed/${result.imageHint}/1200/600`}
+                      src={getPlaceholderImageUrl(result.imageHint || 'hero-abstract')}
                       alt={result.recommendation}
                       fill
                       className="object-cover"
@@ -279,13 +280,13 @@ export default function RecommenderPage() {
 
               <TabsContent value="alternatives" className="space-y-4">
                 {[
-                  { name: "Alternative A", reason: "Slightly cheaper, less social atmosphere.", icon: "coffee" },
-                  { name: "Alternative B", reason: "Premium choice, matches accessibility needs perfectly.", icon: "star" }
+                  { name: "Alternative A", reason: "Slightly cheaper, less social atmosphere.", icon: "restaurant-street" },
+                  { name: "Alternative B", reason: "Premium choice, matches accessibility needs perfectly.", icon: "restaurant-italian" }
                 ].map((alt, i) => (
                   <Card key={i} className="border-2 hover:border-primary/50 transition-all cursor-pointer group p-6">
                     <div className="flex items-center gap-6">
                       <div className="h-16 w-16 bg-muted rounded-2xl overflow-hidden relative shrink-0">
-                        <Image src={`https://picsum.photos/seed/${alt.icon}/100/100`} alt={alt.name} fill className="object-cover" />
+                        <Image src={getPlaceholderImageUrl(alt.icon)} alt={alt.name} fill className="object-cover" />
                       </div>
                       <div className="flex-1">
                         <h4 className="font-bold text-lg group-hover:text-primary transition-colors">{alt.name}</h4>

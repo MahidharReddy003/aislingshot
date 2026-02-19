@@ -4,98 +4,74 @@
     {
       "id": "hero-abstract",
       "description": "Clean abstract technological background",
-      "imageUrl": "https://picsum.photos/seed/tech-abstract/1200/800",
+      "imageUrl": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200&h=800",
       "imageHint": "abstract technology"
     },
     {
       "id": "persona-student",
       "description": "Student at a modern campus",
-      "imageUrl": "https://picsum.photos/seed/student-campus/400/400",
+      "imageUrl": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=400&h=400",
       "imageHint": "student campus"
     },
     {
       "id": "persona-traveler",
       "description": "Traveler with a backpack in a city",
-      "imageUrl": "https://picsum.photos/seed/traveler-city/400/400",
+      "imageUrl": "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&q=80&w=400&h=400",
       "imageHint": "traveler city"
     },
     {
       "id": "persona-creator",
       "description": "Creator working at a desk with digital tools",
-      "imageUrl": "https://picsum.photos/seed/creator-workspace/400/400",
+      "imageUrl": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=400&h=400",
       "imageHint": "creator workspace"
     },
     {
       "id": "restaurant-indian",
       "description": "Vibrant Indian restaurant interior",
-      "imageUrl": "https://picsum.photos/seed/indian-food/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=600&h=400",
       "imageHint": "indian restaurant"
     },
     {
       "id": "restaurant-salad",
       "description": "Fresh and modern salad bar",
-      "imageUrl": "https://picsum.photos/seed/salad-bar/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=600&h=400",
       "imageHint": "healthy cafe"
     },
     {
       "id": "restaurant-burger",
       "description": "Classic American burger joint",
-      "imageUrl": "https://picsum.photos/seed/burger-joint/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?auto=format&fit=crop&q=80&w=600&h=400",
       "imageHint": "burger restaurant"
     },
     {
       "id": "restaurant-italian",
       "description": "Elegant Italian trattoria",
-      "imageUrl": "https://picsum.photos/seed/italian-trattoria/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&q=80&w=600&h=400",
       "imageHint": "italian restaurant"
-    },
-    {
-      "id": "restaurant-street",
-      "description": "Lively street food corner",
-      "imageUrl": "https://picsum.photos/seed/street-food/600/400",
-      "imageHint": "street food"
     },
     {
       "id": "event-tech",
       "description": "Technology workshop or seminar",
-      "imageUrl": "https://picsum.photos/seed/tech-event/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1540575861501-7ad05823c9f5?auto=format&fit=crop&q=80&w=600&h=400",
       "imageHint": "tech workshop"
     },
     {
       "id": "event-music",
       "description": "Outdoor music festival",
-      "imageUrl": "https://picsum.photos/seed/music-fest/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1459749411177-042180ceea72?auto=format&fit=crop&q=80&w=600&h=400",
       "imageHint": "music festival"
     },
     {
       "id": "travel-sunset",
       "description": "Beautiful sunset over a landscape",
-      "imageUrl": "https://picsum.photos/seed/sunset-view/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&q=80&w=600&h=400",
       "imageHint": "sunset landscape"
     },
     {
       "id": "travel-museum",
       "description": "Grand museum entrance",
-      "imageUrl": "https://picsum.photos/seed/museum-exterior/600/400",
+      "imageUrl": "https://images.unsplash.com/photo-1518998053502-53cc8de79e98?auto=format&fit=crop&q=80&w=600&h=400",
       "imageHint": "museum architecture"
-    },
-    {
-      "id": "travel-garden",
-      "description": "Lush botanical garden",
-      "imageUrl": "https://picsum.photos/seed/botanical-garden/600/400",
-      "imageHint": "botanical garden"
-    },
-    {
-      "id": "shop-mall",
-      "description": "Modern shopping mall interior",
-      "imageUrl": "https://picsum.photos/seed/shopping-mall/600/400",
-      "imageHint": "shopping mall"
-    },
-    {
-      "id": "shop-boutique",
-      "description": "Small artisan boutique",
-      "imageUrl": "https://picsum.photos/seed/boutique-shop/600/400",
-      "imageHint": "boutique shop"
     }
   ]
 }
