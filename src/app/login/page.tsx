@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -184,9 +183,6 @@ export default function LoginPage() {
                   </svg>
                   Continue with Google
                 </Button>
-                <p className="text-[10px] text-center text-muted-foreground italic">
-                  Use the same email to keep one account.
-                </p>
               </div>
             </>
           )}
