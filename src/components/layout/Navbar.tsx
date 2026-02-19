@@ -24,8 +24,9 @@ import {
   Info,
   Wrench
 } from "lucide-react";
-import { useUser, useAuth } from "@/firebase";
+import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { signOut } from "firebase/auth";
+import { doc } from "firebase/firestore";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,7 +46,16 @@ export default function Navbar() {
   const pathname = usePathname();
   const { user } = useUser();
   const auth = useAuth();
+  const db = useFirestore();
   const router = useRouter();
+
+  // Fetch profile to ensure Name and Username sync visually in the Navbar
+  const profileRef = useMemoFirebase(() => {
+    if (!user || !db) return null;
+    return doc(db, 'users', user.uid);
+  }, [user, db]);
+
+  const { data: profile } = useDoc(profileRef);
 
   const handleLogout = async () => {
     try {
@@ -55,6 +65,8 @@ export default function Navbar() {
       console.error("Logout error:", error);
     }
   };
+
+  const displayName = profile?.name || user?.displayName || user?.email?.split('@')[0] || 'User';
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -102,7 +114,7 @@ export default function Navbar() {
                       <User className="h-4 w-4 text-primary" />
                     </div>
                     <span className="hidden sm:inline font-bold text-sm text-primary">
-                      {user.displayName || user.email?.split('@')[0]}
+                      {displayName}
                     </span>
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   </Button>
@@ -110,7 +122,7 @@ export default function Navbar() {
                 <DropdownMenuContent className="w-64 mt-2" align="end">
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-bold leading-none">{user.displayName || 'User'}</p>
+                      <p className="text-sm font-bold leading-none">{displayName}</p>
                       <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
                     </div>
                   </DropdownMenuLabel>

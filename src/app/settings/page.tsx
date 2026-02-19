@@ -83,12 +83,12 @@ export default function SettingsPage() {
 
   const handleNameChange = (val: string) => {
     setName(val);
-    setUsername(val); // Sync username with name
+    setUsername(val); // Sync username with name for consistency
   };
 
   const handleUsernameChange = (val: string) => {
     setUsername(val);
-    setName(val); // Sync name with username
+    setName(val); // Sync name with username for consistency
   };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -105,7 +105,7 @@ export default function SettingsPage() {
     // Update Firestore
     updateDocumentNonBlocking(userDocRef, updates);
     
-    // Update Firebase Auth Display Name
+    // Update Firebase Auth Display Name to stay in sync
     try {
       await updateProfile(user, { displayName: name });
     } catch (err) {

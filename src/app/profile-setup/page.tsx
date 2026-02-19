@@ -95,7 +95,7 @@ export default function ProfileSetupPage() {
     setLoading(true);
 
     try {
-      // Sync auth profile name
+      // Synchronize Firebase Auth display name with Firestore profile name
       await updateProfile(user, { displayName: formData.name });
 
       await setDoc(doc(db, 'users', user.uid), {
