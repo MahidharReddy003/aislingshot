@@ -12,6 +12,8 @@
         "username": { "type": "string" },
         "email": { "type": "string", "format": "email" },
         "age": { "type": "number" },
+        "bio": { "type": "string", "description": "Short user biography." },
+        "profileImage": { "type": "string", "description": "URL to profile image." },
         "location": { "type": "string" },
         "budgetPreference": { "type": "number" },
         "interests": {

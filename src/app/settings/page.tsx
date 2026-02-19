@@ -17,6 +17,9 @@ import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   User, 
   Shield, 
@@ -28,13 +31,15 @@ import {
   Accessibility, 
   Settings2,
   Lock,
-  History,
   Info,
   Eye,
-  Trash2,
-  AlertCircle,
   Activity,
-  ArrowRight
+  ArrowRight,
+  Camera,
+  Calendar,
+  Mail,
+  CheckCircle2,
+  ShieldCheck
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -57,6 +62,8 @@ export default function SettingsPage() {
 
   // Identity State
   const [name, setName] = useState('');
+  const [bio, setBio] = useState('');
+  const [role, setRole] = useState('Student');
   const [location, setLocation] = useState('');
 
   // Other settings state
@@ -71,6 +78,8 @@ export default function SettingsPage() {
   useEffect(() => {
     if (profile) {
       setName(profile.name || '');
+      setBio(profile.bio || '');
+      setRole(profile.role || 'Student');
       setLocation(profile.location || '');
       setLocalInterests(profile.interests || []);
       setLocalHealth(profile.healthConditions || []);
@@ -79,32 +88,28 @@ export default function SettingsPage() {
     }
   }, [profile]);
 
-  const handleNameChange = (val: string) => {
-    setName(val);
-  };
-
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userDocRef || !user) return;
     
     const updates = {
       name,
-      username: name, // Sync username with name internally
+      username: name, // Synced username
+      bio,
+      role,
       location,
       updatedAt: serverTimestamp()
     };
 
-    // Update Firestore
     updateDocumentNonBlocking(userDocRef, updates);
     
-    // Update Firebase Auth Display Name to stay in sync
     try {
       await updateProfile(user, { displayName: name });
     } catch (err) {
       console.error("Auth profile update failed", err);
     }
 
-    toast({ title: 'Identity Updated', description: 'Your profile and display name have been synchronized.' });
+    toast({ title: 'Profile Updated', description: 'Your identity and bio have been synchronized successfully.' });
   };
 
   const handleSaveSettings = (updates: any, sectionName: string) => {
@@ -162,37 +167,126 @@ export default function SettingsPage() {
           <TabsTrigger value="notifications" className="rounded-xl data-[state=active]:shadow-md gap-2 py-3"><Bell className="h-4 w-4" /> <span className="hidden md:inline">Alerts</span></TabsTrigger>
         </TabsList>
 
-        <TabsContent value="profile" className="space-y-4">
+        <TabsContent value="profile" className="space-y-8">
           <Card className="border-2 shadow-sm rounded-3xl overflow-hidden">
             <CardHeader className="bg-muted/20 pb-8">
               <CardTitle>Identity & Context</CardTitle>
               <CardDescription>How the SmartLife assistant identifies your daily environment.</CardDescription>
             </CardHeader>
             <CardContent className="pt-8">
-              <form onSubmit={handleUpdateProfile} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="name" className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Full Name</Label>
-                    <Input id="name" value={name} onChange={e => handleNameChange(e.target.value)} placeholder="Enter your full name" className="h-12 border-2" />
+              <form onSubmit={handleUpdateProfile} className="space-y-8">
+                <div className="flex flex-col md:flex-row gap-8 items-start">
+                  <div className="relative group">
+                    <Avatar className="h-32 w-32 border-4 border-background shadow-xl">
+                      <AvatarImage src={profile.profileImage || `https://picsum.photos/seed/${user.uid}/400/400`} />
+                      <AvatarFallback className="bg-primary/10 text-primary text-2xl font-black">{name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                      <Camera className="text-white h-8 w-8" />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="location" className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Search Location</Label>
-                    <Input id="location" value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g., Campus North" className="h-12 border-2" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Email (Authenticated)</Label>
-                    <Input value={user?.email || ''} disabled className="bg-muted h-12 border-2 opacity-60 cursor-not-allowed" />
+                  
+                  <div className="flex-1 w-full space-y-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="name" className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Full Name</Label>
+                        <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder="Enter your full name" className="h-12 border-2" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="username" className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Username (Synced)</Label>
+                        <Input id="username" value={name ? `@${name.toLowerCase().replace(/\s+/g, '')}` : ''} disabled className="h-12 border-2 bg-muted/30 opacity-70" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="bio" className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Short Bio</Label>
+                      <Textarea 
+                        id="bio" 
+                        value={bio} 
+                        onChange={e => setBio(e.target.value)} 
+                        placeholder="Tell us a bit about yourself..." 
+                        className="min-h-[100px] border-2 resize-none" 
+                      />
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="role" className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Primary Role</Label>
+                        <Select value={role} onValueChange={setRole}>
+                          <SelectTrigger className="h-12 border-2"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Student">Student</SelectItem>
+                            <SelectItem value="Professional">Professional</SelectItem>
+                            <SelectItem value="Traveler">Traveler</SelectItem>
+                            <SelectItem value="Creator">Creator</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="location" className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Search Location</Label>
+                        <Input id="location" value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g., Campus North" className="h-12 border-2" />
+                      </div>
+                    </div>
                   </div>
                 </div>
+
                 <div className="pt-6 border-t flex justify-between items-center">
                   <Button type="button" variant="ghost" onClick={handleLogout} className="text-destructive hover:bg-destructive/5 gap-2 px-6 h-12">
                     <LogOut className="h-4 w-4" /> Sign Out
                   </Button>
                   <Button type="submit" className="h-12 px-10 font-bold rounded-xl shadow-lg">
-                    Update Identity
+                    Update Profile
                   </Button>
                 </div>
               </form>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 shadow-sm rounded-3xl overflow-hidden">
+            <CardHeader className="bg-muted/10 border-b">
+              <CardTitle className="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4" /> Account Intelligence
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-8">
+              <div className="grid sm:grid-cols-3 gap-8">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+                    <Calendar className="h-3 w-3" /> Member Since
+                  </p>
+                  <p className="text-sm font-bold">
+                    {profile.createdAt ? new Date(profile.createdAt).toLocaleDateString() : 'N/A'}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+                    <Mail className="h-3 w-3" /> Verification
+                  </p>
+                  <div className="flex items-center gap-1.5">
+                    {user.emailVerified ? (
+                      <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none px-2 h-5">
+                        <CheckCircle2 className="h-3 w-3 mr-1" /> Verified
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-orange-600 border-orange-200 h-5">
+                        Pending
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
+                    <Shield className="h-3 w-3" /> Linked Providers
+                  </p>
+                  <div className="flex gap-2">
+                    {user.providerData.map(p => (
+                      <Badge key={p.providerId} variant="secondary" className="text-[9px] uppercase font-bold tracking-tight h-5">
+                        {p.providerId.replace('.com', '')}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
