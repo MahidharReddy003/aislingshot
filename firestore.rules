@@ -1,180 +1,159 @@
 rules_version = '2';
+
+/**
+ * Explainable AI Consumer Experience Platform - Firestore Security Rules
+ * 
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model designed for an Explainable AI platform. 
+ * The primary goal is to ensure that personalized recommendations, feedback, and settings 
+ * remain private to the individual user while allowing public access to the shared 
+ * library of categories and recommendation items.
+ *
+ * Data Structure:
+ * The data is organized into two main categories:
+ * 1. User-Scoped Data: Nestled under `/users/{userId}/...`. This includes profiles, 
+ *    preferences, AI recommendations, feedback, and collections.
+ * 2. Global Public Data: Top-level collections for `/categories` and `/recommendation_items` 
+ *    which serve as the "catalog" for the AI system.
+ *
+ * Key Security Decisions:
+ * - Ownership Enforcement: All user data requires the authenticated UID to match the 
+ *   {userId} path segment.
+ * - Relational Integrity: Documents within user paths must contain a 'userId' field 
+ *   matching the path to ensure data consistency and allow for future query-based rules.
+ * - Public Read-Only: Categories and Recommendation Items are publicly viewable by 
+ *   anyone (including unauthenticated users) to facilitate the "Try Demo" experience, 
+ *   but writes are strictly prohibited via rules (intended for admin/system use only).
+ * - Prototyping Flexibility: Rules do not enforce strict data types or schemas, 
+ *   allowing for rapid iteration of the AI data models.
+ */
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * CORE PHILOSOPHY:
-     * This ruleset enforces a strict User-Ownership model. Every piece of data in the system is 
-     * logically and physically partitioned under a specific user's root document. This creates 
-     * a secure sandbox where users can only access and modify their own AI recommendations, 
-     * settings, and activity history.
-     *
-     * DATA STRUCTURE:
-     * All application data is nested under the hierarchical path `/users/{userId}/...`. 
-     * Subcollections like 'preferences', 'budgetRules', and 'recommendations' are 
-     * isolated per user.
-     *
-     * KEY SECURITY DECISIONS:
-     * 1. Authorization Independence: Every document contains a denormalized 'userId' field 
-     *    that must match the path's {userId} wildcard and the requester's 'request.auth.uid'. 
-     *    This avoids expensive get() calls and ensures rules are performant.
-     * 2. Self-Creation: Users are allowed to create their own profile document if the 
-     *    document ID matches their Authentication UID.
-     * 3. Resource Protection: Update and Delete operations strictly require the 
-     *    resource to exist and the requester to be the verified owner.
-     * 4. Flexible Schema: While ownership and relational IDs are strictly enforced 
-     *    to maintain integrity, general data shapes are left flexible for rapid prototyping.
-     */
+    // --- Helper Functions ---
 
-    // --- GLOBAL HELPER FUNCTIONS ---
-
-    /**
-     * @description Checks if the user is authenticated with Firebase Auth.
-     */
+    /** @description Checks if the request is from a signed-in user. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /**
-     * @description Checks if the authenticated user's UID matches the provided userId.
-     */
+    /** @description Checks if the authenticated user's UID matches the provided userId. */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /**
-     * @description Combines ownership check with existence check for destructive operations.
-     */
+    /** @description Checks ownership and ensures the document exists for update/delete operations. */
     function isExistingOwner(userId) {
-      return resource != null && isOwner(userId);
+      return isOwner(userId) && resource != null;
     }
 
-    /**
-     * @description Validates that the userId in the data matches the path and is immutable.
-     */
-    function hasValidUserLink(userId) {
-      return request.resource.data.userId == userId;
-    }
+    // --- Collection Rules ---
 
     /**
-     * @description Ensures the userId link cannot be changed during an update.
-     */
-    function isUserLinkImmutable() {
-      return request.resource.data.userId == resource.data.userId;
-    }
-
-    // --- COLLECTION RULES ---
-
-    /**
-     * @description Rules for the root UserProfile entity.
+     * @description User Profile management. Users can only manage their own profile.
      * @path /users/{userId}
-     * @allow (create) if auth.uid matches {userId} and internal data IDs match.
-     * @deny (get) if auth.uid does not match {userId}.
-     * @principle Enforces self-creation and strict ownership of the user profile.
+     * @allow (get) If the user is the owner. (create) If the UID matches and internal ID is set correctly.
+     * @deny (list) Generally restricted or limited to owner only.
+     * @principle Self-creation and ID-to-Path consistency.
      */
     match /users/{userId} {
       allow get, list: if isOwner(userId);
-      allow create: if isOwner(userId) && request.resource.data.id == userId && request.resource.data.firebaseAuthUid == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id && request.resource.data.firebaseAuthUid == resource.data.firebaseAuthUid;
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
       allow delete: if isExistingOwner(userId);
+    }
 
-      /**
-       * @description Rules for User Preferences (Settings).
-       * @path /users/{userId}/preferences/{prefId}
-       * @allow (update) if is the owner of the parent user document.
-       * @deny (create) if the userId in the data doesn't match the path.
-       * @principle Path-based ownership with data-link validation.
-       */
-      match /preferences/{prefId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && hasValidUserLink(userId);
-        allow update: if isExistingOwner(userId) && isUserLinkImmutable();
-        allow delete: if isExistingOwner(userId);
-      }
+    /**
+     * @description User Preferences and Settings. Influences AI transparency and budget controls.
+     * @path /users/{userId}/preferences/{preferenceId}
+     * @allow (create) If userId field matches the authenticated user.
+     * @deny (update) If the userId field is being changed.
+     * @principle Path-based ownership with relational integrity checks.
+     */
+    match /users/{userId}/preferences/{preferenceId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
 
-      /**
-       * @description Rules for User Budget Rules.
-       * @path /users/{userId}/budgetRules/{ruleId}
-       * @allow (list) if is the authenticated owner.
-       * @deny (update) if trying to change the owner of the rule.
-       * @principle Ensures budget constraints are private and immutable regarding ownership.
-       */
-      match /budgetRules/{ruleId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && hasValidUserLink(userId);
-        allow update: if isExistingOwner(userId) && isUserLinkImmutable();
-        allow delete: if isExistingOwner(userId);
-      }
+    /**
+     * @description AI-generated Recommendations. Private to the user.
+     * @path /users/{userId}/recommendations/{recommendationId}
+     * @allow (list) The owner can view their recommendation history.
+     * @principle User-scoped subcollections for privacy.
+     */
+    match /users/{userId}/recommendations/{recommendationId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
 
-      /**
-       * @description Rules for AI-generated Recommendations.
-       * @path /users/{userId}/recommendations/{recId}
-       * @allow (get) if the recommendation belongs to the user.
-       * @deny (write) if the auth.uid does not match the parent userId.
-       * @principle Protects the privacy of AI insights and history.
-       */
-      match /recommendations/{recId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && hasValidUserLink(userId);
-        allow update: if isExistingOwner(userId) && isUserLinkImmutable();
-        allow delete: if isExistingOwner(userId);
-      }
+    /**
+     * @description User Feedback on AI explanations. Used for the improvement loop.
+     * @path /users/{userId}/feedback/{feedbackId}
+     * @allow (create) Authenticated user submitting their own feedback.
+     * @principle Enforces document ownership for writes.
+     */
+    match /users/{userId}/feedback/{feedbackId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
 
-      /**
-       * @description Rules for User Feedback on recommendations.
-       * @path /users/{userId}/feedback/{feedbackId}
-       * @allow (create) if the user is submitting feedback for their own account.
-       * @deny (list) if accessed by a different user.
-       * @principle Relational integrity: links feedback to both the user and the recommendation.
-       */
-      match /feedback/{feedbackId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && hasValidUserLink(userId);
-        allow update: if isExistingOwner(userId) && isUserLinkImmutable();
-        allow delete: if isExistingOwner(userId);
-      }
+    /**
+     * @description Saved items and Favorites.
+     * @path /users/{userId}/saved_recommendations/{savedRecommendationId}
+     * @allow (get) If user owns the saved entry.
+     * @principle Authorization Independence via Denormalization (userId field check).
+     */
+    match /users/{userId}/saved_recommendations/{savedRecommendationId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
 
-      /**
-       * @description Rules for Saved Items and Favorites.
-       * @path /users/{userId}/savedItems/{itemId}
-       * @allow (create) if the user saves an item to their own list.
-       * @deny (delete) if the user does not own the specific item.
-       * @principle Restricts personal 'Saved' collections to the owner.
-       */
-      match /savedItems/{itemId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && hasValidUserLink(userId);
-        allow update: if isExistingOwner(userId) && isUserLinkImmutable();
-        allow delete: if isExistingOwner(userId);
-      }
+    /**
+     * @description Custom collections for organizing saved recommendations.
+     * @path /users/{userId}/collections/{collectionId}
+     * @allow (update) The owner can rename or describe their collections.
+     * @principle Restricts access to a user's own data tree.
+     */
+    match /users/{userId}/collections/{collectionId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
 
-      /**
-       * @description Rules for custom User Collections.
-       * @path /users/{userId}/collections/{colId}
-       * @allow (list) if the user is viewing their own folders.
-       * @deny (update) if changing the userId field.
-       * @principle Supports organizational features with strict access control.
-       */
-      match /collections/{colId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && hasValidUserLink(userId);
-        allow update: if isExistingOwner(userId) && isUserLinkImmutable();
-        allow delete: if isExistingOwner(userId);
-      }
+    /**
+     * @description Public categories for recommendation filtering.
+     * @path /categories/{categoryId}
+     * @allow (get, list) Open to all users to see valid options.
+     * @deny (write) Users cannot modify system-defined categories.
+     * @principle Public read with strictly controlled writes.
+     */
+    match /categories/{categoryId} {
+      allow get, list: if true;
+      // CRITICAL: Cannot implement owner-only writes. The 'Category' entity is missing an 'ownerId' or 'authorId' field.
+      allow create, update, delete: if false; // TODO: Add owner/admin validation once schema supports it.
+    }
 
-      /**
-       * @description Rules for Activity Logs and Audit Trails.
-       * @path /users/{userId}/activityLogs/{logId}
-       * @allow (create) if the system/user records an event.
-       * @deny (update) as activity logs should generally be append-only.
-       * @principle Ensures a private, immutable audit trail of user interactions.
-       */
-      match /activityLogs/{logId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isOwner(userId) && hasValidUserLink(userId);
-        allow update: if isExistingOwner(userId) && isUserLinkImmutable();
-        allow delete: if isExistingOwner(userId);
-      }
+    /**
+     * @description Public library of items that can be recommended.
+     * @path /recommendation_items/{itemId}
+     * @allow (get, list) Open for browsing/searching.
+     * @deny (write) Items are managed by the platform, not individual consumers.
+     * @principle Structural segregation of public and private data.
+     */
+    match /recommendation_items/{itemId} {
+      allow get, list: if true;
+      // CRITICAL: Cannot implement owner-only writes. The 'RecommendationItem' entity is missing an 'ownerId' or 'authorId' field.
+      allow create, update, delete: if false; // TODO: Add owner/admin validation once schema supports it.
     }
   }
 }
