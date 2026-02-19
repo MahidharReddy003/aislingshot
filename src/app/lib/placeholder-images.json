@@ -50,28 +50,70 @@
       "imageHint": "italian restaurant"
     },
     {
+      "id": "dish-paneer",
+      "description": "Paneer Butter Masala",
+      "imageUrl": "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "paneer curry"
+    },
+    {
+      "id": "dish-dal",
+      "description": "Yellow Dal Tadka",
+      "imageUrl": "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "dal tadka"
+    },
+    {
+      "id": "dish-roti",
+      "description": "Fresh Tandoori Roti",
+      "imageUrl": "https://images.unsplash.com/photo-1533777324545-e016272779ad?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "indian bread"
+    },
+    {
+      "id": "dish-biryani",
+      "description": "Vegetable Biryani",
+      "imageUrl": "https://images.unsplash.com/photo-1563379091339-03b21bc4a4f8?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "veg biryani"
+    },
+    {
+      "id": "dish-quinoa",
+      "description": "Quinoa Salad Bowl",
+      "imageUrl": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "quinoa bowl"
+    },
+    {
+      "id": "dish-burger",
+      "description": "Classic Veg Burger",
+      "imageUrl": "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "veggie burger"
+    },
+    {
+      "id": "dish-fries",
+      "description": "Crispy French Fries",
+      "imageUrl": "https://images.unsplash.com/photo-1573016608964-f4b05a68d0cb?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "french fries"
+    },
+    {
+      "id": "dish-pasta",
+      "description": "Creamy Penne Pasta",
+      "imageUrl": "https://images.unsplash.com/photo-1473093226795-af9932fe5856?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "penne pasta"
+    },
+    {
+      "id": "dish-tiramisu",
+      "description": "Italian Tiramisu",
+      "imageUrl": "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?auto=format&fit=crop&q=80&w=400&h=400",
+      "imageHint": "tiramisu cake"
+    },
+    {
       "id": "event-tech",
-      "description": "Technology workshop or seminar",
+      "description": "Technology workshop",
       "imageUrl": "https://images.unsplash.com/photo-1540575861501-7ad05823c9f5?auto=format&fit=crop&q=80&w=600&h=400",
       "imageHint": "tech workshop"
     },
     {
-      "id": "event-music",
-      "description": "Outdoor music festival",
-      "imageUrl": "https://images.unsplash.com/photo-1459749411177-042180ceea72?auto=format&fit=crop&q=80&w=600&h=400",
-      "imageHint": "music festival"
-    },
-    {
       "id": "travel-sunset",
-      "description": "Beautiful sunset over a landscape",
+      "description": "Beautiful sunset landscape",
       "imageUrl": "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&q=80&w=600&h=400",
       "imageHint": "sunset landscape"
-    },
-    {
-      "id": "travel-museum",
-      "description": "Grand museum entrance",
-      "imageUrl": "https://images.unsplash.com/photo-1518998053502-53cc8de79e98?auto=format&fit=crop&q=80&w=600&h=400",
-      "imageHint": "museum architecture"
     }
   ]
 }

@@ -15,10 +15,10 @@
       "logoId": "logo-indian",
       "contact": "+91 98765 43210",
       "menu": [
-        { "item": "Paneer Butter Masala", "price": 140, "description": "Creamy cottage cheese in tomato gravy.", "isAvailable": true },
-        { "item": "Dal Tadka", "price": 100, "description": "Tempered yellow lentils with garlic.", "isAvailable": true },
-        { "item": "Tandoori Roti (2)", "price": 30, "description": "Clay oven baked whole wheat bread.", "isAvailable": true },
-        { "item": "Vegetable Biryani", "price": 150, "description": "Fragrant basmati rice with seasonal veggies.", "isAvailable": false }
+        { "item": "Paneer Butter Masala", "price": 140, "description": "Creamy cottage cheese in tomato gravy.", "isAvailable": true, "imageId": "dish-paneer" },
+        { "item": "Dal Tadka", "price": 100, "description": "Tempered yellow lentils with garlic.", "isAvailable": true, "imageId": "dish-dal" },
+        { "item": "Tandoori Roti (2)", "price": 30, "description": "Clay oven baked whole wheat bread.", "isAvailable": true, "imageId": "dish-roti" },
+        { "item": "Vegetable Biryani", "price": 150, "description": "Fragrant basmati rice with seasonal veggies.", "isAvailable": false, "imageId": "dish-biryani" }
       ]
     },
     { 
@@ -35,10 +35,10 @@
       "logoId": "logo-salad",
       "contact": "+91 87654 32109",
       "menu": [
-        { "item": "Quinoa Avocado Bowl", "price": 220, "description": "Superfood bowl with ripe avocado and lime.", "isAvailable": true },
-        { "item": "Greek Salad", "price": 180, "description": "Feta, olives, and crisp veggies.", "isAvailable": true },
-        { "item": "Fruit Smoothie", "price": 120, "description": "Fresh seasonal fruit blend.", "isAvailable": true },
-        { "item": "Grilled Tofu Salad", "price": 200, "description": "Smoked tofu with honey mustard.", "isAvailable": true }
+        { "item": "Quinoa Avocado Bowl", "price": 220, "description": "Superfood bowl with ripe avocado and lime.", "isAvailable": true, "imageId": "dish-quinoa" },
+        { "item": "Greek Salad", "price": 180, "description": "Feta, olives, and crisp veggies.", "isAvailable": true, "imageId": "dish-quinoa" },
+        { "item": "Fruit Smoothie", "price": 120, "description": "Fresh seasonal fruit blend.", "isAvailable": true, "imageId": "hero-abstract" },
+        { "item": "Grilled Tofu Salad", "price": 200, "description": "Smoked tofu with honey mustard.", "isAvailable": true, "imageId": "dish-quinoa" }
       ]
     },
     { 
@@ -55,10 +55,10 @@
       "logoId": "logo-burger",
       "contact": "+91 76543 21098",
       "menu": [
-        { "item": "Classic Veg Burger", "price": 120, "description": "Hand-crafted veggie patty with lettuce.", "isAvailable": true },
-        { "item": "Cheese Fries", "price": 90, "description": "Loaded with melted cheddar.", "isAvailable": true },
-        { "item": "Peri Peri Wings", "price": 160, "description": "Spicy paneer chunks in peri-peri.", "isAvailable": true },
-        { "item": "Cold Coffee", "price": 80, "description": "Whipped creamy coffee delight.", "isAvailable": true }
+        { "item": "Classic Veg Burger", "price": 120, "description": "Hand-crafted veggie patty with lettuce.", "isAvailable": true, "imageId": "dish-burger" },
+        { "item": "Cheese Fries", "price": 90, "description": "Loaded with melted cheddar.", "isAvailable": true, "imageId": "dish-fries" },
+        { "item": "Peri Peri Wings", "price": 160, "description": "Spicy paneer chunks in peri-peri.", "isAvailable": true, "imageId": "hero-abstract" },
+        { "item": "Cold Coffee", "price": 80, "description": "Whipped creamy coffee delight.", "isAvailable": true, "imageId": "hero-abstract" }
       ]
     },
     { 
@@ -75,10 +75,10 @@
       "logoId": "logo-italian",
       "contact": "+91 65432 10987",
       "menu": [
-        { "item": "Penne Alfredo", "price": 280, "description": "Rich white sauce with mushrooms.", "isAvailable": true },
-        { "item": "Spaghetti Arrabbiata", "price": 260, "description": "Spicy tomato sauce and basil.", "isAvailable": true },
-        { "item": "Garlic Bread with Cheese", "price": 120, "description": "Toasted baguette with mozzarella.", "isAvailable": true },
-        { "item": "Tiramisu", "price": 150, "description": "Classic coffee-flavored Italian cake.", "isAvailable": true }
+        { "item": "Penne Alfredo", "price": 280, "description": "Rich white sauce with mushrooms.", "isAvailable": true, "imageId": "dish-pasta" },
+        { "item": "Spaghetti Arrabbiata", "price": 260, "description": "Spicy tomato sauce and basil.", "isAvailable": true, "imageId": "dish-pasta" },
+        { "item": "Garlic Bread with Cheese", "price": 120, "description": "Toasted baguette with mozzarella.", "isAvailable": true, "imageId": "hero-abstract" },
+        { "item": "Tiramisu", "price": 150, "description": "Classic coffee-flavored Italian cake.", "isAvailable": true, "imageId": "dish-tiramisu" }
       ]
     }
   ],
@@ -101,7 +101,7 @@
       "time": "18:00", 
       "distance": "3.5 km", 
       "category": "Entertainment", 
-      "imageId": "event-music",
+      "imageId": "hero-abstract",
       "organizer": "Vibe Records",
       "attachments": ["Lineup.jpg", "Ticket Info.pdf"]
     }
@@ -123,7 +123,7 @@
       "budget": "Medium", 
       "time": "2 hours", 
       "distance": "8 km", 
-      "imageId": "travel-museum",
+      "imageId": "hero-abstract",
       "bestTime": "10:00 AM - 4:00 PM",
       "features": ["Art", "History", "Indoor"]
     }
@@ -135,7 +135,7 @@
       "type": "Mall", 
       "location": "Downtown", 
       "budgetFriendly": false, 
-      "imageId": "shop-mall",
+      "imageId": "hero-abstract",
       "hours": "10 AM - 11 PM"
     },
     { 
@@ -144,7 +144,7 @@
       "type": "Boutique", 
       "location": "Old Town", 
       "budgetFriendly": true, 
-      "imageId": "shop-boutique",
+      "imageId": "hero-abstract",
       "hours": "11 AM - 8 PM"
     }
   ]

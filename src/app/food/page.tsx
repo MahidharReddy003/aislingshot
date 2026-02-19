@@ -71,7 +71,6 @@ export default function FoodPage() {
                 alt={item.name} 
                 fill 
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
-                data-ai-hint="restaurant food"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               <div className="absolute bottom-4 left-6 flex items-center gap-3">
@@ -133,12 +132,12 @@ export default function FoodPage() {
                       </DialogHeader>
                       
                       <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                        {item.menu?.map((menuItem, idx) => (
+                        {item.menu?.map((menuItem: any, idx: number) => (
                           <div key={idx} className={`p-4 border-2 rounded-3xl transition-all ${menuItem.isAvailable ? 'bg-card hover:bg-muted/30 shadow-sm' : 'bg-muted/50 opacity-60'}`}>
                             <div className="flex gap-4">
                               <div className="relative h-20 w-20 shrink-0 rounded-2xl overflow-hidden bg-muted">
                                 <Image 
-                                  src={getPlaceholderImageUrl('hero-abstract')} 
+                                  src={getPlaceholderImageUrl(menuItem.imageId || 'hero-abstract')} 
                                   alt={menuItem.item}
                                   fill
                                   className="object-cover"
