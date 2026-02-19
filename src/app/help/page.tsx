@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -48,8 +47,8 @@ export default function HelpPage() {
           { title: 'FAQ', desc: 'Quick answers to common questions.', icon: HelpCircle, href: '#faq' },
           { title: 'Community', desc: 'Connect with other SmartLife users.', icon: MessageSquare, href: '#' }
         ].map((box, i) => (
-          <Link key={i} href={box.href} className="group">
-            <Card className="h-full border-2 hover:border-primary transition-all hover:shadow-md cursor-pointer">
+          <Link key={i} href={box.href} className="group" shadow-sm="true">
+            <Card className="h-full border-2 hover:border-primary transition-all hover:shadow-md cursor-pointer rounded-[2rem]">
               <CardHeader>
                 <box.icon className="h-6 w-6 text-primary mb-2 group-hover:scale-110 transition-transform" />
                 <CardTitle className="text-lg">{box.title}</CardTitle>
@@ -67,9 +66,9 @@ export default function HelpPage() {
         </div>
         <Accordion type="single" collapsible className="w-full">
           {faqs.map((faq, i) => (
-            <AccordionItem key={i} value={`item-${i}`} className="border-2 rounded-xl mb-4 px-4 overflow-hidden bg-card">
-              <AccordionTrigger className="hover:no-underline font-bold text-left">{faq.q}</AccordionTrigger>
-              <AccordionContent className="text-muted-foreground leading-relaxed pt-2 pb-4 italic">
+            <AccordionItem key={i} value={`item-${i}`} className="border-2 rounded-2xl mb-4 px-6 overflow-hidden bg-card">
+              <AccordionTrigger className="hover:no-underline font-bold text-left py-6">{faq.q}</AccordionTrigger>
+              <AccordionContent className="text-muted-foreground leading-relaxed pt-2 pb-6 italic text-base">
                 {faq.a}
               </AccordionContent>
             </AccordionItem>
@@ -77,18 +76,18 @@ export default function HelpPage() {
         </Accordion>
       </div>
 
-      <Card className="bg-primary text-primary-foreground rounded-3xl overflow-hidden border-none shadow-xl">
-        <CardContent className="p-10 text-center">
+      <Card className="bg-primary text-primary-foreground rounded-[3rem] overflow-hidden border-none shadow-xl">
+        <CardContent className="p-12 text-center">
           <Sparkles className="h-12 w-12 mx-auto mb-6 opacity-50" />
-          <h2 className="text-3xl font-bold mb-4">Still have questions?</h2>
-          <p className="text-primary-foreground/70 mb-8 max-w-md mx-auto">
+          <h2 className="text-3xl font-bold mb-4 tracking-tight">Still have questions?</h2>
+          <p className="text-primary-foreground/70 mb-10 max-w-md mx-auto text-lg">
             Our support team is here to help you get the most out of your AI experience.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="secondary" className="h-12 px-8 font-bold gap-2">
-              <Mail className="h-4 w-4" /> Contact Support
+            <Button variant="secondary" className="h-14 px-10 font-bold gap-2 rounded-2xl shadow-lg">
+              <Mail className="h-5 w-5" /> Contact Support
             </Button>
-            <Button variant="outline" className="h-12 px-8 font-bold bg-white/10 border-white/20 hover:bg-white/20 text-white" asChild>
+            <Button variant="outline" className="h-14 px-10 font-bold bg-white/10 border-white/20 hover:bg-white/20 text-white rounded-2xl" asChild>
               <Link href="/transparency">Read Protocol</Link>
             </Button>
           </div>
