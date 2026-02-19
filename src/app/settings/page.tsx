@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -27,12 +28,14 @@ import {
   Info,
   Eye,
   Trash2,
-  AlertCircle
+  AlertCircle,
+  Activity
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { signOut } from 'firebase/auth';
 
 const INTERESTS = ['Food', 'Events', 'Shopping', 'Travel', 'Tech', 'Music', 'Outdoors'];
+const HEALTH_TAGS = ['Diabetes', 'Vegan', 'Gluten-Free', 'Knee Pain', 'Asthma', 'Peanut Allergy'];
 
 export default function SettingsPage() {
   const { user, auth } = useUser();
@@ -47,14 +50,15 @@ export default function SettingsPage() {
 
   const { data: profile, isLoading } = useDoc(userDocRef);
 
-  const [saving, setSaving] = useState(false);
   const [localInterests, setLocalInterests] = useState<string[]>([]);
+  const [localHealth, setLocalHealth] = useState<string[]>([]);
   const [budgetVal, setBudgetVal] = useState(500);
   const [discoveryVal, setDiscoveryVal] = useState(50);
 
   useEffect(() => {
     if (profile) {
       setLocalInterests(profile.interests || []);
+      setLocalHealth(profile.healthConditions || []);
       setBudgetVal(profile.budgetPreference || 500);
       setDiscoveryVal(profile.explorationLevel || 50);
     }
@@ -111,7 +115,6 @@ export default function SettingsPage() {
           <TabsTrigger value="notifications" className="rounded-xl data-[state=active]:shadow-md gap-2 py-3"><Bell className="h-4 w-4" /> <span className="hidden md:inline">Alerts</span></TabsTrigger>
         </TabsList>
 
-        {/* PROFILE TAB */}
         <TabsContent value="profile" className="space-y-4">
           <Card className="border-2 shadow-sm rounded-3xl overflow-hidden">
             <CardHeader className="bg-muted/20 pb-8">
@@ -147,7 +150,6 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        {/* PREFERENCES TAB */}
         <TabsContent value="preferences" className="space-y-4">
           <Card className="border-2 shadow-sm rounded-3xl">
             <CardHeader>
@@ -187,9 +189,6 @@ export default function SettingsPage() {
                     </Button>
                   ))}
                 </div>
-                <p className="text-xs text-muted-foreground mt-2 italic flex items-center gap-2">
-                  <Info className="h-3 w-3" /> "Friendly" provides deep logic and emojis. "Concise" gives direct, data-only reasoning.
-                </p>
               </div>
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6">
@@ -203,7 +202,6 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        {/* BUDGET TAB */}
         <TabsContent value="budget" className="space-y-4">
           <Card className="border-2 shadow-sm rounded-3xl">
             <CardHeader>
@@ -224,22 +222,6 @@ export default function SettingsPage() {
                   className="py-4"
                 />
               </div>
-              <div className="space-y-4 pt-6 border-t">
-                <div className="flex items-center justify-between p-6 bg-muted/20 rounded-2xl border-2">
-                  <div className="space-y-1">
-                    <Label className="text-base font-bold">Strict Budget Enforcement</Label>
-                    <p className="text-xs text-muted-foreground">AI will never show options that exceed your cap by even ₹1.</p>
-                  </div>
-                  <Switch defaultChecked onCheckedChange={(c) => handleSaveSettings({ strictBudget: c }, 'Strict Budget')} />
-                </div>
-                <div className="flex items-center justify-between p-6 bg-muted/20 rounded-2xl border-2">
-                  <div className="space-y-1">
-                    <Label className="text-base font-bold">Rolling Savings Bonus</Label>
-                    <p className="text-xs text-muted-foreground">Unspent daily budget adds to your weekend 'exploratory' pool.</p>
-                  </div>
-                  <Switch onCheckedChange={(c) => handleSaveSettings({ rollingSavings: c }, 'Rolling Savings')} />
-                </div>
-              </div>
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6">
               <Button 
@@ -252,7 +234,6 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        {/* DISCOVERY TAB */}
         <TabsContent value="discovery" className="space-y-4">
           <Card className="border-2 shadow-sm rounded-3xl">
             <CardHeader>
@@ -274,17 +255,6 @@ export default function SettingsPage() {
                   onValueChange={(val) => setDiscoveryVal(val[0])} 
                   className="py-4"
                 />
-                <div className="flex justify-between text-[10px] text-muted-foreground font-black uppercase tracking-tighter px-1">
-                  <span>Reliable Favorites</span>
-                  <span>Wild & Unknown</span>
-                </div>
-              </div>
-              <div className="p-6 bg-primary/5 rounded-2xl border-2 border-primary/10 flex items-center justify-between gap-6">
-                <div className="space-y-1">
-                  <Label className="text-base font-bold flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Anti-Stagnation Guard</Label>
-                  <p className="text-xs text-muted-foreground">Force at least one high-diversity suggestion per day to prevent filter bubbles.</p>
-                </div>
-                <Switch defaultChecked onCheckedChange={(c) => handleSaveSettings({ antiStagnation: c }, 'Discovery Guard')} />
               </div>
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6">
@@ -293,41 +263,68 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
 
-        {/* ACCESSIBILITY TAB */}
         <TabsContent value="accessibility" className="space-y-4">
           <Card className="border-2 shadow-sm rounded-3xl">
             <CardHeader>
-              <CardTitle>Inclusion & Visual Profiling</CardTitle>
-              <CardDescription>Ensure SmartLife adaptively respects your physical and cognitive needs.</CardDescription>
+              <CardTitle>Inclusion & Health Profile</CardTitle>
+              <CardDescription>Manage dietary needs and health conditions for precise AI filtering.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 py-6">
-              {[
-                { key: 'lowMobility', title: 'Low Mobility Priority', desc: 'Prioritize locations with ramp access and minimal walking.', icon: Accessibility },
-                { key: 'hapticAlerts', title: 'Time-Critical Alerts', desc: 'Haptic feedback for time-sensitive activity start windows.', icon: Bell },
-                { key: 'highContrast', title: 'High Contrast Mode', desc: 'Increase text weight and button prominence for clarity.', icon: Eye },
-                { key: 'plainLanguage', title: 'Plain-Language Logic', desc: 'Simplify AI explanations into direct bullet points.', icon: Info }
-              ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between p-6 bg-muted/20 rounded-2xl border-2">
-                  <div className="flex gap-4 items-center">
-                    <div className="p-3 rounded-xl bg-background border-2">
-                      <item.icon className="h-5 w-5 text-primary" />
+            <CardContent className="space-y-8 py-6">
+              {/* HEALTH MANAGEMENT SECTION */}
+              <div className="space-y-4">
+                <Label className="font-bold flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-primary" /> Health & Dietary Constraints
+                </Label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 border-2 p-6 rounded-2xl bg-muted/20">
+                  {HEALTH_TAGS.map(tag => (
+                    <div key={tag} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`set-health-${tag}`} 
+                        checked={localHealth.includes(tag)} 
+                        onCheckedChange={(checked) => {
+                          if (checked) setLocalHealth(prev => [...prev, tag]);
+                          else setLocalHealth(prev => prev.filter(h => h !== tag));
+                        }}
+                      />
+                      <label htmlFor={`set-health-${tag}`} className="text-sm font-bold leading-none cursor-pointer">{tag}</label>
                     </div>
-                    <div className="space-y-0.5">
-                      <Label className="text-base font-bold">{item.title}</Label>
-                      <p className="text-xs text-muted-foreground">{item.desc}</p>
-                    </div>
-                  </div>
-                  <Switch 
-                    defaultChecked={profile[item.key]} 
-                    onCheckedChange={(c) => handleSaveSettings({ [item.key]: c }, item.title)} 
-                  />
+                  ))}
                 </div>
-              ))}
+                <Button 
+                  size="sm"
+                  onClick={() => handleSaveSettings({ healthConditions: localHealth }, 'Health Constraints')}
+                  className="rounded-xl"
+                >
+                  Save Health Matrix
+                </Button>
+              </div>
+
+              <div className="pt-6 border-t space-y-4">
+                {[
+                  { key: 'lowMobility', title: 'Low Mobility Priority', desc: 'Prioritize locations with ramp access and minimal walking.', icon: Accessibility },
+                  { key: 'highContrast', title: 'High Contrast Mode', desc: 'Increase text weight and button prominence for clarity.', icon: Eye },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center justify-between p-6 bg-muted/20 rounded-2xl border-2">
+                    <div className="flex gap-4 items-center">
+                      <div className="p-3 rounded-xl bg-background border-2">
+                        <item.icon className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="space-y-0.5">
+                        <Label className="text-base font-bold">{item.title}</Label>
+                        <p className="text-xs text-muted-foreground">{item.desc}</p>
+                      </div>
+                    </div>
+                    <Switch 
+                      checked={profile[item.key]} 
+                      onCheckedChange={(c) => handleSaveSettings({ [item.key]: c }, item.title)} 
+                    />
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* PRIVACY TAB */}
         <TabsContent value="privacy" className="space-y-4">
           <Card className="border-2 shadow-sm rounded-3xl">
             <CardHeader className="bg-accent/10 border-b pb-8">
@@ -345,28 +342,12 @@ export default function SettingsPage() {
                   <Label className="font-bold">Anonymized Telemetry</Label>
                   <p className="text-xs text-muted-foreground">Contribute non-identifiable logic patterns to improve global models.</p>
                 </div>
-                <Switch defaultChecked onCheckedChange={(c) => handleSaveSettings({ telemetry: c }, 'Telemetry')} />
-              </div>
-              <div className="flex items-center justify-between p-4 border-2 rounded-2xl">
-                <div className="space-y-1">
-                  <Label className="font-bold">On-Device Logic Priority</Label>
-                  <p className="text-xs text-muted-foreground">Perform more processing locally for extreme privacy (may be slower).</p>
-                </div>
-                <Switch onCheckedChange={(c) => handleSaveSettings({ localProcessing: c }, 'Privacy Mode')} />
-              </div>
-              <div className="grid grid-cols-2 gap-4 pt-6 border-t">
-                <Button variant="outline" className="h-12 rounded-xl font-bold border-2 gap-2" onClick={() => toast({ title: "Cache Cleared", description: "All local temporary data has been purged." })}>
-                  <History className="h-4 w-4" /> Clear Local Cache
-                </Button>
-                <Button variant="outline" className="h-12 rounded-xl font-bold border-2 text-destructive border-destructive/20 hover:bg-destructive/5 gap-2" onClick={() => toast({ title: "AI Reset Initiated", description: "Contact support to complete factory reset." })}>
-                  <Trash2 className="h-4 w-4" /> Factory Reset AI
-                </Button>
+                <Switch checked={profile?.telemetry} onCheckedChange={(c) => handleSaveSettings({ telemetry: c }, 'Telemetry')} />
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* NOTIFICATIONS TAB */}
         <TabsContent value="notifications" className="space-y-4">
           <Card className="border-2 shadow-sm rounded-3xl">
             <CardHeader>
@@ -375,10 +356,8 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-4 py-6">
               {[
-                { key: 'budgetAlerts', title: 'Budget Threshold Alerts', desc: 'Notify when current activity consumes 80% of daily cap.', default: true },
-                { key: 'smartGaps', title: 'Smart Gap Fillers', desc: 'Suggest mini-activities when a calendar gap is detected.', default: true },
-                { key: 'transparencyReports', title: 'Transparency Reports', desc: 'Weekly summary of how your feedback changed AI logic.', default: false },
-                { key: 'contextualQueries', title: 'Contextual Queries', desc: 'Allow AI to ask for feedback immediately after a saved event.', default: true }
+                { key: 'budgetAlerts', title: 'Budget Threshold Alerts', desc: 'Notify when current activity consumes 80% of daily cap.' },
+                { key: 'smartGaps', title: 'Smart Gap Fillers', desc: 'Suggest mini-activities when a calendar gap is detected.' },
               ].map((item, i) => (
                 <div key={i} className="flex items-center justify-between p-6 bg-muted/20 rounded-2xl border-2">
                   <div className="space-y-1">
@@ -386,7 +365,7 @@ export default function SettingsPage() {
                     <p className="text-xs text-muted-foreground">{item.desc}</p>
                   </div>
                   <Switch 
-                    defaultChecked={profile[item.key] ?? item.default} 
+                    checked={profile[item.key]} 
                     onCheckedChange={(c) => handleSaveSettings({ [item.key]: c }, item.title)} 
                   />
                 </div>
@@ -395,17 +374,6 @@ export default function SettingsPage() {
           </Card>
         </TabsContent>
       </Tabs>
-
-      <div className="mt-12 p-6 bg-yellow-50 border-2 border-yellow-100 rounded-3xl flex gap-4 items-start">
-        <AlertCircle className="h-6 w-6 text-yellow-600 shrink-0 mt-1" />
-        <div>
-          <h4 className="font-bold text-yellow-900">User Control Overrides</h4>
-          <p className="text-sm text-yellow-800 leading-relaxed">
-            Settings marked with "Hard Rules" take absolute precedence over the AI recommendation engine. 
-            If your budget is set to ₹500, SmartLife will never present an option costing ₹501, even if it is a 100% preference match.
-          </p>
-        </div>
-      </div>
     </div>
   );
 }

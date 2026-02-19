@@ -9,6 +9,7 @@ const PlanDayInputSchema = z.object({
   timeAvailable: z.number(),
   userProfile: z.object({
     interests: z.array(z.string()),
+    healthConditions: z.array(z.string()).optional(),
     location: z.string(),
     role: z.string()
   })
@@ -21,7 +22,7 @@ const PlanDayOutputSchema = z.object({
     cost: z.number(),
     durationMinutes: z.number(),
     reason: z.string(),
-    imageHint: z.string().describe('A one or two word keyword hint for an image search (e.g., "coffee", "coding", "park").'),
+    imageHint: z.string().describe('A one or two word keyword hint for an image search.'),
     logoHint: z.string().optional().describe('A keyword hint for a logo or icon.')
   })),
   totalCost: z.number(),
@@ -37,18 +38,21 @@ const planDayPrompt = ai.definePrompt({
   input: { schema: PlanDayInputSchema },
   output: { schema: PlanDayOutputSchema },
   prompt: `You are an AI Smart Life Assistant. 
+
+CRITICAL: You MUST strictly respect the user's health conditions and dietary restrictions: {{#each userProfile.healthConditions}}{{{this}}}, {{/each}}
+
 User Profile:
 - Interests: {{#each userProfile.interests}}{{{this}}}, {{/each}}
 - Location: {{{userProfile.location}}}
 - Role: {{{userProfile.role}}}
 
-User Constraint:
+User Constraints:
 - Budget: ₹{{{budget}}}
 - Time: {{{timeAvailable}}} minutes
 
 Generate a personalized plan including what to eat, where to go, and what to do. 
-Ensure the total cost is within ₹{{{budget}}} and total time is within {{{timeAvailable}}} minutes.
-For each activity, provide a clear "reason" based on user interests and specify image/logo keywords that represent the activity visually.`
+Ensure the plan is safe and suitable based on health conditions.
+For each activity, provide a clear "reason" based on interests and health needs.`
 });
 
 const planDayFlow = ai.defineFlow(

@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Clock, DollarSign, Sparkles, Loader2, Target, CheckCircle, FileText, Share2 } from 'lucide-react';
+import { Clock, DollarSign, Sparkles, Loader2, Target, CheckCircle, FileText, Share2, Activity } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getPlaceholderImageUrl } from '@/lib/placeholder-images';
 
@@ -43,6 +43,7 @@ export default function PlanMyDayPage() {
         timeAvailable: time,
         userProfile: {
           interests: profile.interests || [],
+          healthConditions: profile.healthConditions || [],
           location: profile.location || 'Unknown',
           role: profile.role || 'User'
         }
@@ -101,6 +102,21 @@ export default function PlanMyDayPage() {
                 </div>
                 <Input id="time" type="number" value={time} onChange={e => setTime(parseInt(e.target.value) || 0)} className="h-11 border-2" />
               </div>
+
+              {/* HEALTH INDICATOR */}
+              {profile?.healthConditions && profile.healthConditions.length > 0 && (
+                <div className="p-3 bg-primary/5 rounded-xl border border-primary/10">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-primary flex items-center gap-1 mb-1">
+                    <Activity className="h-3 w-3" /> Active Health Guards
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {profile.healthConditions.map(h => (
+                      <Badge key={h} variant="outline" className="text-[9px] h-4 bg-white">{h}</Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <Button onClick={handlePlan} className="w-full h-12 gap-2 rounded-xl font-bold shadow-lg" disabled={loading || !profile}>
                 {loading ? <Loader2 className="animate-spin h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
                 Draft Plan
@@ -118,10 +134,6 @@ export default function PlanMyDayPage() {
                 <CardHeader className="p-8">
                   <h3 className="text-2xl font-black mb-2 tracking-tight">Today's Itinerary</h3>
                   <p className="text-primary-foreground/80 italic leading-relaxed">"{result.summary}"</p>
-                  <div className="pt-6 flex gap-6 text-xs font-black uppercase tracking-[0.2em]">
-                    <span className="flex items-center gap-2"><DollarSign className="h-4 w-4" /> Total Cost: ₹{result.totalCost}</span>
-                    <span className="flex items-center gap-2"><Clock className="h-4 w-4" /> Duration: {result.activities.reduce((acc: any, curr: any) => acc + curr.durationMinutes, 0)}m</span>
-                  </div>
                 </CardHeader>
               </Card>
 
@@ -135,7 +147,6 @@ export default function PlanMyDayPage() {
                           alt={act.title} 
                           fill 
                           className="object-cover group-hover:scale-105 transition-transform duration-500"
-                          data-ai-hint={act.imageHint}
                         />
                         <div className="absolute top-4 left-4">
                           <Badge className="bg-white/90 text-primary border-none font-black shadow-sm h-8 w-8 flex items-center justify-center p-0 rounded-lg">
@@ -149,21 +160,13 @@ export default function PlanMyDayPage() {
                             <Badge variant="secondary" className="font-bold uppercase text-[10px] tracking-widest">{act.cost === 0 ? 'Free' : `₹${act.cost}`}</Badge>
                             <Badge variant="outline" className="font-bold uppercase text-[10px] tracking-widest">{act.durationMinutes} min</Badge>
                           </div>
-                          <div className="flex gap-2">
-                            <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full border">
-                              <FileText className="h-3 w-3" />
-                            </Button>
-                            <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full border">
-                              <Share2 className="h-3 w-3" />
-                            </Button>
-                          </div>
                         </div>
                         <h3 className="text-2xl font-black mb-2 group-hover:text-primary transition-colors">{act.title}</h3>
                         <p className="text-sm text-muted-foreground leading-relaxed mb-6">{act.description}</p>
                         
                         <Accordion type="single" collapsible>
                           <AccordionItem value="logic" className="border-none">
-                            <AccordionTrigger className="text-[10px] font-black uppercase tracking-widest text-primary bg-primary/5 px-4 py-2.5 rounded-xl hover:no-underline border border-primary/10 transition-all hover:bg-primary/10">
+                            <AccordionTrigger className="text-[10px] font-black uppercase tracking-widest text-primary bg-primary/5 px-4 py-2.5 rounded-xl hover:no-underline border border-primary/10">
                               <div className="flex items-center gap-2">
                                 <Target className="h-4 w-4" /> AI Choice Analysis
                               </div>
@@ -178,16 +181,6 @@ export default function PlanMyDayPage() {
                   </Card>
                 ))}
               </div>
-              
-              <div className="flex gap-4 pt-4">
-                <Button variant="outline" className="flex-1 border-2 h-14 rounded-2xl font-black uppercase tracking-widest gap-2" onClick={handleSavePlan} disabled={savingPlan}>
-                  {savingPlan ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
-                  Save Library
-                </Button>
-                <Button className="flex-1 h-14 rounded-2xl font-black uppercase tracking-widest gap-2 shadow-xl">
-                  <Share2 className="h-4 w-4" /> Share Plan
-                </Button>
-              </div>
             </div>
           ) : (
             <div className="h-full min-h-[450px] border-4 border-dashed rounded-[3rem] flex flex-col items-center justify-center text-muted-foreground p-12 text-center opacity-40">
@@ -195,7 +188,7 @@ export default function PlanMyDayPage() {
                 <Clock className="h-10 w-10" />
               </div>
               <h3 className="text-2xl font-black uppercase tracking-tight mb-2">Itinerary Logic Idle</h3>
-              <p className="max-w-xs text-sm font-medium">Define your constraints on the left. The AI will cross-reference your budget, time, and persona to build a transparent plan.</p>
+              <p className="max-w-xs text-sm font-medium">Define your constraints on the left. The AI will cross-reference your budget, time, persona, and health needs.</p>
             </div>
           )}
         </div>

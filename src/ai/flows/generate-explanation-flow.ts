@@ -1,11 +1,7 @@
 
 'use server';
 /**
- * @fileOverview A Genkit flow that generates a personalized recommendation along with a clear, natural language explanation of why the recommendation was made, based on user preferences and constraints.
- *
- * - generateExplanation - A function that handles the recommendation and explanation generation process.
- * - GenerateExplanationInput - The input type for the generateExplanation function.
- * - GenerateExplanationOutput - The return type for the generateExplanation function.
+ * @fileOverview A Genkit flow that generates a personalized recommendation along with a clear, natural language explanation of why the recommendation was made, based on user preferences, constraints, and health conditions.
  */
 
 import {ai} from '@/ai/genkit';
@@ -15,6 +11,7 @@ import {z} from 'genkit';
 const GenerateExplanationInputSchema = z.object({
   userPersona: z.string().describe('The persona of the user (e.g., "Student", "Traveler", "Creator").'),
   preferences: z.string().describe('User preferences (e.g., "vegetarian", "events", "retail", "Italian food").'),
+  healthConditions: z.array(z.string()).optional().describe('Specific health needs or dietary restrictions.'),
   budget: z.number().describe('The maximum budget in numerical value (e.g., 120 for ₹120).'),
   time: z.string().describe('The preferred time (e.g., "lunch", "evening", "anytime").'),
   accessibility: z.string().describe('Accessibility requirements (e.g., "wheelchair accessible", "quiet environment", "none").'),
@@ -24,52 +21,50 @@ export type GenerateExplanationInput = z.infer<typeof GenerateExplanationInputSc
 
 // Output Schema
 const GenerateExplanationOutputSchema = z.object({
-  recommendation: z.string().describe('A personalized recommendation (e.g., "Try the new Italian restaurant \'Pasta Palace\'").'),
+  recommendation: z.string().describe('A personalized recommendation.'),
   costEstimate: z.number().describe('The estimated cost of the recommendation.'),
-  timeEstimate: z.string().describe('The estimated time commitment or time it takes to experience the recommendation (e.g., "30-45 minutes", "2 hours").'),
-  diversityScore: z.number().min(0).max(100).describe('A score from 0 to 100 indicating how diverse this recommendation is compared to recent choices. Higher is better.'),
+  timeEstimate: z.string().describe('The estimated time commitment.'),
+  diversityScore: z.number().min(0).max(100).describe('Diversity score.'),
   explanation: z
     .string()
     .describe(
-      'A natural language explanation of why this recommendation was made, detailing how it aligns with budget, preferences, accessibility, and diversity.'
+      'A natural language explanation detailing how it aligns with budget, preferences, accessibility, health needs, and diversity.'
     ),
-  imageHint: z.string().describe('A one or two word keyword hint for an image search (e.g., "pasta", "tech park", "city sunset").'),
-  logoHint: z.string().optional().describe('A keyword hint for a logo or icon (e.g., "fork", "sparkles", "train").'),
+  imageHint: z.string().describe('A keyword hint for an image search.'),
+  logoHint: z.string().optional().describe('A keyword hint for a logo or icon.'),
 });
 export type GenerateExplanationOutput = z.infer<typeof GenerateExplanationOutputSchema>;
 
-// Wrapper function for the flow
 export async function generateExplanation(
   input: GenerateExplanationInput
 ): Promise<GenerateExplanationOutput> {
   return generateExplanationFlow(input);
 }
 
-// Define the prompt
 const explainableRecommendationPrompt = ai.definePrompt({
   name: 'explainableRecommendationPrompt',
   input: { schema: GenerateExplanationInputSchema },
   output: { schema: GenerateExplanationOutputSchema },
-  prompt: `You are an Explainable AI Recommendation Engine. Your goal is to provide a personalized recommendation and a clear, concise explanation of why that recommendation was made, based on the user's input.
+  prompt: `You are an Explainable AI Recommendation Engine. Your goal is to provide a personalized recommendation and a clear, concise explanation of why that recommendation was made.
+
+CRITICAL: You MUST strictly adhere to the user's health conditions and dietary restrictions. If they have a health condition like "Diabetes" or an allergy like "Peanuts", your recommendation MUST be safe for them.
 
 The explanation should specifically address:
-1. How the recommendation fits the user's budget.
-2. How it aligns with the user's stated preferences.
-3. How it addresses any accessibility requirements.
-4. How it provides variety, considering their recent choices, to prevent a filter bubble.
+1. How it aligns with health needs or dietary restrictions: {{#each healthConditions}}{{{this}}}, {{/each}}
+2. How it fits the user's budget.
+3. How it aligns with preferences.
+4. How it addresses accessibility.
+5. How it provides variety compared to recent choices: {{#each recentChoices}}- {{{this}}} {{/each}}
 
 User Persona: {{{userPersona}}}
 Preferences: {{{preferences}}}
-Budget: {{{budget}}}
+Budget: ₹{{{budget}}}
 Preferred Time: {{{time}}}
 Accessibility: {{{accessibility}}}
-Recent Choices: {{#if recentChoices}}{{#each recentChoices}}- {{{this}}}
-{{/each}}{{else}}None{{/if}}
 
-Based on the above, provide a suitable recommendation, its estimated cost and time, a diversity score, a detailed explanation, and relevant image/logo keywords.`,
+Provide a suitable recommendation with estimated cost, time, and a detailed explanation.`,
 });
 
-// Define the Genkit flow
 const generateExplanationFlow = ai.defineFlow(
   {
     name: 'generateExplanationFlow',

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -32,7 +33,7 @@ export default function ChatPage() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: 'Hi! I am your Smart Life Assistant. How can I help you plan your day or find something fun to do?' }
+    { role: 'assistant', content: 'Hi! I am your Smart Life Assistant. How can I help you plan your day or find something fun to do? I will also keep your health and budget in mind.' }
   ]);
   
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -51,11 +52,11 @@ export default function ChatPage() {
     setLoading(true);
 
     try {
-      // Sanitize profile to a plain object for Server Action compatibility
       const sanitizedProfile = {
         name: profile.name,
         role: profile.role,
         interests: profile.interests,
+        healthConditions: profile.healthConditions || [],
         location: profile.location,
         budgetPreference: profile.budgetPreference,
         aiBehavior: profile.aiBehavior,
@@ -82,7 +83,7 @@ export default function ChatPage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold">AI Assistant Chat</h1>
-          <p className="text-xs text-muted-foreground">Always personalized to your persona and budget.</p>
+          <p className="text-xs text-muted-foreground">Always personalized to your persona, health, and budget.</p>
         </div>
       </div>
 
@@ -122,7 +123,7 @@ export default function ChatPage() {
         <div className="p-4 border-t bg-muted/20">
           <div className="flex gap-2">
             <Input 
-              placeholder="e.g., Suggest a quiet place to study with ₹100 budget" 
+              placeholder="Type your message here..." 
               value={input} 
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleSend()}

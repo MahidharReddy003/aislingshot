@@ -1,3 +1,4 @@
+
 'use server';
 
 import { ai } from '@/ai/genkit';
@@ -9,6 +10,7 @@ const ChatAssistantInputSchema = z.object({
     name: z.string().optional(),
     role: z.string().optional(),
     interests: z.array(z.string()).optional(),
+    healthConditions: z.array(z.string()).optional(),
     location: z.string().optional(),
     budgetPreference: z.number().optional(),
     aiBehavior: z.string().optional(),
@@ -30,6 +32,8 @@ const chatAssistantPrompt = ai.definePrompt({
   output: { schema: ChatAssistantOutputSchema },
   prompt: `You are a helpful and friendly AI Smart Life Assistant.
 
+CRITICAL: Be extremely mindful of the user's health conditions and dietary restrictions: {{#each userProfile.healthConditions}}{{{this}}}, {{/each}}. Avoid suggesting anything that could be dangerous or unsuitable.
+
 User Profile Info:
 - Name: {{{userProfile.name}}}
 - Role: {{{userProfile.role}}}
@@ -40,7 +44,7 @@ User Profile Info:
 
 User Message: {{{message}}}
 
-Provide a personalized, helpful response based on the above profile. If the user mentions budget or time, keep your suggestions within those bounds.`
+Provide a personalized, safe, and helpful response based on the above profile.`
 });
 
 const chatAssistantFlow = ai.defineFlow(

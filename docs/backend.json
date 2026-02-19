@@ -17,6 +17,11 @@
           "type": "array",
           "items": { "type": "string" }
         },
+        "healthConditions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Specific health needs or dietary restrictions (e.g., 'Diabetes', 'Vegan', 'Knee Pain')."
+        },
         "role": { "type": "string" },
         "aiBehavior": { "type": "string", "enum": ["formal", "friendly"] },
         "availableTime": { "type": "number" },

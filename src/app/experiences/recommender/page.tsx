@@ -4,6 +4,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import { generateExplanation, type GenerateExplanationOutput } from "@/ai/flows/generate-explanation-flow";
+import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
+import { doc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -27,13 +29,24 @@ import {
   Loader2,
   FileText,
   MapPin,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Activity
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getPlaceholderImageUrl } from "@/lib/placeholder-images";
 
 export default function RecommenderPage() {
+  const { user } = useUser();
+  const db = useFirestore();
   const { toast } = useToast();
+
+  const profileRef = useMemoFirebase(() => {
+    if (!user || !db) return null;
+    return doc(db, 'users', user.uid);
+  }, [user, db]);
+
+  const { data: profile } = useDoc(profileRef);
+
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<GenerateExplanationOutput | null>(null);
   
@@ -41,6 +54,7 @@ export default function RecommenderPage() {
   const [budget, setBudget] = useState(150);
   const [selectedPrefs, setSelectedPrefs] = useState<string[]>(["Healthy"]);
   const [accessibility, setAccessibility] = useState(false);
+  const [healthAware, setHealthAware] = useState(true);
 
   const handleRecommend = async () => {
     setLoading(true);
@@ -48,28 +62,22 @@ export default function RecommenderPage() {
       const output = await generateExplanation({
         userPersona: persona,
         preferences: selectedPrefs.join(", "),
+        healthConditions: healthAware ? (profile?.healthConditions || []) : [],
         budget: budget,
         time: "Lunchtime",
         accessibility: accessibility ? "Wheelchair Accessible" : "None",
         recentChoices: ["Campus Deli", "Subway"]
       });
       setResult(output);
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to generate recommendation. Please try again.",
+        description: error.message || "Failed to generate recommendation.",
         variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleFeedback = (type: string) => {
-    toast({
-      title: "Feedback Recorded",
-      description: `We've noted that this was ${type.toLowerCase()}. Logic updated.`,
-    });
   };
 
   const togglePref = (p: string) => {
@@ -116,6 +124,19 @@ export default function RecommenderPage() {
                 </div>
                 <Slider value={[budget]} max={1000} step={50} onValueChange={(val) => setBudget(val[0])} />
               </div>
+
+              {/* HEALTH TOGGLE */}
+              {profile?.healthConditions && profile.healthConditions.length > 0 && (
+                <div className="flex items-center justify-between p-4 bg-primary/5 rounded-2xl border-2 border-primary/20">
+                  <div className="space-y-0.5">
+                    <Label className="text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-1">
+                      <Activity className="h-3 w-3" /> Health-Aware
+                    </Label>
+                    <p className="text-[10px] text-muted-foreground italic">Considering: {profile.healthConditions.join(', ')}</p>
+                  </div>
+                  <Switch checked={healthAware} onCheckedChange={setHealthAware} />
+                </div>
+              )}
 
               <div className="space-y-3">
                 <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Thematic Focus</Label>
@@ -169,19 +190,11 @@ export default function RecommenderPage() {
                       alt={result.recommendation}
                       fill
                       className="object-cover"
-                      data-ai-hint={result.imageHint}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                    <div className="absolute bottom-6 left-8 text-white space-y-2">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
-                          <ImageIcon className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <Badge variant="outline" className="text-white border-white/30 font-bold uppercase text-[10px] mb-1">AI Curated Choice</Badge>
-                          <h2 className="text-3xl font-black">{result.recommendation}</h2>
-                        </div>
-                      </div>
+                    <div className="absolute bottom-6 left-8 text-white">
+                      <Badge variant="outline" className="text-white border-white/30 font-bold uppercase text-[10px] mb-1">AI Curated Choice</Badge>
+                      <h2 className="text-3xl font-black">{result.recommendation}</h2>
                     </div>
                   </div>
                   
@@ -213,29 +226,6 @@ export default function RecommenderPage() {
                         {result.explanation}
                       </p>
                     </div>
-
-                    <div className="mt-8 space-y-4">
-                      <h4 className="font-black text-[10px] uppercase tracking-widest text-muted-foreground">Attachments & Metadata</h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <div className="flex items-center gap-3 p-3 rounded-xl border bg-card">
-                          <FileText className="h-4 w-4 text-primary" />
-                          <span className="text-xs font-medium">Menu & Pricing Details</span>
-                        </div>
-                        <div className="flex items-center gap-3 p-3 rounded-xl border bg-card">
-                          <MapPin className="h-4 w-4 text-primary" />
-                          <span className="text-xs font-medium">Verified Location Pin</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-10 border-t pt-8">
-                      <p className="text-[10px] font-black uppercase text-muted-foreground mb-4 text-center tracking-widest">Logic Feedback Loop</p>
-                      <div className="flex flex-wrap justify-center gap-2">
-                        {['Relevant', 'Not Useful', 'Expensive', 'Repetitive'].map(f => (
-                          <Button key={f} variant="outline" size="sm" className="rounded-xl border-2 h-10 px-4 font-bold" onClick={() => handleFeedback(f)}>{f}</Button>
-                        ))}
-                      </div>
-                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -258,20 +248,11 @@ export default function RecommenderPage() {
                     </div>
                     <div className="space-y-2">
                       <div className="flex justify-between text-xs font-bold uppercase tracking-widest">
-                        <span>Preference Match</span>
-                        <span>82%</span>
+                        <span>Health Priority Match</span>
+                        <span>100%</span>
                       </div>
                       <div className="h-3 w-full bg-muted rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500 w-[82%]" />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs font-bold uppercase tracking-widest">
-                        <span>Discovery Novelty</span>
-                        <span>{result.diversityScore}%</span>
-                      </div>
-                      <div className="h-3 w-full bg-muted rounded-full overflow-hidden">
-                        <div className="h-full bg-purple-500" style={{ width: `${result.diversityScore}%` }} />
+                        <div className="h-full bg-blue-500 w-[100%]" />
                       </div>
                     </div>
                   </div>
@@ -279,23 +260,9 @@ export default function RecommenderPage() {
               </TabsContent>
 
               <TabsContent value="alternatives" className="space-y-4">
-                {[
-                  { name: "Alternative A", reason: "Slightly cheaper, less social atmosphere.", icon: "restaurant-street" },
-                  { name: "Alternative B", reason: "Premium choice, matches accessibility needs perfectly.", icon: "restaurant-italian" }
-                ].map((alt, i) => (
-                  <Card key={i} className="border-2 hover:border-primary/50 transition-all cursor-pointer group p-6">
-                    <div className="flex items-center gap-6">
-                      <div className="h-16 w-16 bg-muted rounded-2xl overflow-hidden relative shrink-0">
-                        <Image src={getPlaceholderImageUrl(alt.icon)} alt={alt.name} fill className="object-cover" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-lg group-hover:text-primary transition-colors">{alt.name}</h4>
-                        <p className="text-sm text-muted-foreground italic">{alt.reason}</p>
-                      </div>
-                      <Button variant="ghost" size="sm" className="font-black uppercase text-[10px] tracking-widest">Swap Choice <ArrowRight className="ml-2 h-3 w-3" /></Button>
-                    </div>
-                  </Card>
-                ))}
+                <div className="p-6 text-center text-muted-foreground italic border-2 border-dashed rounded-3xl">
+                  AI has prioritized the primary choice to satisfy all active health and budget constraints.
+                </div>
               </TabsContent>
             </Tabs>
           ) : (

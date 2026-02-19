@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -10,10 +11,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Loader2, UserCircle } from 'lucide-react';
+import { Loader2, UserCircle, Activity } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const INTERESTS = ['Food', 'Events', 'Shopping', 'Travel', 'Tech', 'Music', 'Outdoors'];
+const HEALTH_TAGS = ['Diabetes', 'Vegan', 'Gluten-Free', 'Knee Pain', 'Asthma', 'Peanut Allergy'];
 
 export default function ProfileSetupPage() {
   const { user, isUserLoading } = useUser();
@@ -35,6 +37,7 @@ export default function ProfileSetupPage() {
     location: '',
     budgetPreference: 500,
     interests: [] as string[],
+    healthConditions: [] as string[],
     role: 'Student',
     aiBehavior: 'friendly',
     availableTime: 4,
@@ -50,25 +53,23 @@ export default function ProfileSetupPage() {
     }
 
     if (existingProfile) {
-      // Pre-fill form if doc exists
       setFormData({
         name: existingProfile.name || '',
         age: existingProfile.age || 20,
         location: existingProfile.location || '',
         budgetPreference: existingProfile.budgetPreference || 500,
         interests: existingProfile.interests || [],
+        healthConditions: existingProfile.healthConditions || [],
         role: existingProfile.role || 'Student',
         aiBehavior: existingProfile.aiBehavior || 'friendly',
         availableTime: existingProfile.availableTime || 4,
         currency: existingProfile.currency || 'INR'
       });
 
-      // If setup already marked as completed, don't allow user to stay here
       if (existingProfile.hasCompletedSetup === true) {
         router.replace('/dashboard');
       }
     } else {
-      // First time, pre-fill name from Auth
       setFormData(prev => ({ ...prev, name: user.displayName || '' }));
     }
   }, [user, isUserLoading, existingProfile, isProfileLoading, router]);
@@ -135,6 +136,29 @@ export default function ProfileSetupPage() {
               <Input id="location" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} required className="h-12 border-2" />
             </div>
 
+            {/* HEALTH SECTION */}
+            <div className="space-y-4">
+              <Label className="font-bold flex items-center gap-2">
+                <Activity className="h-4 w-4 text-primary" /> Health & Dietary Needs
+              </Label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 border-2 p-4 rounded-2xl bg-muted/10">
+                {HEALTH_TAGS.map(tag => (
+                  <div key={tag} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`health-${tag}`}
+                      checked={formData.healthConditions.includes(tag)}
+                      onCheckedChange={(checked) => {
+                        if (checked) setFormData({ ...formData, healthConditions: [...formData.healthConditions, tag] });
+                        else setFormData({ ...formData, healthConditions: formData.healthConditions.filter(h => h !== tag) });
+                      }}
+                    />
+                    <label htmlFor={`health-${tag}`} className="text-sm font-semibold leading-none cursor-pointer">{tag}</label>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[10px] text-muted-foreground italic">AI will automatically filter recommendations based on these conditions.</p>
+            </div>
+
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="role" className="font-bold">Primary Role</Label>
@@ -157,17 +181,6 @@ export default function ProfileSetupPage() {
                     <SelectItem value="formal">Formal (Direct)</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="budget" className="font-bold">Daily Spending Limit (INR)</Label>
-                <Input id="budget" type="number" value={formData.budgetPreference} onChange={e => setFormData({ ...formData, budgetPreference: parseInt(e.target.value) })} className="h-12 border-2" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="time" className="font-bold">Typical Available Hours</Label>
-                <Input id="time" type="number" value={formData.availableTime} onChange={e => setFormData({ ...formData, availableTime: parseInt(e.target.value) })} className="h-12 border-2" />
               </div>
             </div>
 
