@@ -47,7 +47,7 @@ export default function HelpPage() {
           { title: 'FAQ', desc: 'Quick answers to common questions.', icon: HelpCircle, href: '#faq' },
           { title: 'Community', desc: 'Connect with other SmartLife users.', icon: MessageSquare, href: '#' }
         ].map((box, i) => (
-          <Link key={i} href={box.href} className="group" shadow-sm="true">
+          <Link key={i} href={box.href} className="group">
             <Card className="h-full border-2 hover:border-primary transition-all hover:shadow-md cursor-pointer rounded-[2rem]">
               <CardHeader>
                 <box.icon className="h-6 w-6 text-primary mb-2 group-hover:scale-110 transition-transform" />
