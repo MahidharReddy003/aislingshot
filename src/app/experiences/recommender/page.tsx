@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -14,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { 
   ThumbsUp, 
@@ -36,7 +36,8 @@ import {
   TrendingUp,
   ShieldCheck,
   ChevronRight,
-  MessageSquare
+  MessageSquare,
+  Send
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getPlaceholderImageUrl } from "@/lib/placeholder-images";
@@ -48,8 +49,6 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
-
-type FeedbackType = 'Relevant' | 'Not useful' | 'Too expensive' | 'Too repetitive';
 
 export default function RecommenderPage() {
   const { user } = useUser();
@@ -75,10 +74,12 @@ export default function RecommenderPage() {
   // Feedback State
   const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [refinedResponse, setRefinedResponse] = useState<RefineExplanationWithFeedbackOutput | null>(null);
+  const [customFeedback, setCustomFeedback] = useState("");
 
   const handleRecommend = async () => {
     setLoading(true);
     setRefinedResponse(null);
+    setCustomFeedback("");
     try {
       const output = await generateExplanation({
         userPersona: persona,
@@ -101,14 +102,14 @@ export default function RecommenderPage() {
     }
   };
 
-  const handleFeedback = async (type: FeedbackType) => {
+  const handleFeedback = async (text: string) => {
     if (!result || !user || !db) return;
     setFeedbackLoading(true);
     try {
       const response = await refineExplanationWithFeedback({
         originalRecommendation: result.recommendation,
         originalExplanation: result.explanation,
-        userFeedback: type,
+        userFeedback: text,
         userPreferences: {
           budget: `₹${budget}`,
           accessibility: accessibility ? ["wheelchair accessible"] : [],
@@ -121,7 +122,7 @@ export default function RecommenderPage() {
       // Save to Firestore
       await addDoc(collection(db, 'users', user.uid, 'feedback'), {
         recommendation: result.recommendation,
-        feedback: type,
+        feedback: text,
         refinedExplanation: response.refinedExplanation,
         userId: user.uid,
         createdAt: serverTimestamp()
@@ -131,6 +132,7 @@ export default function RecommenderPage() {
         title: "Feedback Recorded",
         description: "The AI has refined its logic based on your input.",
       });
+      setCustomFeedback("");
     } catch (error: any) {
       toast({
         title: "Feedback Error",
@@ -407,27 +409,51 @@ export default function RecommenderPage() {
                         </Button>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        {[
-                          { type: 'Relevant', icon: ThumbsUp, color: 'hover:bg-green-50 hover:border-green-200' },
-                          { type: 'Not useful', icon: ThumbsDown, color: 'hover:bg-red-50 hover:border-red-200' },
-                          { type: 'Too expensive', icon: DollarSign, color: 'hover:bg-orange-50 hover:border-orange-200' },
-                          { type: 'Too repetitive', icon: RefreshCcw, color: 'hover:bg-blue-50 hover:border-blue-200' }
-                        ].map((btn) => (
-                          <Button
-                            key={btn.type}
-                            variant="outline"
-                            className={cn(
-                              "h-auto flex-col gap-3 py-6 rounded-2xl border-2 transition-all",
-                              btn.color
-                            )}
-                            disabled={feedbackLoading}
-                            onClick={() => handleFeedback(btn.type as FeedbackType)}
-                          >
-                            {feedbackLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <btn.icon className="h-6 w-6" />}
-                            <span className="text-[10px] font-black uppercase tracking-tighter">{btn.type}</span>
-                          </Button>
-                        ))}
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          {[
+                            { type: 'Relevant', icon: ThumbsUp, color: 'hover:bg-green-50 hover:border-green-200' },
+                            { type: 'Not useful', icon: ThumbsDown, color: 'hover:bg-red-50 hover:border-red-200' },
+                            { type: 'Too expensive', icon: DollarSign, color: 'hover:bg-orange-50 hover:border-orange-200' },
+                            { type: 'Too repetitive', icon: RefreshCcw, color: 'hover:bg-blue-50 hover:border-blue-200' }
+                          ].map((btn) => (
+                            <Button
+                              key={btn.type}
+                              variant="outline"
+                              className={cn(
+                                "h-auto flex-col gap-3 py-6 rounded-2xl border-2 transition-all",
+                                btn.color
+                              )}
+                              disabled={feedbackLoading}
+                              onClick={() => handleFeedback(btn.type)}
+                            >
+                              {feedbackLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <btn.icon className="h-6 w-6" />}
+                              <span className="text-[10px] font-black uppercase tracking-tighter">{btn.type}</span>
+                            </Button>
+                          ))}
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                            <MessageSquare className="h-3 w-3" /> Share your detailed opinion
+                          </Label>
+                          <div className="flex gap-2">
+                            <Textarea 
+                              placeholder="Tell the AI what you really think about this recommendation..." 
+                              value={customFeedback}
+                              onChange={(e) => setCustomFeedback(e.target.value)}
+                              className="bg-background min-h-[80px] rounded-xl border-2"
+                              disabled={feedbackLoading}
+                            />
+                            <Button 
+                              onClick={() => handleFeedback(customFeedback)} 
+                              disabled={feedbackLoading || !customFeedback.trim()}
+                              className="h-auto aspect-square rounded-xl px-4"
+                            >
+                              {feedbackLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                            </Button>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </CardContent>

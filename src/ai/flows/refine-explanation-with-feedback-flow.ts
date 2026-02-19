@@ -13,13 +13,13 @@ import {z} from 'genkit';
 const RefineExplanationWithFeedbackInputSchema = z.object({
   originalRecommendation: z.string().describe('The text of the original recommendation provided to the user.'),
   originalExplanation: z.string().describe('The initial explanation given for the recommendation.'),
-  userFeedback: z.enum(['Relevant', 'Not useful', 'Too expensive', 'Too repetitive']).describe('The specific feedback provided by the user on the recommendation.'),
+  userFeedback: z.string().describe('The specific feedback or opinion provided by the user on the recommendation.'),
   userPreferences: z.object({
-    budget: z.string().optional().describe('The user\u0027s budget preference (e.g., "low", "medium", "high" or a specific currency amount).'),
-    timeConstraint: z.string().optional().describe('The user\u0027s time constraint preference (e.g., "short", "long", "2 hours").'),
+    budget: z.string().optional().describe('The user\'s budget preference (e.g., "low", "medium", "high" or a specific currency amount).'),
+    timeConstraint: z.string().optional().describe('The user\'s time constraint preference (e.g., "short", "long", "2 hours").'),
     accessibility: z.array(z.string()).optional().describe('A list of accessibility needs (e.g., "wheelchair accessible", "audio descriptions").'),
     preferenceType: z.array(z.string()).optional().describe('Specific item preferences (e.g., "vegetarian", "vegan", "gluten-free").'),
-    discoveryLevel: z.string().optional().describe('The user\u0027s preference for discovery vs. familiarity (e.g., "high", "medium", "low").')
+    discoveryLevel: z.string().optional().describe('The user\'s preference for discovery vs. familiarity (e.g., "high", "medium", "low").')
   }).optional().describe('The current preferences of the user that influenced the original recommendation.')
 });
 export type RefineExplanationWithFeedbackInput = z.infer<typeof RefineExplanationWithFeedbackInputSchema>;
@@ -38,7 +38,41 @@ const refineExplanationWithFeedbackPrompt = ai.definePrompt({
   name: 'refineExplanationWithFeedbackPrompt',
   input: {schema: RefineExplanationWithFeedbackInputSchema},
   output: {schema: RefineExplanationWithFeedbackOutputSchema},
-  prompt: `You are an AI system designed to provide transparent and budget-aware recommendations.\nYour goal is to acknowledge user feedback on a previous recommendation and explain how this feedback will influence future recommendations and their explanations to better suit the user's needs.\n\nHere is the context:\nOriginal Recommendation:\n{{{originalRecommendation}}}\n\nOriginal Explanation:\n{{{originalExplanation}}}\n\nUser Feedback: "{{{userFeedback}}}"\n\nCurrent User Preferences (if available):\n{{#if userPreferences}}\n  Budget: {{userPreferences.budget}}\n  Time Constraint: {{userPreferences.timeConstraint}}\n  Accessibility: {{#each userPreferences.accessibility}}- {{{this}}}\n  {{/each}}\n  Preference Type: {{#each userPreferences.preferenceType}}- {{{this}}}\n  {{/each}}\n  Discovery Level: {{userPreferences.discoveryLevel}}\n{{else}}\n  No specific user preferences provided for this context.\n{{/if}}\n\nBased on the User Feedback and the Original Recommendation/Explanation, provide a 'refinedExplanation' that addresses the feedback directly.\nAlso, provide 'actionableInsights' as a list of concrete ways the recommendation system could adjust its logic or user preferences for future interactions.\n\nIf the feedback is "Relevant", acknowledge that and suggest maintaining similar recommendation parameters.\nIf "Not useful", consider broader exploration or re-evaluation of core preferences.\nIf "Too expensive", suggest a stricter budget filter for future recommendations.\nIf "Too repetitive", suggest increasing diversity or exploring new categories.\n\nEnsure the 'refinedExplanation' sounds empathetic, helpful, and forward-looking.`
+  prompt: `You are an AI system designed to provide transparent and budget-aware recommendations.
+Your goal is to acknowledge user feedback on a previous recommendation and explain how this feedback will influence future recommendations and their explanations to better suit the user's needs.
+
+Here is the context:
+Original Recommendation:
+{{{originalRecommendation}}}
+
+Original Explanation:
+{{{originalExplanation}}}
+
+User Feedback: "{{{userFeedback}}}"
+
+Current User Preferences (if available):
+{{#if userPreferences}}
+  Budget: {{userPreferences.budget}}
+  Time Constraint: {{userPreferences.timeConstraint}}
+  Accessibility: {{#each userPreferences.accessibility}}- {{{this}}}
+  {{/each}}
+  Preference Type: {{#each userPreferences.preferenceType}}- {{{this}}}
+  {{/each}}
+  Discovery Level: {{userPreferences.discoveryLevel}}
+{{else}}
+  No specific user preferences provided for this context.
+{{/if}}
+
+Based on the User Feedback and the Original Recommendation/Explanation, provide a 'refinedExplanation' that addresses the feedback directly.
+Also, provide 'actionableInsights' as a list of concrete ways the recommendation system could adjust its logic or user preferences for future interactions.
+
+If the feedback indicates high satisfaction (e.g., "Relevant"), acknowledge that and suggest maintaining similar recommendation parameters.
+If "Not useful", consider broader exploration or re-evaluation of core preferences.
+If "Too expensive", suggest a stricter budget filter for future recommendations.
+If "Too repetitive", suggest increasing diversity or exploring new categories.
+If the feedback is a custom opinion, address it specifically and empatheticly.
+
+Ensure the 'refinedExplanation' sounds empathetic, helpful, and forward-looking.`
 });
 
 const refineExplanationWithFeedbackFlow = ai.defineFlow(
@@ -52,6 +86,6 @@ const refineExplanationWithFeedbackFlow = ai.defineFlow(
     if (!output) {
       throw new Error('Failed to generate refined explanation.');
     }
-    return output;
+    return output!;
   }
 );
