@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ThumbsUp, ThumbsDown, DollarSign, RefreshCcw, Info, Sparkles, Clock, MapPin } from "lucide-react";
+import { ThumbsUp, ThumbsDown, DollarSign, RefreshCcw, Info, Sparkles, Clock, MapPin, Target } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function RecommenderPage() {
