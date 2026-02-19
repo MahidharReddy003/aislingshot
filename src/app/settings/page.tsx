@@ -43,7 +43,8 @@ import {
   History,
   Download,
   Trash2,
-  RefreshCcw
+  RefreshCcw,
+  Clock
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
