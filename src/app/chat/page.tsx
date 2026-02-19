@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -79,7 +78,7 @@ export default function ChatPage() {
     <div className="container max-w-6xl mx-auto py-12 px-4 pb-24 h-[calc(100vh-10rem)] flex flex-col">
       <div className="mb-12">
         <h1 className="text-4xl font-black tracking-tight flex items-center gap-3">
-          <MessageSquare className="text-pink-500 h-8 w-8" /> AI Chat
+          <MessageSquare className="text-pink-500 h-8 w-8" /> AI Assistant
         </h1>
         <p className="text-muted-foreground mt-2 text-lg">Always personalized to your persona, health, and budget.</p>
       </div>
@@ -97,7 +96,7 @@ export default function ChatPage() {
                       <AvatarFallback className="bg-muted"><UserCircle className="h-6 w-6" /></AvatarFallback>
                     )}
                   </Avatar>
-                  <div className={`rounded-3xl px-6 py-4 text-sm font-medium leading-relaxed shadow-sm ${
+                  <div className={`rounded-[2rem] px-6 py-4 text-sm font-medium leading-relaxed shadow-sm ${
                     m.role === 'user' 
                       ? 'bg-primary text-primary-foreground rounded-tr-none' 
                       : 'bg-muted rounded-tl-none border-2'
