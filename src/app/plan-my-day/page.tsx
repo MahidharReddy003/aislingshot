@@ -39,6 +39,7 @@ export default function PlanMyDayPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
 
+  // INTERCONNECTED DATA: Initialize with profile values
   useEffect(() => {
     if (profile) {
       if (profile.budgetPreference !== undefined) setBudget(profile.budgetPreference);
