@@ -1,13 +1,16 @@
+
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, ShieldCheck, User } from "lucide-react";
+import { LayoutDashboard, ShieldCheck, User, Heart, History } from "lucide-react";
 import { useUser } from "@/firebase";
 
 const navItems = [
   { name: "Experiences", href: "/experiences/recommender", icon: LayoutDashboard },
+  { name: "Saved", href: "/saved", icon: Heart },
+  { name: "History", href: "/history", icon: History },
   { name: "Transparency", href: "/transparency", icon: ShieldCheck },
 ];
 
