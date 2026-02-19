@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { generateExplanation, type GenerateExplanationOutput } from "@/ai/flows/generate-explanation-flow";
 import { refineExplanationWithFeedback, type RefineExplanationWithFeedbackOutput } from "@/ai/flows/refine-explanation-with-feedback-flow";
@@ -53,7 +53,7 @@ export default function RecommenderPage() {
     return doc(db, 'users', user.uid);
   }, [user, db]);
 
-  const { data: profile } = useDoc(profileRef);
+  const { data: profile, isLoading: isProfileLoading } = useDoc(profileRef);
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<GenerateExplanationOutput | null>(null);
@@ -63,6 +63,15 @@ export default function RecommenderPage() {
   const [selectedPrefs, setSelectedPrefs] = useState<string[]>(["Healthy"]);
   const [accessibility, setAccessibility] = useState(false);
   const [healthAware, setHealthAware] = useState(true);
+
+  // Sync local state with profile on load
+  useEffect(() => {
+    if (profile) {
+      if (profile.budgetPreference !== undefined) setBudget(profile.budgetPreference);
+      if (profile.role) setPersona(profile.role);
+      if (profile.interests && profile.interests.length > 0) setSelectedPrefs(profile.interests);
+    }
+  }, [profile]);
 
   // Feedback State
   const [feedbackLoading, setFeedbackLoading] = useState(false);
@@ -143,6 +152,15 @@ export default function RecommenderPage() {
     );
   };
 
+  if (isProfileLoading && !profile) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen space-y-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Loading AI Persona...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl pb-24">
       <div className="mb-10">
@@ -160,7 +178,7 @@ export default function RecommenderPage() {
               <div className="space-y-3">
                 <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Persona</Label>
                 <div className="flex flex-wrap gap-2">
-                  {["Student", "Professional", "Creator"].map(p => (
+                  {["Student", "Professional", "Creator", "Traveler"].map(p => (
                     <Button 
                       key={p} 
                       variant={persona === p ? "default" : "outline"} 
@@ -179,7 +197,7 @@ export default function RecommenderPage() {
                   <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Budget cap</Label>
                   <span className="text-sm font-black">₹{budget}</span>
                 </div>
-                <Slider value={[budget]} max={1000} step={50} onValueChange={(val) => setBudget(val[0])} />
+                <Slider value={[budget]} max={2000} step={50} onValueChange={(val) => setBudget(val[0])} />
               </div>
 
               {profile?.healthConditions && profile.healthConditions.length > 0 && (

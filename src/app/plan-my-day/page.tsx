@@ -1,11 +1,10 @@
-
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { planDay } from '@/ai/flows/plan-day-flow';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { doc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,13 +31,20 @@ export default function PlanMyDayPage() {
     return doc(db, 'users', user.uid);
   }, [user, db]);
 
-  const { data: profile, isLoading } = useDoc(profileRef);
+  const { data: profile, isLoading: isProfileLoading } = useDoc(profileRef);
   const { toast } = useToast();
 
-  const [budget, setBudget] = useState(200);
+  const [budget, setBudget] = useState(0);
   const [time, setTime] = useState(120);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
+
+  // Sync local budget with profile budgetPreference on load
+  useEffect(() => {
+    if (profile && profile.budgetPreference !== undefined) {
+      setBudget(profile.budgetPreference);
+    }
+  }, [profile]);
 
   const handlePlan = async () => {
     if (!profile) return;
@@ -62,6 +68,15 @@ export default function PlanMyDayPage() {
     }
   };
 
+  if (isProfileLoading && !profile) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen space-y-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-sm text-muted-foreground">Loading your preferences...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="container max-w-6xl mx-auto py-12 px-4 pb-24">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-12">
@@ -82,7 +97,7 @@ export default function PlanMyDayPage() {
             <CardContent className="p-8 space-y-8">
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <Label htmlFor="budget" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Budget Cap</Label>
+                  <Label htmlFor="budget" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Budget Cap (INR)</Label>
                   <span className="font-black text-primary">₹{budget}</span>
                 </div>
                 <Input id="budget" type="number" value={budget} onChange={e => setBudget(parseInt(e.target.value) || 0)} className="h-12 border-2 rounded-xl" />
@@ -188,7 +203,7 @@ export default function PlanMyDayPage() {
                         <p className="text-muted-foreground leading-relaxed flex-1">{act.description}</p>
                         
                         <div className="mt-8 pt-6 border-t flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-primary">
-                           <span>Selected for: {profile.role}</span>
+                           <span>Selected for: {profile?.role || 'User'}</span>
                            <span className="text-muted-foreground opacity-60">Phase {idx + 1} of Day</span>
                         </div>
                       </div>

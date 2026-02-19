@@ -54,13 +54,11 @@ export default function DashboardPage() {
       return;
     }
 
-    // Now that loading is complete, check for setup status
     if (!profile || profile.hasCompletedSetup === false) {
       router.replace('/profile-setup');
     }
   }, [user, isUserLoading, profile, isProfileLoading, router]);
 
-  // Show loader while loading or if we haven't confirmed setup completion
   if (isUserLoading || isProfileLoading || !user || !profile?.hasCompletedSetup) {
     return (
       <div className="flex flex-col items-center justify-center h-screen space-y-4">
@@ -69,6 +67,10 @@ export default function DashboardPage() {
       </div>
     );
   }
+
+  const weeklyCap = (profile.budgetPreference || 500) * 7;
+  const currentSpent = 1240; // Simulated weekly spend
+  const budgetProgress = Math.min((currentSpent / weeklyCap) * 100, 100);
 
   return (
     <div className="flex min-h-screen bg-secondary/5 pb-20">
@@ -125,7 +127,9 @@ export default function DashboardPage() {
                       <TrendingUp className="h-5 w-5 text-primary" />
                       Weekly Budget Summary
                     </CardTitle>
-                    <Badge className="bg-green-100 text-green-700 border-none px-3">On Track</Badge>
+                    <Badge className={budgetProgress > 90 ? "bg-red-100 text-red-700 border-none px-3" : "bg-green-100 text-green-700 border-none px-3"}>
+                      {budgetProgress > 90 ? "Near Limit" : "On Track"}
+                    </Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="p-8 space-y-6">
@@ -133,8 +137,8 @@ export default function DashboardPage() {
                     <div>
                       <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest mb-1">Spent This Week</p>
                       <div className="flex items-baseline gap-2">
-                        <h3 className="text-4xl font-black text-primary">₹1,240</h3>
-                        <span className="text-muted-foreground font-medium">/ ₹{(profile.budgetPreference || 500) * 7} cap</span>
+                        <h3 className="text-4xl font-black text-primary">₹{currentSpent.toLocaleString()}</h3>
+                        <span className="text-muted-foreground font-medium">/ ₹{weeklyCap.toLocaleString()} cap</span>
                       </div>
                     </div>
                     <div className="text-right">
@@ -142,7 +146,7 @@ export default function DashboardPage() {
                       <p className="text-xl font-bold">₹420 <span className="text-xs text-muted-foreground">vs. avg</span></p>
                     </div>
                   </div>
-                  <Progress value={35} className="h-3 rounded-full" />
+                  <Progress value={budgetProgress} className="h-3 rounded-full" />
                   <div className="grid grid-cols-3 gap-4 pt-2">
                     <div className="text-center p-3 rounded-xl bg-muted/20 border">
                       <p className="text-[10px] font-bold text-muted-foreground uppercase">Dining</p>
