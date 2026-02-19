@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -106,7 +105,7 @@ export default function SettingsPage() {
     try {
       await updateProfile(user, { displayName: name });
     } catch (err) {
-      console.error("Auth profile update failed", err);
+      // Auth update failed, but we continue as Firestore is primary
     }
 
     toast({ title: 'Profile Updated', description: 'Your identity and bio have been synchronized successfully.' });
@@ -124,7 +123,6 @@ export default function SettingsPage() {
 
   const handlePfpUpdate = () => {
     if (!userDocRef) return;
-    // Simulate PFP update by changing the seed for picsum
     const newSeed = Math.floor(Math.random() * 1000);
     const newPfp = `https://picsum.photos/seed/${newSeed}/400/400`;
     
@@ -162,14 +160,14 @@ export default function SettingsPage() {
       await signOut(auth);
       router.replace('/login');
     } catch (error) {
-      console.error("Logout error:", error);
+      // Handle logout error
     }
   };
 
   if (isLoading || !profile) return <div className="flex items-center justify-center h-screen"><Loader2 className="animate-spin text-primary h-8 w-8" /></div>;
 
   return (
-    <div className="container max-w-5xl mx-auto py-12 px-4">
+    <div className="container max-w-5xl mx-auto py-12 px-4 pb-24">
       <div className="mb-10">
         <h1 className="text-4xl font-black tracking-tight text-primary">Control Center</h1>
         <p className="text-muted-foreground mt-2 text-lg">Manage your persona, privacy, and AI constraints.</p>

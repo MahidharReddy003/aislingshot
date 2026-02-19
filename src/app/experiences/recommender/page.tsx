@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,18 +22,11 @@ import {
   RefreshCcw, 
   Info, 
   Sparkles, 
-  Clock, 
   Target,
-  ArrowRight,
   Scale,
   ListRestart,
   Loader2,
-  FileText,
-  MapPin,
-  ImageIcon,
   Activity,
-  HelpCircle,
-  TrendingUp,
   ShieldCheck,
   ChevronRight,
   MessageSquare,
@@ -120,7 +113,7 @@ export default function RecommenderPage() {
       setRefinedResponse(response);
 
       // Save to Firestore
-      await addDoc(collection(db, 'users', user.uid, 'feedback'), {
+      addDoc(collection(db, 'users', user.uid, 'feedback'), {
         recommendation: result.recommendation,
         feedback: text,
         refinedExplanation: response.refinedExplanation,
@@ -151,19 +144,19 @@ export default function RecommenderPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto px-4 py-8 max-w-6xl pb-24">
       <div className="mb-10">
-        <h1 className="text-3xl font-black tracking-tight mb-2">Smart Recommender</h1>
+        <h1 className="text-4xl font-black tracking-tight mb-2">Smart Recommender</h1>
         <p className="text-muted-foreground">Adjust preferences and explore the AI reasoning behind every suggestion.</p>
       </div>
 
       <div className="grid lg:grid-cols-12 gap-8">
         <div className="lg:col-span-4 space-y-6">
-          <Card className="border-2 shadow-sm">
-            <CardHeader className="bg-muted/30 border-b">
-              <CardTitle className="text-sm font-bold uppercase tracking-widest">Contextual Inputs</CardTitle>
+          <Card className="border-2 shadow-sm rounded-[2.5rem]">
+            <CardHeader className="bg-muted/30 border-b px-8 py-6">
+              <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground">Contextual Inputs</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6 pt-6">
+            <CardContent className="space-y-6 p-8">
               <div className="space-y-3">
                 <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Persona</Label>
                 <div className="flex flex-wrap gap-2">
@@ -228,7 +221,7 @@ export default function RecommenderPage() {
                 <Switch checked={accessibility} onCheckedChange={setAccessibility} />
               </div>
 
-              <Button className="w-full h-12 rounded-xl font-bold shadow-lg gap-2" onClick={handleRecommend} disabled={loading}>
+              <Button className="w-full h-14 rounded-2xl font-bold shadow-lg gap-2" onClick={handleRecommend} disabled={loading}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                 Generate Suggestion
               </Button>
@@ -247,7 +240,7 @@ export default function RecommenderPage() {
                 </TabsList>
 
                 <TabsContent value="explain" className="space-y-6">
-                  <Card className="border-primary border-2 shadow-xl overflow-hidden rounded-3xl relative">
+                  <Card className="border-primary border-4 shadow-xl overflow-hidden rounded-[2.5rem] relative">
                     <div className="relative h-64 w-full bg-muted">
                       <Image 
                         src={getPlaceholderImageUrl(result.imageHint || 'hero-abstract')}
@@ -321,14 +314,14 @@ export default function RecommenderPage() {
                       </div>
                       
                       <div className="flex items-center justify-center p-5 bg-accent/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-primary border border-accent/20 animate-pulse">
-                        <Sparkles className="h-4 w-4 mr-2" /> Click the large logic icon above to see exactly why we made this choice
+                        <Sparkles className="h-4 w-4 mr-2" /> Click the logic icon above to see reasoning
                       </div>
                     </CardContent>
                   </Card>
                 </TabsContent>
 
                 <TabsContent value="compare">
-                  <Card className="border-2 rounded-3xl p-8 space-y-8 shadow-sm">
+                  <Card className="border-2 rounded-[2.5rem] p-8 space-y-8 shadow-sm">
                     <div>
                       <CardTitle className="mb-2 text-2xl font-black">Constraint Scorecard</CardTitle>
                       <CardDescription className="text-base">Visualizing how this recommendation balances your specific parameters.</CardDescription>
@@ -352,21 +345,12 @@ export default function RecommenderPage() {
                           <div className="h-full bg-blue-500 w-[100%] transition-all duration-1000 shadow-sm" />
                         </div>
                       </div>
-                      <div className="space-y-3">
-                        <div className="flex justify-between text-xs font-black uppercase tracking-widest items-center">
-                          <span className="flex items-center gap-2"><TrendingUp className="h-4 w-4 text-purple-500" /> Interest Relevance</span>
-                          <span className="text-primary">88%</span>
-                        </div>
-                        <div className="h-3 w-full bg-muted rounded-full overflow-hidden border">
-                          <div className="h-full bg-purple-500 w-[88%] transition-all duration-1000 shadow-sm" />
-                        </div>
-                      </div>
                     </div>
                   </Card>
                 </TabsContent>
 
                 <TabsContent value="alternatives" className="space-y-4">
-                  <div className="p-12 text-center text-muted-foreground border-4 border-dashed rounded-[3rem] bg-muted/5 flex flex-col items-center justify-center">
+                  <div className="p-12 text-center text-muted-foreground border-4 border-dashed rounded-[2.5rem] bg-muted/5 flex flex-col items-center justify-center">
                     <div className="p-4 rounded-full bg-muted mb-4 opacity-50"><RefreshCcw className="h-8 w-8" /></div>
                     <p className="italic font-medium max-w-sm">The primary choice was prioritized to satisfy all active health, budget, and persona constraints simultaneously.</p>
                   </div>
@@ -376,11 +360,11 @@ export default function RecommenderPage() {
               {/* FEEDBACK SECTION */}
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <Card className="border-2 rounded-[2.5rem] overflow-hidden bg-muted/10">
-                  <CardHeader className="text-center">
+                  <CardHeader className="text-center py-8">
                     <CardTitle className="text-xl font-black">Help the AI learn</CardTitle>
                     <CardDescription>Your feedback directly refines the assistant's decision-making logic.</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-6">
+                  <CardContent className="space-y-6 px-8 pb-8">
                     {refinedResponse ? (
                       <div className="bg-primary text-primary-foreground p-8 rounded-[2rem] space-y-4 animate-in zoom-in duration-500">
                         <div className="flex items-center gap-3">
@@ -402,7 +386,7 @@ export default function RecommenderPage() {
                         <Button 
                           variant="secondary" 
                           size="sm" 
-                          className="w-full mt-4 font-bold"
+                          className="w-full mt-4 font-bold rounded-xl"
                           onClick={() => setRefinedResponse(null)}
                         >
                           Provide More Feedback
@@ -442,13 +426,13 @@ export default function RecommenderPage() {
                               placeholder="Tell the AI what you really think about this recommendation..." 
                               value={customFeedback}
                               onChange={(e) => setCustomFeedback(e.target.value)}
-                              className="bg-background min-h-[80px] rounded-xl border-2"
+                              className="bg-background min-h-[80px] rounded-2xl border-2"
                               disabled={feedbackLoading}
                             />
                             <Button 
                               onClick={() => handleFeedback(customFeedback)} 
                               disabled={feedbackLoading || !customFeedback.trim()}
-                              className="h-auto aspect-square rounded-xl px-4"
+                              className="h-auto aspect-square rounded-2xl px-4 shrink-0"
                             >
                               {feedbackLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
                             </Button>
@@ -461,7 +445,7 @@ export default function RecommenderPage() {
               </div>
             </>
           ) : (
-            <div className="h-full min-h-[500px] border-4 border-dashed rounded-[3rem] flex flex-col items-center justify-center text-muted-foreground p-12 text-center opacity-40">
+            <div className="h-full min-h-[500px] border-4 border-dashed rounded-[2.5rem] flex flex-col items-center justify-center text-muted-foreground p-12 text-center opacity-40">
               <div className="p-6 rounded-full bg-muted mb-6"><Target className="h-16 w-16" /></div>
               <h3 className="text-2xl font-black mb-2 uppercase tracking-tight">System Ready</h3>
               <p className="max-w-xs text-sm font-medium leading-relaxed">Define your context (Persona, Budget, Health) on the left. The AI will cross-reference its logic modules to find your best match.</p>

@@ -1,11 +1,10 @@
-
 'use client';
 
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Map, Clock, ArrowRight, MapPin, Compass, Sparkles } from 'lucide-react';
+import { Map, Clock, MapPin, Compass, Sparkles } from 'lucide-react';
 import mockData from '@/app/lib/mock-data.json';
 import { getPlaceholderImageUrl } from '@/lib/placeholder-images';
 

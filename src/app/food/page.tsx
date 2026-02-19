@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Utensils, Star, MapPin, Sparkles, Loader2, Clock, Info, CheckCircle2, XCircle, HelpCircle, DollarSign, ThumbsUp, ThumbsDown, RefreshCcw, Send, MessageSquare } from 'lucide-react';
+import { Utensils, Star, MapPin, Sparkles, Loader2, Clock, Info, CheckCircle2, XCircle, DollarSign, ThumbsUp, ThumbsDown, RefreshCcw, Send, MessageSquare } from 'lucide-react';
 import mockData from '@/app/lib/mock-data.json';
 import { useToast } from '@/hooks/use-toast';
 import { getPlaceholderImageUrl } from '@/lib/placeholder-images';
@@ -61,7 +61,7 @@ export default function FoodPage() {
 
       setRefinedResponse(response);
 
-      await addDoc(collection(db, 'users', user.uid, 'feedback'), {
+      addDoc(collection(db, 'users', user.uid, 'feedback'), {
         recommendation: recommendation.name,
         feedback: text,
         refinedExplanation: response.refinedExplanation,
@@ -99,9 +99,9 @@ export default function FoodPage() {
               <Sparkles className="h-5 w-5 text-primary" />
               <span className="text-xs font-black uppercase tracking-widest text-primary">AI Logic Choice</span>
             </div>
-          <Card className="border-primary border-4 shadow-2xl rounded-[3rem] overflow-hidden relative group">
+          <Card className="border-primary border-4 shadow-2xl rounded-[2.5rem] overflow-hidden relative group">
             <CardContent className="p-0 flex flex-col md:flex-row">
-              <div className="relative w-full md:w-[40%] h-64 md:h-auto">
+              <div className="relative w-full md:w-[40%] h-64 md:h-auto shrink-0">
                 <Image 
                   src={getPlaceholderImageUrl(recommendation.imageId || 'restaurant-street')} 
                   alt={recommendation.name} 
@@ -160,7 +160,7 @@ export default function FoodPage() {
                           <div className="bg-primary text-primary-foreground p-6 rounded-2xl space-y-3 animate-in zoom-in duration-500">
                             <h4 className="font-bold text-xs flex items-center gap-2"><Sparkles className="h-3 w-3" /> Adaptation Insight</h4>
                             <p className="text-xs italic leading-relaxed opacity-90">{refinedResponse.refinedExplanation}</p>
-                            <Button variant="secondary" size="sm" onClick={() => setRefinedResponse(null)} className="w-full text-[10px] h-8 font-bold">Provide More Feedback</Button>
+                            <Button variant="secondary" size="sm" onClick={() => setRefinedResponse(null)} className="w-full text-[10px] h-8 font-bold rounded-xl">Provide More Feedback</Button>
                           </div>
                         ) : (
                           <div className="space-y-4">
@@ -180,10 +180,10 @@ export default function FoodPage() {
                                   placeholder="What did you think of this choice?" 
                                   value={customOpinion}
                                   onChange={(e) => setCustomOpinion(e.target.value)}
-                                  className="min-h-[60px] text-xs bg-muted/20 border-2"
+                                  className="min-h-[60px] text-xs bg-muted/20 border-2 rounded-xl"
                                   disabled={feedbackLoading}
                                 />
-                                <Button size="icon" onClick={() => handleFeedback(customOpinion)} disabled={feedbackLoading || !customOpinion.trim()} className="h-auto px-3">
+                                <Button size="icon" onClick={() => handleFeedback(customOpinion)} disabled={feedbackLoading || !customOpinion.trim()} className="h-auto px-3 rounded-xl shrink-0">
                                   {feedbackLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />}
                                 </Button>
                               </div>
