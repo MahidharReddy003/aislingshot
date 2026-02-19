@@ -10,20 +10,24 @@ import { getFirestore } from 'firebase/firestore'
  * Includes defensive checks to prevent initialization errors during Next.js build-time pre-rendering.
  */
 export function initializeFirebase() {
-  if (typeof window === 'undefined') {
-    // During server-side rendering or build pre-render, we still return the initialized app
-    // but we ensure it's not re-initializing incorrectly.
-    const existingApps = getApps();
-    const app = existingApps.length > 0 ? existingApps[0] : initializeApp(firebaseConfig);
-    return {
-      firebaseApp: app,
-      auth: getAuth(app),
-      firestore: getFirestore(app)
-    };
-  }
-
   const existingApps = getApps();
-  const app = existingApps.length > 0 ? existingApps[0] : initializeApp(firebaseConfig);
+  
+  // Create a stable app instance
+  let app: FirebaseApp;
+  
+  if (existingApps.length > 0) {
+    app = existingApps[0];
+  } else {
+    // We only provide options if we are NOT on a server-side build that might have empty config
+    // though firebaseConfig is defined in config.ts, we wrap it defensively.
+    try {
+      app = initializeApp(firebaseConfig);
+    } catch (e) {
+      console.warn("Firebase initialization failed during build time. This is expected if config is missing.");
+      // Fallback app if needed, but usually we just want to avoid the crash
+      app = getApp(); 
+    }
+  }
 
   return {
     firebaseApp: app,
