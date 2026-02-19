@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { doc, serverTimestamp } from 'firebase/firestore';
 import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking, useAuth } from '@/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -13,6 +14,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { 
   User, 
   Shield, 
@@ -29,7 +31,8 @@ import {
   Eye,
   Trash2,
   AlertCircle,
-  Activity
+  Activity,
+  ArrowRight
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { signOut } from 'firebase/auth';
@@ -55,6 +58,9 @@ export default function SettingsPage() {
   const [localHealth, setLocalHealth] = useState<string[]>([]);
   const [budgetVal, setBudgetVal] = useState(500);
   const [discoveryVal, setDiscoveryVal] = useState(50);
+
+  const hasPasswordProvider = user?.providerData.some(p => p.providerId === 'password');
+  const isGoogleUser = user?.providerData.some(p => p.providerId === 'google.com');
 
   useEffect(() => {
     if (profile) {
@@ -108,14 +114,30 @@ export default function SettingsPage() {
         <p className="text-muted-foreground mt-2 text-lg">Manage your persona, privacy, and AI constraints with full transparency.</p>
       </div>
 
+      {isGoogleUser && !hasPasswordProvider && (
+        <Alert className="mb-8 border-2 border-primary/20 bg-primary/5">
+          <Shield className="h-4 w-4 text-primary" />
+          <AlertTitle className="font-bold">Account Security</AlertTitle>
+          <AlertDescription className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <span>Secure your account by setting a password. This allows you to log in with your email even if Google is unavailable.</span>
+            <Button asChild size="sm" className="font-bold shrink-0">
+              <Link href="/settings/security">
+                Set Password <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Tabs defaultValue="profile" className="space-y-8">
-        <TabsList className="bg-muted p-1 border grid grid-cols-4 md:grid-cols-7 h-auto gap-1 rounded-2xl shadow-inner">
+        <TabsList className="bg-muted p-1 border grid grid-cols-4 md:grid-cols-8 h-auto gap-1 rounded-2xl shadow-inner">
           <TabsTrigger value="profile" className="rounded-xl data-[state=active]:shadow-md gap-2 py-3"><User className="h-4 w-4" /> <span className="hidden md:inline">Profile</span></TabsTrigger>
           <TabsTrigger value="preferences" className="rounded-xl data-[state=active]:shadow-md gap-2 py-3"><Settings2 className="h-4 w-4" /> <span className="hidden md:inline">Interests</span></TabsTrigger>
           <TabsTrigger value="budget" className="rounded-xl data-[state=active]:shadow-md gap-2 py-3"><Wallet className="h-4 w-4" /> <span className="hidden md:inline">Budget</span></TabsTrigger>
           <TabsTrigger value="discovery" className="rounded-xl data-[state=active]:shadow-md gap-2 py-3"><Sparkles className="h-4 w-4" /> <span className="hidden md:inline">Discovery</span></TabsTrigger>
           <TabsTrigger value="accessibility" className="rounded-xl data-[state=active]:shadow-md gap-2 py-3"><Accessibility className="h-4 w-4" /> <span className="hidden md:inline">Access</span></TabsTrigger>
-          <TabsTrigger value="privacy" className="rounded-xl data-[state=active]:shadow-md gap-2 py-3"><Lock className="h-4 w-4" /> <span className="hidden md:inline">Privacy</span></TabsTrigger>
+          <TabsTrigger value="security" className="rounded-xl data-[state=active]:shadow-md gap-2 py-3"><Lock className="h-4 w-4" /> <span className="hidden md:inline">Security</span></TabsTrigger>
+          <TabsTrigger value="privacy" className="rounded-xl data-[state=active]:shadow-md gap-2 py-3"><Shield className="h-4 w-4" /> <span className="hidden md:inline">Privacy</span></TabsTrigger>
           <TabsTrigger value="notifications" className="rounded-xl data-[state=active]:shadow-md gap-2 py-3"><Bell className="h-4 w-4" /> <span className="hidden md:inline">Alerts</span></TabsTrigger>
         </TabsList>
 
@@ -203,6 +225,63 @@ export default function SettingsPage() {
                 Apply Interest Matrix
               </Button>
             </CardFooter>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="security" className="space-y-4">
+          <Card className="border-2 shadow-sm rounded-3xl">
+            <CardHeader>
+              <CardTitle>Security & Access</CardTitle>
+              <CardDescription>Manage how you access your SmartLife account.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6 pt-6">
+              <div className="flex items-center justify-between p-6 bg-muted/20 rounded-2xl border-2">
+                <div className="flex gap-4 items-center">
+                  <div className="p-3 rounded-xl bg-background border-2">
+                    <Lock className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <Label className="text-base font-bold">Password Protection</Label>
+                    <p className="text-xs text-muted-foreground">
+                      {hasPasswordProvider 
+                        ? "You have a password set for this account." 
+                        : "You are currently only using social login."}
+                    </p>
+                  </div>
+                </div>
+                <Button asChild variant="outline" className="font-bold rounded-xl h-11">
+                  <Link href="/settings/security">
+                    {hasPasswordProvider ? "Update Password" : "Set Password"}
+                  </Link>
+                </Button>
+              </div>
+
+              <div className="p-6 bg-muted/20 rounded-2xl border-2 space-y-4">
+                <h4 className="font-bold flex items-center gap-2"><Shield className="h-4 w-4" /> Connected Accounts</h4>
+                <div className="space-y-3">
+                  {user?.providerData.map((provider) => (
+                    <div key={provider.providerId} className="flex items-center justify-between py-2 border-b last:border-none">
+                      <div className="flex items-center gap-3">
+                        {provider.providerId === 'google.com' ? (
+                          <svg className="h-4 w-4" viewBox="0 0 24 24">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.26.81-.58z" fill="#FBBC05"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                          </svg>
+                        ) : (
+                          <Lock className="h-4 w-4" />
+                        )}
+                        <span className="text-sm font-medium capitalize">
+                          {provider.providerId.replace('.com', '')} Account
+                        </span>
+                      </div>
+                      <Badge variant="secondary" className="text-[10px] font-bold">Active</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
           </Card>
         </TabsContent>
 
@@ -318,7 +397,7 @@ export default function SettingsPage() {
                       </div>
                     </div>
                     <Switch 
-                      checked={profile[item.key]} 
+                      checked={profile[item.key as keyof typeof profile] as boolean} 
                       onCheckedChange={(c) => handleSaveSettings({ [item.key]: c }, item.title)} 
                     />
                   </div>
@@ -368,7 +447,7 @@ export default function SettingsPage() {
                     <p className="text-xs text-muted-foreground">{item.desc}</p>
                   </div>
                   <Switch 
-                    checked={profile[item.key]} 
+                    checked={profile[item.key as keyof typeof profile] as boolean} 
                     onCheckedChange={(c) => handleSaveSettings({ [item.key]: c }, item.title)} 
                   />
                 </div>

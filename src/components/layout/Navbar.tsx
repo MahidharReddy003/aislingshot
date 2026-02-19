@@ -187,6 +187,7 @@ export default function Navbar() {
                         <DropdownMenuItem asChild><Link href="/settings"><Wallet className="mr-2 h-4 w-4" />Budget Rules</Link></DropdownMenuItem>
                         <DropdownMenuItem asChild><Link href="/settings"><Sparkles className="mr-2 h-4 w-4" />Discovery</Link></DropdownMenuItem>
                         <DropdownMenuItem asChild><Link href="/settings"><Accessibility className="mr-2 h-4 w-4" />Accessibility</Link></DropdownMenuItem>
+                        <DropdownMenuItem asChild><Link href="/settings/security"><Lock className="mr-2 h-4 w-4" />Security</Link></DropdownMenuItem>
                         <DropdownMenuItem asChild><Link href="/settings"><Lock className="mr-2 h-4 w-4" />Privacy</Link></DropdownMenuItem>
                         <DropdownMenuItem asChild><Link href="/settings"><Bell className="mr-2 h-4 w-4" />Notifications</Link></DropdownMenuItem>
                       </DropdownMenuSubContent>
