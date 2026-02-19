@@ -1,0 +1,26 @@
+
+{
+  "food": [
+    { "id": "1", "name": "Spicy Canteen", "price": 150, "location": "Campus North", "rating": 4.2, "category": "Indian" },
+    { "id": "2", "name": "Healthy Greens", "price": 250, "location": "City Center", "rating": 4.5, "category": "Salads" },
+    { "id": "3", "name": "Burger Hub", "price": 180, "location": "Market Square", "rating": 3.9, "category": "Fast Food" },
+    { "id": "4", "name": "Pasta Palace", "price": 300, "location": "East Wing", "rating": 4.6, "category": "Italian" },
+    { "id": "5", "name": "Momos Corner", "price": 80, "location": "Near Metro", "rating": 4.8, "category": "Street Food" }
+  ],
+  "events": [
+    { "id": "1", "name": "AI Tech Workshop", "cost": 0, "time": "14:00", "distance": "1.2 km", "category": "Education" },
+    { "id": "2", "name": "Music Fest 2024", "cost": 500, "time": "18:00", "distance": "3.5 km", "category": "Entertainment" },
+    { "id": "3", "name": "Code Hackathon", "cost": 0, "time": "09:00", "distance": "0.5 km", "category": "Campus" },
+    { "id": "4", "name": "Photography Walk", "cost": 100, "time": "07:00", "distance": "2.0 km", "category": "Leisure" }
+  ],
+  "shopping": [
+    { "id": "1", "name": "Mega Mall", "type": "Mall", "location": "Downtown", "budgetFriendly": false },
+    { "id": "2", "name": "Campus Book Store", "type": "Store", "location": "Admin Block", "budgetFriendly": true },
+    { "id": "3", "name": "Eco-Friendly Outlet", "type": "Boutique", "location": "Old Town", "budgetFriendly": true }
+  ],
+  "travel": [
+    { "id": "1", "name": "Sunset Point", "budget": "Low", "time": "1 hour", "distance": "5 km" },
+    { "id": "2", "name": "Heritage Museum", "budget": "Medium", "time": "2 hours", "distance": "8 km" },
+    { "id": "3", "name": "Botanical Garden", "budget": "Low", "time": "1.5 hours", "distance": "3 km" }
+  ]
+}
