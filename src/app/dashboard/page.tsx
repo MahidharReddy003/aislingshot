@@ -54,18 +54,13 @@ export default function DashboardPage() {
       return;
     }
 
-    // Only redirect if we are sure the profile setup is explicitly incomplete
-    if (profile && profile.hasCompletedSetup === false) {
-      console.log("Profile explicitly incomplete, redirecting to setup...");
-      router.replace('/profile-setup');
-    } else if (!profile) {
-      // If document doesn't exist at all, also go to setup
-      console.log("No profile found, redirecting to setup...");
+    // Now that loading is complete, check for setup status
+    if (!profile || profile.hasCompletedSetup === false) {
       router.replace('/profile-setup');
     }
   }, [user, isUserLoading, profile, isProfileLoading, router]);
 
-  // Show loader while we are making up our minds
+  // Show loader while loading or if we haven't confirmed setup completion
   if (isUserLoading || isProfileLoading || !user || !profile?.hasCompletedSetup) {
     return (
       <div className="flex flex-col items-center justify-center h-screen space-y-4">

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -42,10 +42,15 @@ export default function ProfileSetupPage() {
   });
 
   useEffect(() => {
-    if (user && !existingProfile) {
-      setFormData(prev => ({ ...prev, name: user.displayName || '' }));
-    } else if (existingProfile) {
-      // If user returns to setup, pre-fill with what we have
+    if (isUserLoading || isProfileLoading) return;
+
+    if (!user) {
+      router.replace('/login');
+      return;
+    }
+
+    if (existingProfile) {
+      // Pre-fill form if doc exists
       setFormData({
         name: existingProfile.name || '',
         age: existingProfile.age || 20,
@@ -58,31 +63,33 @@ export default function ProfileSetupPage() {
         currency: existingProfile.currency || 'INR'
       });
 
-      // If already completed, redirect away to avoid loop
-      if (existingProfile.hasCompletedSetup) {
-        router.push('/dashboard');
+      // If setup already marked as completed, don't allow user to stay here
+      if (existingProfile.hasCompletedSetup === true) {
+        router.replace('/dashboard');
       }
+    } else {
+      // First time, pre-fill name from Auth
+      setFormData(prev => ({ ...prev, name: user.displayName || '' }));
     }
-  }, [user, existingProfile, router]);
+  }, [user, isUserLoading, existingProfile, isProfileLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || !db) return;
     setLoading(true);
 
     try {
-      // Create or update the user document
       await setDoc(doc(db, 'users', user.uid), {
         ...formData,
         id: user.uid,
         email: user.email,
-        hasCompletedSetup: true, // Mark as done
+        hasCompletedSetup: true,
         updatedAt: serverTimestamp(),
         createdAt: existingProfile?.createdAt || serverTimestamp()
       });
 
       toast({ title: 'Profile Updated!', description: 'Your SmartLife experience is ready.' });
-      router.push('/dashboard');
+      router.replace('/dashboard');
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } finally {
@@ -90,7 +97,13 @@ export default function ProfileSetupPage() {
     }
   };
 
-  if (isUserLoading || isProfileLoading) return <div className="flex items-center justify-center h-screen"><Loader2 className="animate-spin text-primary" /></div>;
+  if (isUserLoading || isProfileLoading || (user && existingProfile?.hasCompletedSetup === true)) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="animate-spin text-primary h-8 w-8" />
+      </div>
+    );
+  }
 
   return (
     <div className="container max-w-2xl mx-auto py-12 px-4">
@@ -178,7 +191,7 @@ export default function ProfileSetupPage() {
             </div>
 
             <Button className="w-full h-14 text-lg font-bold rounded-2xl shadow-lg transition-all hover:scale-[1.02]" type="submit" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Activate SmartLife
             </Button>
           </form>

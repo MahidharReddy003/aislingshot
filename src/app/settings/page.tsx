@@ -71,8 +71,9 @@ export default function SettingsPage() {
   };
 
   const handleLogout = async () => {
+    if (!auth) return;
     await signOut(auth);
-    router.push('/login');
+    router.replace('/login');
   };
 
   const handleMockSave = (section: string) => {
