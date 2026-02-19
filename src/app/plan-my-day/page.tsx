@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { planDay } from '@/ai/flows/plan-day-flow';
-import { useUser, useFirestore, useDoc } from '@/firebase';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,13 @@ import { useToast } from '@/hooks/use-toast';
 export default function PlanMyDayPage() {
   const { user } = useUser();
   const db = useFirestore();
-  const { data: profile } = useDoc(user ? doc(db, 'users', user.uid) : null);
+  
+  const profileRef = useMemoFirebase(() => {
+    if (!user || !db) return null;
+    return doc(db, 'users', user.uid);
+  }, [user, db]);
+
+  const { data: profile } = useDoc(profileRef);
   const { toast } = useToast();
 
   const [budget, setBudget] = useState(200);

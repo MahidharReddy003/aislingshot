@@ -3,7 +3,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { chatWithAssistant } from '@/ai/flows/chat-assistant-flow';
-import { useUser, useFirestore, useDoc } from '@/firebase';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,13 @@ interface Message {
 export default function ChatPage() {
   const { user } = useUser();
   const db = useFirestore();
-  const { data: profile } = useDoc(user ? doc(db, 'users', user.uid) : null);
+  
+  const profileRef = useMemoFirebase(() => {
+    if (!user || !db) return null;
+    return doc(db, 'users', user.uid);
+  }, [user, db]);
+
+  const { data: profile } = useDoc(profileRef);
   const { toast } = useToast();
 
   const [input, setInput] = useState('');
