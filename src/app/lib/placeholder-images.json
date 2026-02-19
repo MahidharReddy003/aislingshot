@@ -54,6 +54,48 @@
       "description": "Lively street food corner",
       "imageUrl": "https://picsum.photos/seed/street-food/600/400",
       "imageHint": "street food"
+    },
+    {
+      "id": "event-tech",
+      "description": "Technology workshop or seminar",
+      "imageUrl": "https://picsum.photos/seed/tech-event/600/400",
+      "imageHint": "tech workshop"
+    },
+    {
+      "id": "event-music",
+      "description": "Outdoor music festival",
+      "imageUrl": "https://picsum.photos/seed/music-fest/600/400",
+      "imageHint": "music festival"
+    },
+    {
+      "id": "travel-sunset",
+      "description": "Beautiful sunset over a landscape",
+      "imageUrl": "https://picsum.photos/seed/sunset-view/600/400",
+      "imageHint": "sunset landscape"
+    },
+    {
+      "id": "travel-museum",
+      "description": "Grand museum entrance",
+      "imageUrl": "https://picsum.photos/seed/museum-exterior/600/400",
+      "imageHint": "museum architecture"
+    },
+    {
+      "id": "travel-garden",
+      "description": "Lush botanical garden",
+      "imageUrl": "https://picsum.photos/seed/botanical-garden/600/400",
+      "imageHint": "botanical garden"
+    },
+    {
+      "id": "shop-mall",
+      "description": "Modern shopping mall interior",
+      "imageUrl": "https://picsum.photos/seed/shopping-mall/600/400",
+      "imageHint": "shopping mall"
+    },
+    {
+      "id": "shop-boutique",
+      "description": "Small artisan boutique",
+      "imageUrl": "https://picsum.photos/seed/boutique-shop/600/400",
+      "imageHint": "boutique shop"
     }
   ]
 }

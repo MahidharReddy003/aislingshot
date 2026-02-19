@@ -12,6 +12,8 @@
       "timings": "10:00 AM - 10:00 PM",
       "isOpen": true,
       "imageId": "restaurant-indian",
+      "logoId": "logo-indian",
+      "contact": "+91 98765 43210",
       "menu": [
         { "item": "Paneer Butter Masala", "price": 140, "description": "Creamy cottage cheese in tomato gravy.", "isAvailable": true },
         { "item": "Dal Tadka", "price": 100, "description": "Tempered yellow lentils with garlic.", "isAvailable": true },
@@ -30,6 +32,8 @@
       "timings": "09:00 AM - 08:00 PM",
       "isOpen": true,
       "imageId": "restaurant-salad",
+      "logoId": "logo-salad",
+      "contact": "+91 87654 32109",
       "menu": [
         { "item": "Quinoa Avocado Bowl", "price": 220, "description": "Superfood bowl with ripe avocado and lime.", "isAvailable": true },
         { "item": "Greek Salad", "price": 180, "description": "Feta, olives, and crisp veggies.", "isAvailable": true },
@@ -48,6 +52,8 @@
       "timings": "11:00 AM - 11:00 PM",
       "isOpen": true,
       "imageId": "restaurant-burger",
+      "logoId": "logo-burger",
+      "contact": "+91 76543 21098",
       "menu": [
         { "item": "Classic Veg Burger", "price": 120, "description": "Hand-crafted veggie patty with lettuce.", "isAvailable": true },
         { "item": "Cheese Fries", "price": 90, "description": "Loaded with melted cheddar.", "isAvailable": true },
@@ -66,46 +72,80 @@
       "timings": "12:00 PM - 10:30 PM",
       "isOpen": false,
       "imageId": "restaurant-italian",
+      "logoId": "logo-italian",
+      "contact": "+91 65432 10987",
       "menu": [
         { "item": "Penne Alfredo", "price": 280, "description": "Rich white sauce with mushrooms.", "isAvailable": true },
         { "item": "Spaghetti Arrabbiata", "price": 260, "description": "Spicy tomato sauce and basil.", "isAvailable": true },
         { "item": "Garlic Bread with Cheese", "price": 120, "description": "Toasted baguette with mozzarella.", "isAvailable": true },
         { "item": "Tiramisu", "price": 150, "description": "Classic coffee-flavored Italian cake.", "isAvailable": true }
       ]
-    },
-    { 
-      "id": "5", 
-      "name": "Momos Corner", 
-      "price": 80, 
-      "location": "Near Metro", 
-      "rating": 4.8, 
-      "category": "Street Food",
-      "description": "The best street-side dumplings in town. Fast, hot, and delicious.",
-      "timings": "04:00 PM - 11:30 PM",
-      "isOpen": true,
-      "imageId": "restaurant-street",
-      "menu": [
-        { "item": "Steamed Veg Momos (8pcs)", "price": 80, "description": "Traditional vegetable filled dumplings.", "isAvailable": true },
-        { "item": "Fried Paneer Momos (8pcs)", "price": 120, "description": "Deep fried golden paneer goodness.", "isAvailable": true },
-        { "item": "Thukpa", "price": 100, "description": "Tibetan noodle soup with veggies.", "isAvailable": true },
-        { "item": "Iced Lemon Tea", "price": 50, "description": "Refreshing chilled brew.", "isAvailable": true }
-      ]
     }
   ],
   "events": [
-    { "id": "1", "name": "AI Tech Workshop", "cost": 0, "time": "14:00", "distance": "1.2 km", "category": "Education" },
-    { "id": "2", "name": "Music Fest 2024", "cost": 500, "time": "18:00", "distance": "3.5 km", "category": "Entertainment" },
-    { "id": "3", "name": "Code Hackathon", "cost": 0, "time": "09:00", "distance": "0.5 km", "category": "Campus" },
-    { "id": "4", "name": "Photography Walk", "cost": 100, "time": "07:00", "distance": "2.0 km", "category": "Leisure" }
-  ],
-  "shopping": [
-    { "id": "1", "name": "Mega Mall", "type": "Mall", "location": "Downtown", "budgetFriendly": false },
-    { "id": "2", "name": "Campus Book Store", "type": "Store", "location": "Admin Block", "budgetFriendly": true },
-    { "id": "3", "name": "Eco-Friendly Outlet", "type": "Boutique", "location": "Old Town", "budgetFriendly": true }
+    { 
+      "id": "1", 
+      "name": "AI Tech Workshop", 
+      "cost": 0, 
+      "time": "14:00", 
+      "distance": "1.2 km", 
+      "category": "Education", 
+      "imageId": "event-tech",
+      "organizer": "Tech Society",
+      "attachments": ["Workshop Syllabus.pdf", "Campus Map.png"]
+    },
+    { 
+      "id": "2", 
+      "name": "Music Fest 2024", 
+      "cost": 500, 
+      "time": "18:00", 
+      "distance": "3.5 km", 
+      "category": "Entertainment", 
+      "imageId": "event-music",
+      "organizer": "Vibe Records",
+      "attachments": ["Lineup.jpg", "Ticket Info.pdf"]
+    }
   ],
   "travel": [
-    { "id": "1", "name": "Sunset Point", "budget": "Low", "time": "1 hour", "distance": "5 km" },
-    { "id": "2", "name": "Heritage Museum", "budget": "Medium", "time": "2 hours", "distance": "8 km" },
-    { "id": "3", "name": "Botanical Garden", "budget": "Low", "time": "1.5 hours", "distance": "3 km" }
+    { 
+      "id": "1", 
+      "name": "Sunset Point", 
+      "budget": "Low", 
+      "time": "1 hour", 
+      "distance": "5 km", 
+      "imageId": "travel-sunset",
+      "bestTime": "5:30 PM - 6:30 PM",
+      "features": ["Trekking", "Photography", "Quiet"]
+    },
+    { 
+      "id": "2", 
+      "name": "Heritage Museum", 
+      "budget": "Medium", 
+      "time": "2 hours", 
+      "distance": "8 km", 
+      "imageId": "travel-museum",
+      "bestTime": "10:00 AM - 4:00 PM",
+      "features": ["Art", "History", "Indoor"]
+    }
+  ],
+  "shopping": [
+    { 
+      "id": "1", 
+      "name": "Mega Mall", 
+      "type": "Mall", 
+      "location": "Downtown", 
+      "budgetFriendly": false, 
+      "imageId": "shop-mall",
+      "hours": "10 AM - 11 PM"
+    },
+    { 
+      "id": "3", 
+      "name": "Eco-Friendly Outlet", 
+      "type": "Boutique", 
+      "location": "Old Town", 
+      "budgetFriendly": true, 
+      "imageId": "shop-boutique",
+      "hours": "11 AM - 8 PM"
+    }
   ]
 }

@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A Genkit flow that generates a personalized recommendation along with a clear, natural language explanation of why the recommendation was made, based on user preferences and constraints.
@@ -30,8 +31,10 @@ const GenerateExplanationOutputSchema = z.object({
   explanation: z
     .string()
     .describe(
-      'A natural language explanation of why this recommendation was made, detailing how it aligns with budget, preferences, accessibility, and diversity. Example: "Within your ₹120 budget. Matches your vegetarian preference. Adds variety to recent choices. Highly rated by students."'
+      'A natural language explanation of why this recommendation was made, detailing how it aligns with budget, preferences, accessibility, and diversity.'
     ),
+  imageHint: z.string().describe('A one or two word keyword hint for an image search (e.g., "pasta", "tech park", "city sunset").'),
+  logoHint: z.string().optional().describe('A keyword hint for a logo or icon (e.g., "fork", "sparkles", "train").'),
 });
 export type GenerateExplanationOutput = z.infer<typeof GenerateExplanationOutputSchema>;
 
@@ -54,7 +57,6 @@ The explanation should specifically address:
 2. How it aligns with the user's stated preferences.
 3. How it addresses any accessibility requirements.
 4. How it provides variety, considering their recent choices, to prevent a filter bubble.
-5. Optionally, mention any perceived quality or popularity relevant to the user's persona.
 
 User Persona: {{{userPersona}}}
 Preferences: {{{preferences}}}
@@ -64,7 +66,7 @@ Accessibility: {{{accessibility}}}
 Recent Choices: {{#if recentChoices}}{{#each recentChoices}}- {{{this}}}
 {{/each}}{{else}}None{{/if}}
 
-Based on the above, provide a suitable recommendation, its estimated cost and time, a diversity score, and a detailed explanation.`,
+Based on the above, provide a suitable recommendation, its estimated cost and time, a diversity score, a detailed explanation, and relevant image/logo keywords.`,
 });
 
 // Define the Genkit flow

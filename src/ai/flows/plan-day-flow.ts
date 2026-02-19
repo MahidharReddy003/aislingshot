@@ -20,7 +20,9 @@ const PlanDayOutputSchema = z.object({
     description: z.string(),
     cost: z.number(),
     durationMinutes: z.number(),
-    reason: z.string()
+    reason: z.string(),
+    imageHint: z.string().describe('A one or two word keyword hint for an image search (e.g., "coffee", "coding", "park").'),
+    logoHint: z.string().optional().describe('A keyword hint for a logo or icon.')
   })),
   totalCost: z.number(),
   summary: z.string()
@@ -46,7 +48,7 @@ User Constraint:
 
 Generate a personalized plan including what to eat, where to go, and what to do. 
 Ensure the total cost is within ₹{{{budget}}} and total time is within {{{timeAvailable}}} minutes.
-Provide a clear "reason" for each activity based on user interests.`
+For each activity, provide a clear "reason" based on user interests and specify image/logo keywords that represent the activity visually.`
 });
 
 const planDayFlow = ai.defineFlow(
