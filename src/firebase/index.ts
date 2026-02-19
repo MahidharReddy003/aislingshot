@@ -1,4 +1,3 @@
-
 'use client';
 
 import { firebaseConfig } from '@/firebase/config';
@@ -7,10 +6,22 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore'
 
 /**
- * Initialize Firebase with explicit config to ensure it works on Vercel.
- * Avoids the "no-options" error by always providing the config object.
+ * Initialize Firebase with explicit config to ensure it works on all platforms (Local/Hosting/Vercel).
+ * Includes defensive checks to prevent initialization errors during Next.js build-time pre-rendering.
  */
 export function initializeFirebase() {
+  if (typeof window === 'undefined') {
+    // During server-side rendering or build pre-render, we still return the initialized app
+    // but we ensure it's not re-initializing incorrectly.
+    const existingApps = getApps();
+    const app = existingApps.length > 0 ? existingApps[0] : initializeApp(firebaseConfig);
+    return {
+      firebaseApp: app,
+      auth: getAuth(app),
+      firestore: getFirestore(app)
+    };
+  }
+
   const existingApps = getApps();
   const app = existingApps.length > 0 ? existingApps[0] : initializeApp(firebaseConfig);
 
@@ -21,7 +32,6 @@ export function initializeFirebase() {
   };
 }
 
-// These are still used by the providers but are now correctly initialized
 export function getSdks(firebaseApp: FirebaseApp) {
   return {
     firebaseApp,
