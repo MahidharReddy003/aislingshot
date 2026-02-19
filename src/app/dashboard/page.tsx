@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -68,8 +69,9 @@ export default function DashboardPage() {
     );
   }
 
+  // INTERCONNECTED DATA: Calculate weekly cap from profile budgetPreference
   const weeklyCap = (profile.budgetPreference || 500) * 7;
-  const currentSpent = 1240; // Simulated weekly spend
+  const currentSpent = 1240; // Simulated weekly spend for demo
   const budgetProgress = Math.min((currentSpent / weeklyCap) * 100, 100);
 
   return (
@@ -192,11 +194,6 @@ export default function DashboardPage() {
                       </div>
                     ))}
                   </div>
-                  <div className="p-4 border-t text-center">
-                    <Button variant="link" className="text-xs h-auto p-0 text-muted-foreground" asChild>
-                      <Link href="/history">View Full History</Link>
-                    </Button>
-                  </div>
                 </CardContent>
               </Card>
 
@@ -216,9 +213,6 @@ export default function DashboardPage() {
                     </div>
                     <Progress value={65} className="bg-white/20 h-2" />
                   </div>
-                  <p className="text-xs text-primary-foreground/80 leading-relaxed italic">
-                    "We've improved recommendation relevance by 12% based on your feedback from last night's meal."
-                  </p>
                   <Button variant="secondary" className="w-full font-bold h-11" asChild>
                     <Link href="/settings">Tune Discovery</Link>
                   </Button>
