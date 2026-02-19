@@ -1,5 +1,4 @@
-
-"use client";
+'use client';
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
@@ -28,8 +27,6 @@ import {
   ListRestart,
   Loader2,
   Activity,
-  ShieldCheck,
-  ChevronRight,
   MessageSquare,
   Send
 } from "lucide-react";
@@ -66,6 +63,7 @@ export default function RecommenderPage() {
   const [accessibility, setAccessibility] = useState(false);
   const [healthAware, setHealthAware] = useState(true);
 
+  // Sync profile data when it loads
   useEffect(() => {
     if (profile) {
       if (profile.budgetPreference !== undefined) setBudget(profile.budgetPreference);
@@ -155,36 +153,36 @@ export default function RecommenderPage() {
 
   if (isProfileLoading && !profile) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen space-y-4">
+      <div className="flex flex-col items-center justify-center h-[80vh] space-y-4">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">Loading AI Persona...</p>
+        <p className="text-sm text-muted-foreground font-medium">Loading AI Persona...</p>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl pb-24">
-      <div className="mb-10">
-        <h1 className="text-4xl font-black tracking-tight mb-2">Smart Recommender</h1>
-        <p className="text-muted-foreground">Adjust preferences and explore the AI reasoning behind every suggestion.</p>
+    <div className="container mx-auto px-4 py-12 max-w-6xl pb-24">
+      <div className="mb-12">
+        <h1 className="text-5xl font-black tracking-tighter mb-2">Smart Recommender</h1>
+        <p className="text-muted-foreground text-lg">Adjust your constraints and explore the AI logic behind every suggestion.</p>
       </div>
 
-      <div className="grid lg:grid-cols-12 gap-8">
+      <div className="grid lg:grid-cols-12 gap-12">
         <div className="lg:col-span-4 space-y-6">
-          <Card className="border-2 shadow-sm rounded-[2.5rem]">
+          <Card className="border-2 shadow-sm rounded-[2.5rem] overflow-hidden">
             <CardHeader className="bg-muted/30 border-b px-8 py-6">
-              <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground">Contextual Inputs</CardTitle>
+              <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground">Contextual Constraints</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6 p-8">
-              <div className="space-y-3">
-                <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Persona</Label>
+            <CardContent className="space-y-8 p-8">
+              <div className="space-y-4">
+                <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Persona</Label>
                 <div className="flex flex-wrap gap-2">
                   {["Student", "Professional", "Creator", "Traveler"].map(p => (
                     <Button 
                       key={p} 
                       variant={persona === p ? "default" : "outline"} 
                       size="sm"
-                      className="rounded-full h-8 text-[10px] font-bold"
+                      className="rounded-full h-9 px-4 text-xs font-bold"
                       onClick={() => setPersona(p)}
                     >
                       {p}
@@ -193,137 +191,188 @@ export default function RecommenderPage() {
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="flex justify-between items-end">
-                  <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Budget cap</Label>
-                  <span className="text-sm font-black">₹{budget}</span>
+                  <Label className="font-black text-xs uppercase tracking-widest text-muted-foreground">Budget Cap</Label>
+                  <span className="text-xl font-black text-primary">₹{budget}</span>
                 </div>
-                <Slider value={[budget]} max={2000} step={50} onValueChange={(val) => setBudget(val[0])} />
+                <Slider value={[budget]} max={2000} step={50} onValueChange={(val) => setBudget(val[0])} className="py-2" />
               </div>
 
               {profile?.healthConditions && profile.healthConditions.length > 0 && (
-                <div className="flex items-center justify-between p-4 bg-primary/5 rounded-2xl border-2 border-primary/20">
-                  <div className="space-y-0.5">
-                    <Label className="text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-1">
-                      <Activity className="h-3 w-3" /> Health-Aware
+                <div className="flex items-center justify-between p-5 bg-primary/5 rounded-[2rem] border-2 border-primary/20">
+                  <div className="space-y-1">
+                    <Label className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                      <Activity className="h-4 w-4" /> Health-Aware Mode
                     </Label>
-                    <p className="text-[10px] text-muted-foreground italic">Considering: {profile.healthConditions.join(', ')}</p>
+                    <p className="text-[10px] text-muted-foreground italic line-clamp-1">Considering: {profile.healthConditions.join(', ')}</p>
                   </div>
                   <Switch checked={healthAware} onCheckedChange={setHealthAware} />
                 </div>
               )}
 
-              <div className="space-y-3">
-                <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Thematic Focus</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {["Healthy", "Quick", "Social", "Budget", "Premium"].map(p => (
+              <div className="space-y-4">
+                <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground">Preference Focus</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  {["Healthy", "Quick", "Social", "Budget", "Premium", "Outdoor"].map(p => (
                     <div 
                       key={p} 
                       className={cn(
-                        "flex items-center space-x-2 border-2 rounded-xl p-3 cursor-pointer transition-colors",
+                        "flex items-center space-x-3 border-2 rounded-2xl p-4 cursor-pointer transition-all hover:scale-[1.02]",
                         selectedPrefs.includes(p) ? "bg-primary/5 border-primary" : "hover:bg-muted"
                       )}
                       onClick={() => togglePref(p)}
                     >
-                      <div className={cn("h-3 w-3 rounded-full border-2", selectedPrefs.includes(p) ? "bg-primary border-primary" : "border-muted-foreground")} />
-                      <span className="text-xs font-bold">{p}</span>
+                      <div className={cn("h-4 w-4 rounded-full border-2", selectedPrefs.includes(p) ? "bg-primary border-primary" : "border-muted-foreground")} />
+                      <span className="text-sm font-bold">{p}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between p-4 bg-muted/20 rounded-2xl border-2">
-                <div className="space-y-0.5">
-                  <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Accessibility</Label>
-                  <p className="text-[10px] text-muted-foreground">Strict filtering</p>
+              <div className="flex items-center justify-between p-5 bg-muted/20 rounded-[2rem] border-2">
+                <div className="space-y-1">
+                  <Label className="font-bold">Accessibility Priority</Label>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black">Strict Filtering</p>
                 </div>
                 <Switch checked={accessibility} onCheckedChange={setAccessibility} />
               </div>
 
-              <Button className="w-full h-14 rounded-2xl font-bold shadow-lg gap-2" onClick={handleRecommend} disabled={loading}>
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                Generate Suggestion
+              <Button className="w-full h-16 rounded-[2rem] font-black text-lg shadow-xl gap-3 transition-transform hover:scale-[1.02]" onClick={handleRecommend} disabled={loading}>
+                {loading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Sparkles className="h-6 w-6" />}
+                Generate Discovery
               </Button>
             </CardContent>
           </Card>
         </div>
 
-        <div className="lg:col-span-8 space-y-8">
+        <div className="lg:col-span-8">
           {result ? (
-            <>
-              <Tabs defaultValue="explain" className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-                <TabsList className="bg-muted p-1 border-2 rounded-2xl grid grid-cols-3 h-auto">
-                  <TabsTrigger value="explain" className="rounded-xl py-3 font-bold gap-2"><Info className="h-4 w-4" /> Explain</TabsTrigger>
-                  <TabsTrigger value="compare" className="rounded-xl py-3 font-bold gap-2"><Scale className="h-4 w-4" /> Compare</TabsTrigger>
-                  <TabsTrigger value="alternatives" className="rounded-xl py-3 font-bold gap-2"><ListRestart className="h-4 w-4" /> Alternatives</TabsTrigger>
+            <div className="space-y-10 animate-in fade-in slide-in-from-right-8 duration-700">
+              <Tabs defaultValue="explain" className="space-y-8">
+                <TabsList className="bg-muted p-1.5 border-2 rounded-[2rem] grid grid-cols-3 h-auto max-w-md mx-auto">
+                  <TabsTrigger value="explain" className="rounded-[1.5rem] py-4 font-black gap-2"><Info className="h-5 w-5" /> Logic</TabsTrigger>
+                  <TabsTrigger value="compare" className="rounded-[1.5rem] py-4 font-black gap-2"><Scale className="h-5 w-5" /> Compare</TabsTrigger>
+                  <TabsTrigger value="alternatives" className="rounded-[1.5rem] py-4 font-black gap-2"><ListRestart className="h-5 w-5" /> More</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="explain" className="space-y-6">
-                  <Card className="border-primary border-4 shadow-xl overflow-hidden rounded-[2.5rem] relative">
-                    <div className="relative h-64 w-full bg-muted">
+                <TabsContent value="explain" className="space-y-8">
+                  <Card className="border-primary border-4 shadow-2xl overflow-hidden rounded-[3rem] relative group">
+                    <div className="relative h-[30rem] w-full bg-muted overflow-hidden">
                       <Image 
                         src={getPlaceholderImageUrl(result.imageHint || 'hero-abstract')}
                         alt={result.recommendation}
                         fill
-                        className="object-cover"
+                        className="object-cover transition-transform duration-1000 group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
                       
-                      <div className="absolute top-6 right-8">
+                      <div className="absolute top-10 right-10">
                         <Dialog>
                           <DialogTrigger asChild>
-                            <Button size="icon" className="h-16 w-16 rounded-full shadow-2xl bg-primary hover:scale-110 transition-transform flex flex-col items-center justify-center p-0">
-                              <Sparkles className="h-8 w-8" />
+                            <Button size="icon" className="h-20 w-20 rounded-full shadow-2xl bg-primary hover:scale-110 transition-transform flex flex-col items-center justify-center p-0 border-4 border-white/20">
+                              <Sparkles className="h-10 w-10 text-primary-foreground" />
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="rounded-3xl border-2 sm:max-w-[500px]">
+                          <DialogContent className="rounded-[2.5rem] border-2 sm:max-w-[550px] p-10">
                             <DialogHeader>
-                              <DialogTitle className="text-2xl font-black flex items-center gap-2">
-                                <Sparkles className="text-primary" /> AI Reasoning Breakdown
+                              <DialogTitle className="text-3xl font-black flex items-center gap-3">
+                                <Sparkles className="text-primary h-8 w-8" /> Why this choice?
                               </DialogTitle>
-                              <DialogDescription className="text-base font-medium text-foreground italic py-6 leading-relaxed">
-                                {result.explanation}
-                              </DialogDescription>
+                              <div className="py-8">
+                                <p className="text-lg font-medium text-foreground italic leading-relaxed">
+                                  "{result.explanation}"
+                                </p>
+                              </div>
                             </DialogHeader>
+                            
+                            <div className="space-y-6 pt-6 border-t">
+                              <p className="text-xs font-black uppercase tracking-widest text-muted-foreground text-center">Help refine the engine</p>
+                              
+                              {refinedResponse ? (
+                                <div className="bg-primary text-primary-foreground p-8 rounded-[2rem] space-y-4 animate-in zoom-in duration-500 shadow-xl">
+                                  <div className="flex items-center gap-2">
+                                    <Sparkles className="h-4 w-4" />
+                                    <h4 className="font-black text-xs uppercase tracking-widest">Logic Adaptation Active</h4>
+                                  </div>
+                                  <p className="text-sm italic leading-relaxed opacity-90">{refinedResponse.refinedExplanation}</p>
+                                  <div className="pt-4 space-y-2">
+                                    {refinedResponse.actionableInsights.map((insight, idx) => (
+                                      <div key={idx} className="flex gap-2 text-[10px] font-bold opacity-80 bg-white/10 p-2 rounded-lg">
+                                        <Activity className="h-3 w-3 shrink-0" /> {insight}
+                                      </div>
+                                    ))}
+                                  </div>
+                                  <Button variant="secondary" size="sm" onClick={() => setRefinedResponse(null)} className="w-full text-[10px] h-10 font-black rounded-xl uppercase">Provide More Feedback</Button>
+                                </div>
+                              ) : (
+                                <div className="space-y-6">
+                                  <div className="grid grid-cols-4 gap-3">
+                                     <Button variant="outline" onClick={() => handleFeedback('Relevant')} disabled={feedbackLoading} className="rounded-2xl h-14 border-2"><ThumbsUp className="h-5 w-5" /></Button>
+                                     <Button variant="outline" onClick={() => handleFeedback('Not useful')} disabled={feedbackLoading} className="rounded-2xl h-14 border-2"><ThumbsDown className="h-5 w-5" /></Button>
+                                     <Button variant="outline" onClick={() => handleFeedback('Too expensive')} disabled={feedbackLoading} className="rounded-2xl h-14 border-2"><DollarSign className="h-5 w-5" /></Button>
+                                     <Button variant="outline" onClick={() => handleFeedback('Too repetitive')} disabled={feedbackLoading} className="rounded-2xl h-14 border-2"><RefreshCcw className="h-5 w-5" /></Button>
+                                  </div>
+
+                                  <div className="space-y-3">
+                                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                                      <MessageSquare className="h-3 w-3" /> Custom Opinion
+                                    </Label>
+                                    <div className="flex gap-3">
+                                      <Textarea 
+                                        placeholder="Tell us what you really think..." 
+                                        value={customFeedback}
+                                        onChange={(e) => setCustomFeedback(e.target.value)}
+                                        className="min-h-[80px] text-sm bg-muted/30 border-2 rounded-2xl resize-none"
+                                        disabled={feedbackLoading}
+                                      />
+                                      <Button onClick={() => handleFeedback(customFeedback)} disabled={feedbackLoading || !customFeedback.trim()} className="h-auto w-16 rounded-2xl shrink-0 shadow-lg">
+                                        {feedbackLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           </DialogContent>
                         </Dialog>
                       </div>
 
-                      <div className="absolute bottom-6 left-8 text-white">
-                        <Badge variant="outline" className="text-white border-white/30 font-bold uppercase text-[10px] mb-1">AI Curated Choice</Badge>
-                        <h2 className="text-3xl font-black tracking-tight">{result.recommendation}</h2>
+                      <div className="absolute bottom-10 left-10 text-white space-y-2">
+                        <Badge variant="outline" className="text-white border-white/40 bg-white/10 backdrop-blur-md px-4 py-1.5 font-black uppercase text-[10px] tracking-widest">Logic-Matched Suggestion</Badge>
+                        <h2 className="text-5xl font-black tracking-tighter">{result.recommendation}</h2>
                       </div>
                     </div>
                     
-                    <CardContent className="p-8">
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="p-4 rounded-2xl bg-muted/30 border-2 text-center">
+                    <CardContent className="p-10">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <div className="p-6 rounded-[2rem] bg-muted/40 border-2 text-center shadow-inner">
                           <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest mb-1">Est. Cost</p>
-                          <p className="text-lg font-bold">₹{result.costEstimate}</p>
+                          <p className="text-2xl font-black text-primary">₹{result.costEstimate}</p>
                         </div>
-                        <div className="p-4 rounded-2xl bg-muted/30 border-2 text-center">
-                          <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest mb-1">Time</p>
-                          <p className="text-lg font-bold">{result.timeEstimate}</p>
+                        <div className="p-6 rounded-[2rem] bg-muted/40 border-2 text-center shadow-inner">
+                          <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest mb-1">Time Focus</p>
+                          <p className="text-2xl font-black text-primary">{result.timeEstimate}</p>
                         </div>
-                        <div className="p-4 rounded-2xl bg-muted/30 border-2 text-center">
+                        <div className="p-6 rounded-[2rem] bg-muted/40 border-2 text-center shadow-inner">
                           <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest mb-1">Diversity</p>
-                          <p className="text-lg font-bold">{result.diversityScore}%</p>
+                          <p className="text-2xl font-black text-primary">{result.diversityScore}%</p>
                         </div>
-                        <div className="p-4 rounded-2xl bg-primary text-primary-foreground border-2 border-primary text-center">
-                          <p className="text-[10px] uppercase font-black opacity-70 tracking-widest mb-1">Match</p>
-                          <p className="text-lg font-bold">98%</p>
+                        <div className="p-6 rounded-[2rem] bg-primary text-primary-foreground border-4 border-primary/20 text-center shadow-xl">
+                          <p className="text-[10px] uppercase font-black opacity-70 tracking-widest mb-1">AI Match</p>
+                          <p className="text-2xl font-black">98%</p>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
                 </TabsContent>
               </Tabs>
-            </>
+            </div>
           ) : (
-            <div className="h-full min-h-[500px] border-4 border-dashed rounded-[2.5rem] flex flex-col items-center justify-center text-muted-foreground p-12 text-center opacity-40">
-              <div className="p-6 rounded-full bg-muted mb-6"><Target className="h-16 w-16" /></div>
-              <h3 className="text-2xl font-black mb-2 uppercase tracking-tight">System Ready</h3>
-              <p className="max-w-xs text-sm font-medium leading-relaxed">Define your context (Persona, Budget, Health) on the left. The AI will cross-reference its logic modules to find your best match.</p>
+            <div className="h-full min-h-[600px] border-4 border-dashed rounded-[3.5rem] flex flex-col items-center justify-center text-muted-foreground p-16 text-center opacity-40 bg-muted/5">
+              <div className="p-10 rounded-full bg-muted mb-8 shadow-inner"><Target className="h-20 w-20" /></div>
+              <h3 className="text-3xl font-black mb-4 uppercase tracking-tighter">Discovery System Idle</h3>
+              <p className="max-w-md text-lg font-medium leading-relaxed">Adjust your persona, budget, and health context on the left. The AI will then cross-reference its logic modules to find your highest matching experience.</p>
             </div>
           )}
         </div>
