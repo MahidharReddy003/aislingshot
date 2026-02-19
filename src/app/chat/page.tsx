@@ -1,15 +1,14 @@
-
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { chatWithAssistant } from '@/ai/flows/chat-assistant-flow';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Send, Loader2, Sparkles, UserCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -52,9 +51,20 @@ export default function ChatPage() {
     setLoading(true);
 
     try {
+      // Sanitize profile to a plain object for Server Action compatibility
+      const sanitizedProfile = {
+        name: profile.name,
+        role: profile.role,
+        interests: profile.interests,
+        location: profile.location,
+        budgetPreference: profile.budgetPreference,
+        aiBehavior: profile.aiBehavior,
+        availableTime: profile.availableTime
+      };
+
       const { response } = await chatWithAssistant({
         message: userMsg,
-        userProfile: profile
+        userProfile: sanitizedProfile
       });
       setMessages(prev => [...prev, { role: 'assistant', content: response }]);
     } catch (error: any) {

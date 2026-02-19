@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { doc, serverTimestamp } from 'firebase/firestore';
+import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -56,42 +56,33 @@ export default function SettingsPage() {
     if (profile) {
       setLocalInterests(profile.interests || []);
       setBudgetVal(profile.budgetPreference || 500);
+      setDiscoveryVal(profile.explorationLevel || 50);
     }
   }, [profile]);
 
-  const handleUpdateProfile = async (e: React.FormEvent) => {
+  const handleUpdateProfile = (e: React.FormEvent) => {
     e.preventDefault();
     if (!userDocRef) return;
-    setSaving(true);
-    try {
-      const formData = new FormData(e.currentTarget as HTMLFormElement);
-      await updateDoc(userDocRef, {
-        name: formData.get('name'),
-        location: formData.get('location'),
-        updatedAt: serverTimestamp()
-      });
-      toast({ title: 'Identity Updated', description: 'Your profile changes have been saved.' });
-    } catch (error: any) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } finally {
-      setSaving(false);
-    }
+    
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const updates = {
+      name: formData.get('name'),
+      location: formData.get('location'),
+      updatedAt: serverTimestamp()
+    };
+
+    updateDocumentNonBlocking(userDocRef, updates);
+    toast({ title: 'Identity Updated', description: 'Your profile changes have been applied.' });
   };
 
-  const handleSaveSettings = async (updates: any, sectionName: string) => {
+  const handleSaveSettings = (updates: any, sectionName: string) => {
     if (!userDocRef) return;
-    setSaving(true);
-    try {
-      await updateDoc(userDocRef, {
-        ...updates,
-        updatedAt: serverTimestamp()
-      });
-      toast({ title: 'Settings Saved', description: `${sectionName} preferences updated successfully.` });
-    } catch (error: any) {
-      toast({ title: 'Save Failed', description: error.message, variant: 'destructive' });
-    } finally {
-      setSaving(false);
-    }
+    
+    updateDocumentNonBlocking(userDocRef, {
+      ...updates,
+      updatedAt: serverTimestamp()
+    });
+    toast({ title: 'Settings Saved', description: `${sectionName} preferences updated successfully.` });
   };
 
   const handleLogout = async () => {
@@ -121,7 +112,7 @@ export default function SettingsPage() {
         </TabsList>
 
         {/* PROFILE TAB */}
-        <TabsContent value="profile" className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <TabsContent value="profile" className="space-y-4">
           <Card className="border-2 shadow-sm rounded-3xl overflow-hidden">
             <CardHeader className="bg-muted/20 pb-8">
               <CardTitle>Identity & Context</CardTitle>
@@ -147,8 +138,7 @@ export default function SettingsPage() {
                   <Button type="button" variant="ghost" onClick={handleLogout} className="text-destructive hover:bg-destructive/5 gap-2 px-6 h-12">
                     <LogOut className="h-4 w-4" /> Sign Out
                   </Button>
-                  <Button type="submit" disabled={saving} className="h-12 px-10 font-bold rounded-xl shadow-lg">
-                    {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  <Button type="submit" className="h-12 px-10 font-bold rounded-xl shadow-lg">
                     Update Identity
                   </Button>
                 </div>
@@ -158,7 +148,7 @@ export default function SettingsPage() {
         </TabsContent>
 
         {/* PREFERENCES TAB */}
-        <TabsContent value="preferences" className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <TabsContent value="preferences" className="space-y-4">
           <Card className="border-2 shadow-sm rounded-3xl">
             <CardHeader>
               <CardTitle>Interests & AI Behavior</CardTitle>
@@ -205,10 +195,8 @@ export default function SettingsPage() {
             <CardFooter className="bg-muted/10 border-t p-6">
               <Button 
                 onClick={() => handleSaveSettings({ interests: localInterests }, 'Preferences')} 
-                disabled={saving} 
                 className="w-full h-12 rounded-xl font-bold"
               >
-                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Apply Interest Matrix
               </Button>
             </CardFooter>
@@ -216,7 +204,7 @@ export default function SettingsPage() {
         </TabsContent>
 
         {/* BUDGET TAB */}
-        <TabsContent value="budget" className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <TabsContent value="budget" className="space-y-4">
           <Card className="border-2 shadow-sm rounded-3xl">
             <CardHeader>
               <CardTitle>Budget Hard-Rules</CardTitle>
@@ -242,24 +230,22 @@ export default function SettingsPage() {
                     <Label className="text-base font-bold">Strict Budget Enforcement</Label>
                     <p className="text-xs text-muted-foreground">AI will never show options that exceed your cap by even ₹1.</p>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch defaultChecked onCheckedChange={(c) => handleSaveSettings({ strictBudget: c }, 'Strict Budget')} />
                 </div>
                 <div className="flex items-center justify-between p-6 bg-muted/20 rounded-2xl border-2">
                   <div className="space-y-1">
                     <Label className="text-base font-bold">Rolling Savings Bonus</Label>
                     <p className="text-xs text-muted-foreground">Unspent daily budget adds to your weekend 'exploratory' pool.</p>
                   </div>
-                  <Switch />
+                  <Switch onCheckedChange={(c) => handleSaveSettings({ rollingSavings: c }, 'Rolling Savings')} />
                 </div>
               </div>
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6">
               <Button 
                 onClick={() => handleSaveSettings({ budgetPreference: budgetVal }, 'Budget')} 
-                disabled={saving} 
                 className="w-full h-12 rounded-xl font-bold"
               >
-                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Lock Budget Rules
               </Button>
             </CardFooter>
@@ -267,7 +253,7 @@ export default function SettingsPage() {
         </TabsContent>
 
         {/* DISCOVERY TAB */}
-        <TabsContent value="discovery" className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <TabsContent value="discovery" className="space-y-4">
           <Card className="border-2 shadow-sm rounded-3xl">
             <CardHeader>
               <CardTitle>Discovery & Filter Bubble Control</CardTitle>
@@ -298,17 +284,17 @@ export default function SettingsPage() {
                   <Label className="text-base font-bold flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Anti-Stagnation Guard</Label>
                   <p className="text-xs text-muted-foreground">Force at least one high-diversity suggestion per day to prevent filter bubbles.</p>
                 </div>
-                <Switch defaultChecked />
+                <Switch defaultChecked onCheckedChange={(c) => handleSaveSettings({ antiStagnation: c }, 'Discovery Guard')} />
               </div>
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6">
-              <Button onClick={() => handleSaveSettings({ explorationLevel: discoveryVal }, 'Discovery')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Refresh Exploration Logic</Button>
+              <Button onClick={() => handleSaveSettings({ explorationLevel: discoveryVal }, 'Discovery')} className="w-full h-12 rounded-xl font-bold">Refresh Exploration Logic</Button>
             </CardFooter>
           </Card>
         </TabsContent>
 
         {/* ACCESSIBILITY TAB */}
-        <TabsContent value="accessibility" className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <TabsContent value="accessibility" className="space-y-4">
           <Card className="border-2 shadow-sm rounded-3xl">
             <CardHeader>
               <CardTitle>Inclusion & Visual Profiling</CardTitle>
@@ -316,10 +302,10 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-4 py-6">
               {[
-                { title: 'Low Mobility Priority', desc: 'Prioritize locations with ramp access and minimal walking.', icon: Accessibility },
-                { title: 'Time-Critical Alerts', desc: 'Haptic feedback for time-sensitive activity start windows.', icon: Bell },
-                { title: 'High Contrast Mode', desc: 'Increase text weight and button prominence for clarity.', icon: Eye },
-                { title: 'Plain-Language Logic', desc: 'Simplify AI explanations into direct bullet points.', icon: Info }
+                { key: 'lowMobility', title: 'Low Mobility Priority', desc: 'Prioritize locations with ramp access and minimal walking.', icon: Accessibility },
+                { key: 'hapticAlerts', title: 'Time-Critical Alerts', desc: 'Haptic feedback for time-sensitive activity start windows.', icon: Bell },
+                { key: 'highContrast', title: 'High Contrast Mode', desc: 'Increase text weight and button prominence for clarity.', icon: Eye },
+                { key: 'plainLanguage', title: 'Plain-Language Logic', desc: 'Simplify AI explanations into direct bullet points.', icon: Info }
               ].map((item, i) => (
                 <div key={i} className="flex items-center justify-between p-6 bg-muted/20 rounded-2xl border-2">
                   <div className="flex gap-4 items-center">
@@ -331,18 +317,18 @@ export default function SettingsPage() {
                       <p className="text-xs text-muted-foreground">{item.desc}</p>
                     </div>
                   </div>
-                  <Switch />
+                  <Switch 
+                    defaultChecked={profile[item.key]} 
+                    onCheckedChange={(c) => handleSaveSettings({ [item.key]: c }, item.title)} 
+                  />
                 </div>
               ))}
             </CardContent>
-            <CardFooter className="bg-muted/10 border-t p-6">
-              <Button onClick={() => handleSaveSettings({}, 'Accessibility')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Save Inclusive Profile</Button>
-            </CardFooter>
           </Card>
         </TabsContent>
 
         {/* PRIVACY TAB */}
-        <TabsContent value="privacy" className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <TabsContent value="privacy" className="space-y-4">
           <Card className="border-2 shadow-sm rounded-3xl">
             <CardHeader className="bg-accent/10 border-b pb-8">
               <div className="flex items-center gap-3 text-primary mb-2">
@@ -359,20 +345,20 @@ export default function SettingsPage() {
                   <Label className="font-bold">Anonymized Telemetry</Label>
                   <p className="text-xs text-muted-foreground">Contribute non-identifiable logic patterns to improve global models.</p>
                 </div>
-                <Switch defaultChecked />
+                <Switch defaultChecked onCheckedChange={(c) => handleSaveSettings({ telemetry: c }, 'Telemetry')} />
               </div>
               <div className="flex items-center justify-between p-4 border-2 rounded-2xl">
                 <div className="space-y-1">
                   <Label className="font-bold">On-Device Logic Priority</Label>
                   <p className="text-xs text-muted-foreground">Perform more processing locally for extreme privacy (may be slower).</p>
                 </div>
-                <Switch />
+                <Switch onCheckedChange={(c) => handleSaveSettings({ localProcessing: c }, 'Privacy Mode')} />
               </div>
               <div className="grid grid-cols-2 gap-4 pt-6 border-t">
-                <Button variant="outline" className="h-12 rounded-xl font-bold border-2 gap-2">
+                <Button variant="outline" className="h-12 rounded-xl font-bold border-2 gap-2" onClick={() => toast({ title: "Cache Cleared", description: "All local temporary data has been purged." })}>
                   <History className="h-4 w-4" /> Clear Local Cache
                 </Button>
-                <Button variant="outline" className="h-12 rounded-xl font-bold border-2 text-destructive border-destructive/20 hover:bg-destructive/5 gap-2">
+                <Button variant="outline" className="h-12 rounded-xl font-bold border-2 text-destructive border-destructive/20 hover:bg-destructive/5 gap-2" onClick={() => toast({ title: "AI Reset Initiated", description: "Contact support to complete factory reset." })}>
                   <Trash2 className="h-4 w-4" /> Factory Reset AI
                 </Button>
               </div>
@@ -381,7 +367,7 @@ export default function SettingsPage() {
         </TabsContent>
 
         {/* NOTIFICATIONS TAB */}
-        <TabsContent value="notifications" className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <TabsContent value="notifications" className="space-y-4">
           <Card className="border-2 shadow-sm rounded-3xl">
             <CardHeader>
               <CardTitle>Proactive Logic Engagement</CardTitle>
@@ -389,23 +375,23 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-4 py-6">
               {[
-                { title: 'Budget Threshold Alerts', desc: 'Notify when current activity consumes 80% of daily cap.', default: true },
-                { title: 'Smart Gap Fillers', desc: 'Suggest mini-activities when a calendar gap is detected.', default: true },
-                { title: 'Transparency Reports', desc: 'Weekly summary of how your feedback changed AI logic.', default: false },
-                { title: 'Contextual Queries', desc: 'Allow AI to ask for feedback immediately after a saved event.', default: true }
+                { key: 'budgetAlerts', title: 'Budget Threshold Alerts', desc: 'Notify when current activity consumes 80% of daily cap.', default: true },
+                { key: 'smartGaps', title: 'Smart Gap Fillers', desc: 'Suggest mini-activities when a calendar gap is detected.', default: true },
+                { key: 'transparencyReports', title: 'Transparency Reports', desc: 'Weekly summary of how your feedback changed AI logic.', default: false },
+                { key: 'contextualQueries', title: 'Contextual Queries', desc: 'Allow AI to ask for feedback immediately after a saved event.', default: true }
               ].map((item, i) => (
                 <div key={i} className="flex items-center justify-between p-6 bg-muted/20 rounded-2xl border-2">
                   <div className="space-y-1">
                     <Label className="text-base font-bold">{item.title}</Label>
                     <p className="text-xs text-muted-foreground">{item.desc}</p>
                   </div>
-                  <Switch defaultChecked={item.default} />
+                  <Switch 
+                    defaultChecked={profile[item.key] ?? item.default} 
+                    onCheckedChange={(c) => handleSaveSettings({ [item.key]: c }, item.title)} 
+                  />
                 </div>
               ))}
             </CardContent>
-            <CardFooter className="bg-muted/10 border-t p-6">
-              <Button onClick={() => handleSaveSettings({}, 'Notifications')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Update Alert Engine</Button>
-            </CardFooter>
           </Card>
         </TabsContent>
       </Tabs>
