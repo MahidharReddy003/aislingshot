@@ -24,6 +24,36 @@
       "description": "Creator working at a desk with digital tools",
       "imageUrl": "https://picsum.photos/seed/creator-workspace/400/400",
       "imageHint": "creator workspace"
+    },
+    {
+      "id": "restaurant-indian",
+      "description": "Vibrant Indian restaurant interior",
+      "imageUrl": "https://picsum.photos/seed/indian-food/600/400",
+      "imageHint": "indian restaurant"
+    },
+    {
+      "id": "restaurant-salad",
+      "description": "Fresh and modern salad bar",
+      "imageUrl": "https://picsum.photos/seed/salad-bar/600/400",
+      "imageHint": "healthy cafe"
+    },
+    {
+      "id": "restaurant-burger",
+      "description": "Classic American burger joint",
+      "imageUrl": "https://picsum.photos/seed/burger-joint/600/400",
+      "imageHint": "burger restaurant"
+    },
+    {
+      "id": "restaurant-italian",
+      "description": "Elegant Italian trattoria",
+      "imageUrl": "https://picsum.photos/seed/italian-trattoria/600/400",
+      "imageHint": "italian restaurant"
+    },
+    {
+      "id": "restaurant-street",
+      "description": "Lively street food corner",
+      "imageUrl": "https://picsum.photos/seed/street-food/600/400",
+      "imageHint": "street food"
     }
   ]
 }
