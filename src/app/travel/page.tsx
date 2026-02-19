@@ -32,7 +32,7 @@ export default function TravelPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
               <div className="absolute bottom-4 left-6 flex items-center gap-3">
-                <Badge className="bg-teal-500/90 text-white">
+                <Badge className="bg-teal-500/90 text-white border-none px-4 py-1.5 font-black uppercase text-[10px] tracking-widest">
                   {place.budget} Budget
                 </Badge>
                 <div className="flex items-center gap-1 text-sm font-black text-white bg-black/40 backdrop-blur-md px-3 py-1 rounded-full">
@@ -52,7 +52,7 @@ export default function TravelPage() {
                   <Sparkles className="h-3 w-3" /> Best: {place.bestTime}
                 </span>
               </div>
-              <CardTitle className="text-3xl font-black mt-2">{place.name}</CardTitle>
+              <CardTitle className="text-3xl font-black mt-2 leading-tight">{place.name}</CardTitle>
               <div className="flex items-center gap-1 font-bold text-muted-foreground text-xs mt-3">
                 <MapPin className="h-3 w-3 text-primary" /> Approx. {place.distance} away
               </div>
@@ -60,7 +60,7 @@ export default function TravelPage() {
             
             <CardContent className="pt-6 pb-8 px-8 mt-auto">
               <div className="flex justify-between items-center pt-6 border-t">
-                <p className="text-xs text-muted-foreground italic font-medium">Recommended based on mobility needs</p>
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground italic">Optimized for mobility needs</p>
                 <Button variant="outline" className="border-2 rounded-2xl px-8 h-12 font-bold hover:bg-primary hover:text-primary-foreground transition-all shadow-sm">
                   View Route
                 </Button>
