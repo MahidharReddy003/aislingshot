@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -22,7 +23,7 @@ export default function PlanMyDayPage() {
     return doc(db, 'users', user.uid);
   }, [user, db]);
 
-  const { data: profile } = useDoc(profileRef);
+  const { data: profile, isLoading } = useDoc(profileRef);
   const { toast } = useToast();
 
   const [budget, setBudget] = useState(200);

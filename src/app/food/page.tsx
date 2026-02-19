@@ -118,7 +118,7 @@ export default function FoodPage() {
                       View Menu
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[550px] rounded-[2rem] p-0 overflow-hidden border-2">
+                  <DialogContent className="sm:max-w-[600px] rounded-[2rem] p-0 overflow-hidden border-2">
                     <div className="relative h-48 w-full">
                        <Image 
                         src={getRestaurantImage(item.imageId || '')} 
@@ -139,23 +139,33 @@ export default function FoodPage() {
                       
                       <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                         {item.menu?.map((menuItem, idx) => (
-                          <div key={idx} className={`p-5 border-2 rounded-3xl transition-all ${menuItem.isAvailable ? 'bg-card hover:bg-muted/30 shadow-sm' : 'bg-muted/50 opacity-60'}`}>
-                            <div className="flex justify-between items-start">
-                              <div className="space-y-1 pr-4">
-                                <h4 className="font-bold text-lg">{menuItem.item}</h4>
-                                <p className="text-xs text-muted-foreground leading-relaxed italic">{menuItem.description}</p>
+                          <div key={idx} className={`p-4 border-2 rounded-3xl transition-all ${menuItem.isAvailable ? 'bg-card hover:bg-muted/30 shadow-sm' : 'bg-muted/50 opacity-60'}`}>
+                            <div className="flex gap-4">
+                              <div className="relative h-20 w-20 shrink-0 rounded-2xl overflow-hidden bg-muted">
+                                <Image 
+                                  src={`https://picsum.photos/seed/${menuItem.item}/200/200`} 
+                                  alt={menuItem.item}
+                                  fill
+                                  className="object-cover"
+                                />
                               </div>
-                              <div className="flex flex-col items-end gap-2">
-                                <span className="font-black text-primary bg-primary/5 px-4 py-1.5 rounded-2xl text-sm shadow-inner">₹{menuItem.price}</span>
-                                {menuItem.isAvailable ? (
-                                  <Badge variant="outline" className="text-[10px] text-green-600 border-green-200 bg-green-50 uppercase tracking-tighter">
-                                    <CheckCircle2 className="h-2 w-2 mr-1" /> Available
-                                  </Badge>
-                                ) : (
-                                  <Badge variant="outline" className="text-[10px] text-red-600 border-red-200 bg-red-50 uppercase tracking-tighter">
-                                    <XCircle className="h-2 w-2 mr-1" /> Sold Out
-                                  </Badge>
-                                )}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex justify-between items-start gap-2">
+                                  <h4 className="font-bold text-lg truncate">{menuItem.item}</h4>
+                                  <span className="font-black text-primary text-sm whitespace-nowrap">₹{menuItem.price}</span>
+                                </div>
+                                <p className="text-xs text-muted-foreground leading-relaxed italic line-clamp-2 mt-1">{menuItem.description}</p>
+                                <div className="mt-2">
+                                  {menuItem.isAvailable ? (
+                                    <Badge variant="outline" className="text-[10px] text-green-600 border-green-200 bg-green-50 uppercase tracking-tighter">
+                                      <CheckCircle2 className="h-2 w-2 mr-1" /> Available
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="outline" className="text-[10px] text-red-600 border-red-200 bg-red-50 uppercase tracking-tighter">
+                                      <XCircle className="h-2 w-2 mr-1" /> Sold Out
+                                    </Badge>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -163,7 +173,7 @@ export default function FoodPage() {
                       </div>
                     </div>
                     <div className="px-8 pb-8 flex items-center justify-center gap-2 text-[10px] text-muted-foreground font-black uppercase tracking-widest">
-                      <Info className="h-3 w-3" /> Menu updated 2 hours ago
+                      <Info className="h-3 w-3" /> Timings: {item.timings}
                     </div>
                   </DialogContent>
                 </Dialog>
