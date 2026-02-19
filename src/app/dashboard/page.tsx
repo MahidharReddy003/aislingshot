@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -16,7 +15,8 @@ import {
   Sparkles,
   User,
   Loader2,
-  TrendingUp
+  TrendingUp,
+  Settings
 } from 'lucide-react';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
@@ -47,23 +47,25 @@ export default function DashboardPage() {
   const { data: profile, isLoading: isProfileLoading } = useDoc(userDocRef);
 
   useEffect(() => {
-    // Wait for auth to settle
-    if (isUserLoading) return;
+    if (isUserLoading || isProfileLoading) return;
 
     if (!user) {
       router.replace('/login');
       return;
     }
 
-    // Wait for profile to load before making redirect decisions
-    if (!isProfileLoading) {
-      if (!profile || profile.hasCompletedSetup === false) {
-        console.log("Profile incomplete, redirecting to setup...");
-        router.replace('/profile-setup');
-      }
+    // Only redirect if we are sure the profile setup is explicitly incomplete
+    if (profile && profile.hasCompletedSetup === false) {
+      console.log("Profile explicitly incomplete, redirecting to setup...");
+      router.replace('/profile-setup');
+    } else if (!profile) {
+      // If document doesn't exist at all, also go to setup
+      console.log("No profile found, redirecting to setup...");
+      router.replace('/profile-setup');
     }
   }, [user, isUserLoading, profile, isProfileLoading, router]);
 
+  // Show loader while we are making up our minds
   if (isUserLoading || isProfileLoading || !user || !profile?.hasCompletedSetup) {
     return (
       <div className="flex flex-col items-center justify-center h-screen space-y-4">
@@ -84,7 +86,7 @@ export default function DashboardPage() {
                 Welcome back, {profile?.name?.split(' ')[0] || 'User'}!
               </h1>
               <p className="text-muted-foreground mt-1 text-lg">
-                Your AI assistant has curated some choices for your {profile.role?.toLowerCase() || 'day'}.
+                Your SmartLife assistant has curated some choices for your {profile.role?.toLowerCase() || 'day'}.
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -93,7 +95,10 @@ export default function DashboardPage() {
                 <span className="text-sm font-semibold">{profile.role || 'Member'}</span>
               </div>
               <Button asChild variant="outline" className="border-2 rounded-xl h-12 px-6">
-                <Link href="/settings">Settings</Link>
+                <Link href="/settings">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Control Center
+                </Link>
               </Button>
             </div>
           </div>
@@ -134,7 +139,7 @@ export default function DashboardPage() {
                       <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest mb-1">Spent This Week</p>
                       <div className="flex items-baseline gap-2">
                         <h3 className="text-4xl font-black text-primary">₹1,240</h3>
-                        <span className="text-muted-foreground font-medium">/ ₹{profile.budgetPreference * 7 || 3500} cap</span>
+                        <span className="text-muted-foreground font-medium">/ ₹{(profile.budgetPreference || 500) * 7} cap</span>
                       </div>
                     </div>
                     <div className="text-right">
@@ -216,7 +221,7 @@ export default function DashboardPage() {
                     "We've improved recommendation relevance by 12% based on your feedback from last night's meal."
                   </p>
                   <Button variant="secondary" className="w-full font-bold h-11" asChild>
-                    <Link href="/experiences/recommender">Tune Discovery</Link>
+                    <Link href="/settings">Tune Discovery</Link>
                   </Button>
                 </CardContent>
               </Card>

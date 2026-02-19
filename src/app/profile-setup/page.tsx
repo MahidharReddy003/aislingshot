@@ -1,10 +1,9 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { useUser, useFirestore } from '@/firebase';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +22,13 @@ export default function ProfileSetupPage() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
+  const userDocRef = useMemoFirebase(() => {
+    if (!user || !db) return null;
+    return doc(db, 'users', user.uid);
+  }, [user, db]);
+
+  const { data: existingProfile, isLoading: isProfileLoading } = useDoc(userDocRef);
+
   const [formData, setFormData] = useState({
     name: '',
     age: 20,
@@ -36,10 +42,28 @@ export default function ProfileSetupPage() {
   });
 
   useEffect(() => {
-    if (user) {
+    if (user && !existingProfile) {
       setFormData(prev => ({ ...prev, name: user.displayName || '' }));
+    } else if (existingProfile) {
+      // If user returns to setup, pre-fill with what we have
+      setFormData({
+        name: existingProfile.name || '',
+        age: existingProfile.age || 20,
+        location: existingProfile.location || '',
+        budgetPreference: existingProfile.budgetPreference || 500,
+        interests: existingProfile.interests || [],
+        role: existingProfile.role || 'Student',
+        aiBehavior: existingProfile.aiBehavior || 'friendly',
+        availableTime: existingProfile.availableTime || 4,
+        currency: existingProfile.currency || 'INR'
+      });
+
+      // If already completed, redirect away to avoid loop
+      if (existingProfile.hasCompletedSetup) {
+        router.push('/dashboard');
+      }
     }
-  }, [user]);
+  }, [user, existingProfile, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,16 +71,17 @@ export default function ProfileSetupPage() {
     setLoading(true);
 
     try {
+      // Create or update the user document
       await setDoc(doc(db, 'users', user.uid), {
         ...formData,
         id: user.uid,
         email: user.email,
-        hasCompletedSetup: true,
+        hasCompletedSetup: true, // Mark as done
         updatedAt: serverTimestamp(),
-        createdAt: serverTimestamp()
+        createdAt: existingProfile?.createdAt || serverTimestamp()
       });
 
-      toast({ title: 'Profile Created!', description: 'Redirecting to your dashboard...' });
+      toast({ title: 'Profile Updated!', description: 'Your SmartLife experience is ready.' });
       router.push('/dashboard');
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -65,74 +90,77 @@ export default function ProfileSetupPage() {
     }
   };
 
-  if (isUserLoading) return <div className="flex items-center justify-center h-screen"><Loader2 className="animate-spin" /></div>;
+  if (isUserLoading || isProfileLoading) return <div className="flex items-center justify-center h-screen"><Loader2 className="animate-spin text-primary" /></div>;
 
   return (
     <div className="container max-w-2xl mx-auto py-12 px-4">
-      <Card className="border-2">
-        <CardHeader className="text-center">
+      <Card className="border-2 shadow-xl rounded-3xl overflow-hidden">
+        <CardHeader className="text-center bg-muted/20 pb-8 border-b">
           <div className="flex justify-center mb-4">
-            <UserCircle className="h-12 w-12 text-primary" />
+            <div className="p-3 rounded-2xl bg-primary/10">
+              <UserCircle className="h-10 w-10 text-primary" />
+            </div>
           </div>
-          <CardTitle className="text-2xl font-bold">Personalize Your Assistant</CardTitle>
-          <CardDescription>We use these details to give you better recommendations.</CardDescription>
+          <CardTitle className="text-3xl font-bold">Personalize SmartLife</CardTitle>
+          <CardDescription className="text-lg">We use these details to provide transparent, budget-aware recommendations.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
+        <CardContent className="pt-10">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input id="name" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required />
+                <Label htmlFor="name" className="font-bold">Full Name</Label>
+                <Input id="name" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required className="h-12 border-2" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="age">Age</Label>
-                <Input id="age" type="number" value={formData.age} onChange={e => setFormData({ ...formData, age: parseInt(e.target.value) })} required />
+                <Label htmlFor="age" className="font-bold">Age</Label>
+                <Input id="age" type="number" value={formData.age} onChange={e => setFormData({ ...formData, age: parseInt(e.target.value) })} required className="h-12 border-2" />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="location">Your Location (e.g., Campus North)</Label>
-              <Input id="location" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} required />
+              <Label htmlFor="location" className="font-bold">Default Search Area (e.g., Campus North)</Label>
+              <Input id="location" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} required className="h-12 border-2" />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
+                <Label htmlFor="role" className="font-bold">Primary Role</Label>
                 <Select value={formData.role} onValueChange={v => setFormData({ ...formData, role: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-12 border-2"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Student">Student</SelectItem>
                     <SelectItem value="Professional">Professional</SelectItem>
+                    <SelectItem value="Creator">Creator</SelectItem>
                     <SelectItem value="Freelancer">Freelancer</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="behavior">AI Behavior</Label>
+                <Label htmlFor="behavior" className="font-bold">AI Tone</Label>
                 <Select value={formData.aiBehavior} onValueChange={v => setFormData({ ...formData, aiBehavior: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-12 border-2"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="friendly">Friendly</SelectItem>
-                    <SelectItem value="formal">Formal</SelectItem>
+                    <SelectItem value="friendly">Friendly (Contextual)</SelectItem>
+                    <SelectItem value="formal">Formal (Direct)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="budget">Daily Budget (INR)</Label>
-                <Input id="budget" type="number" value={formData.budgetPreference} onChange={e => setFormData({ ...formData, budgetPreference: parseInt(e.target.value) })} />
+                <Label htmlFor="budget" className="font-bold">Daily Spending Limit (INR)</Label>
+                <Input id="budget" type="number" value={formData.budgetPreference} onChange={e => setFormData({ ...formData, budgetPreference: parseInt(e.target.value) })} className="h-12 border-2" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="time">Available Hours / Day</Label>
-                <Input id="time" type="number" value={formData.availableTime} onChange={e => setFormData({ ...formData, availableTime: parseInt(e.target.value) })} />
+                <Label htmlFor="time" className="font-bold">Typical Available Hours</Label>
+                <Input id="time" type="number" value={formData.availableTime} onChange={e => setFormData({ ...formData, availableTime: parseInt(e.target.value) })} className="h-12 border-2" />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>Interests</Label>
-              <div className="grid grid-cols-3 gap-2 border p-3 rounded-lg bg-muted/20">
+            <div className="space-y-4">
+              <Label className="font-bold">Areas of Interest</Label>
+              <div className="grid grid-cols-3 gap-3 border-2 p-4 rounded-2xl bg-muted/10">
                 {INTERESTS.map(interest => (
                   <div key={interest} className="flex items-center space-x-2">
                     <Checkbox
@@ -143,15 +171,15 @@ export default function ProfileSetupPage() {
                         else setFormData({ ...formData, interests: formData.interests.filter(i => i !== interest) });
                       }}
                     />
-                    <label htmlFor={interest} className="text-sm font-medium leading-none cursor-pointer">{interest}</label>
+                    <label htmlFor={interest} className="text-sm font-semibold leading-none cursor-pointer">{interest}</label>
                   </div>
                 ))}
               </div>
             </div>
 
-            <Button className="w-full" type="submit" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Complete Setup
+            <Button className="w-full h-14 text-lg font-bold rounded-2xl shadow-lg transition-all hover:scale-[1.02]" type="submit" disabled={loading}>
+              {loading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+              Activate SmartLife
             </Button>
           </form>
         </CardContent>

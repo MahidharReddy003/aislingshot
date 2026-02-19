@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -26,7 +25,9 @@ import {
   Lock,
   History,
   Info,
-  Eye
+  Eye,
+  Trash2,
+  AlertCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { signOut } from 'firebase/auth';
@@ -82,13 +83,13 @@ export default function SettingsPage() {
     }, 800);
   };
 
-  if (isLoading || !profile) return <div className="flex items-center justify-center h-screen"><Loader2 className="animate-spin" /></div>;
+  if (isLoading || !profile) return <div className="flex items-center justify-center h-screen"><Loader2 className="animate-spin text-primary" /></div>;
 
   return (
     <div className="container max-w-5xl mx-auto py-12 px-4">
       <div className="mb-10">
-        <h1 className="text-4xl font-black tracking-tight text-primary">Control Center</h1>
-        <p className="text-muted-foreground mt-2 text-lg">Manage your SmartLife persona, privacy, and AI constraints.</p>
+        <h1 className="text-4xl font-black tracking-tight text-primary">SmartLife Control Center</h1>
+        <p className="text-muted-foreground mt-2 text-lg">Manage your persona, privacy, and AI constraints with full transparency.</p>
       </div>
 
       <Tabs defaultValue="profile" className="space-y-8">
@@ -106,8 +107,8 @@ export default function SettingsPage() {
         <TabsContent value="profile" className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <Card className="border-2 shadow-sm rounded-3xl overflow-hidden">
             <CardHeader className="bg-muted/20 pb-8">
-              <CardTitle>Identity & Role</CardTitle>
-              <CardDescription>How the AI assistant identifies you and identifies your daily context.</CardDescription>
+              <CardTitle>Identity & Context</CardTitle>
+              <CardDescription>How the SmartLife assistant identifies your daily environment.</CardDescription>
             </CardHeader>
             <CardContent className="pt-8">
               <form onSubmit={handleUpdateProfile} className="space-y-6">
@@ -117,22 +118,21 @@ export default function SettingsPage() {
                     <Input id="name" name="name" defaultValue={profile?.name} placeholder="Enter your name" className="h-12 border-2" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="location" className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Default Search Radius</Label>
+                    <Label htmlFor="location" className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Search Location</Label>
                     <Input id="location" name="location" defaultValue={profile?.location} placeholder="e.g., Campus North" className="h-12 border-2" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Email Address</Label>
+                  <Label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Email (Authenticated)</Label>
                   <Input value={user?.email || ''} disabled className="bg-muted h-12 border-2 opacity-60 cursor-not-allowed" />
-                  <p className="text-[10px] text-muted-foreground italic">Email is tied to your primary authentication and cannot be changed here.</p>
                 </div>
                 <div className="pt-6 border-t flex justify-between items-center">
                   <Button type="button" variant="ghost" onClick={handleLogout} className="text-destructive hover:bg-destructive/5 gap-2 px-6 h-12">
-                    <LogOut className="h-4 w-4" /> Logout Session
+                    <LogOut className="h-4 w-4" /> Sign Out
                   </Button>
                   <Button type="submit" disabled={saving} className="h-12 px-10 font-bold rounded-xl shadow-lg">
                     {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Update Profile
+                    Update Identity
                   </Button>
                 </div>
               </form>
@@ -144,12 +144,12 @@ export default function SettingsPage() {
         <TabsContent value="preferences" className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <Card className="border-2 shadow-sm rounded-3xl">
             <CardHeader>
-              <CardTitle>Interests & AI Personality</CardTitle>
-              <CardDescription>Tailor the tone and content priority of your SmartLife assistant.</CardDescription>
+              <CardTitle>Interests & AI Behavior</CardTitle>
+              <CardDescription>Refine the thematic priority and tone of your SmartLife assistant.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-10 py-6">
               <div className="space-y-4">
-                <Label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Active Priority Interests</Label>
+                <Label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Thematic Focus</Label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {INTERESTS.map(item => (
                     <div key={item} className="flex items-center space-x-3 p-4 border-2 rounded-2xl hover:bg-muted/20 transition-colors">
@@ -160,26 +160,26 @@ export default function SettingsPage() {
                 </div>
               </div>
               <div className="space-y-4 pt-6 border-t">
-                <Label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Assistant Interaction Style</Label>
+                <Label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Assistant Response Tone</Label>
                 <div className="flex flex-wrap gap-3">
                   {['Friendly', 'Formal', 'Concise'].map(style => (
                     <Button 
                       key={style}
                       variant={profile?.aiBehavior === style.toLowerCase() ? 'default' : 'outline'} 
                       className="rounded-2xl px-8 h-12 border-2 font-bold"
-                      onClick={() => handleMockSave(`Style: ${style}`)}
+                      onClick={() => handleMockSave(`AI Tone: ${style}`)}
                     >
                       {style}
                     </Button>
                   ))}
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 italic flex items-center gap-2">
-                  <Info className="h-3 w-3" /> "Friendly" adds context and emojis. "Concise" focuses on raw facts and direct reasoning.
+                  <Info className="h-3 w-3" /> "Friendly" provides deep logic and emojis. "Concise" gives direct, data-only reasoning.
                 </p>
               </div>
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6">
-              <Button onClick={() => handleMockSave('Preferences')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Apply Style Settings</Button>
+              <Button onClick={() => handleMockSave('Preferences')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Apply Interest Matrix</Button>
             </CardFooter>
           </Card>
         </TabsContent>
@@ -188,13 +188,13 @@ export default function SettingsPage() {
         <TabsContent value="budget" className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <Card className="border-2 shadow-sm rounded-3xl">
             <CardHeader>
-              <CardTitle>Budget Guardrails</CardTitle>
-              <CardDescription>Strict constraints the AI must respect when suggesting activities.</CardDescription>
+              <CardTitle>Budget Hard-Rules</CardTitle>
+              <CardDescription>Define the non-negotiable financial constraints the AI must respect.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-10 py-6">
               <div className="space-y-6">
                 <div className="flex justify-between items-end">
-                  <Label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Daily Spending Cap</Label>
+                  <Label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Maximum Daily Spend</Label>
                   <span className="text-2xl font-black text-primary">₹{budgetVal}</span>
                 </div>
                 <Slider 
@@ -208,22 +208,22 @@ export default function SettingsPage() {
               <div className="space-y-4 pt-6 border-t">
                 <div className="flex items-center justify-between p-6 bg-muted/20 rounded-2xl border-2">
                   <div className="space-y-1">
-                    <Label className="text-base font-bold">Strict Enforcement</Label>
-                    <p className="text-xs text-muted-foreground">Filter out any result that exceeds your cap by even ₹1.</p>
+                    <Label className="text-base font-bold">Strict Budget Enforcement</Label>
+                    <p className="text-xs text-muted-foreground">AI will never show options that exceed your cap by even ₹1.</p>
                   </div>
                   <Switch defaultChecked />
                 </div>
                 <div className="flex items-center justify-between p-6 bg-muted/20 rounded-2xl border-2">
                   <div className="space-y-1">
-                    <Label className="text-base font-bold">Weekly Rollover</Label>
-                    <p className="text-xs text-muted-foreground">Unspent daily budget automatically adds to your weekend limit.</p>
+                    <Label className="text-base font-bold">Rolling Savings Bonus</Label>
+                    <p className="text-xs text-muted-foreground">Unspent daily budget adds to your weekend 'exploratory' pool.</p>
                   </div>
                   <Switch />
                 </div>
               </div>
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6">
-              <Button onClick={() => handleMockSave('Budget')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Update Guardrails</Button>
+              <Button onClick={() => handleMockSave('Budget')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Lock Budget Rules</Button>
             </CardFooter>
           </Card>
         </TabsContent>
@@ -232,15 +232,15 @@ export default function SettingsPage() {
         <TabsContent value="discovery" className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <Card className="border-2 shadow-sm rounded-3xl">
             <CardHeader>
-              <CardTitle>Discovery Engine</CardTitle>
-              <CardDescription>Balance your familiar favorites with the thrill of new territory.</CardDescription>
+              <CardTitle>Discovery & Filter Bubble Control</CardTitle>
+              <CardDescription>Balance known comfort against the novelty of unexplored territory.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-10 py-6">
               <div className="space-y-6">
                 <div className="flex justify-between items-end">
-                  <Label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Discovery Bias</Label>
+                  <Label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Exploration Bias</Label>
                   <span className="text-lg font-black text-primary uppercase">
-                    {discoveryVal < 30 ? 'Conservative' : discoveryVal > 70 ? 'Exploratory' : 'Balanced'}
+                    {discoveryVal < 30 ? 'Conservative' : discoveryVal > 70 ? 'High Discovery' : 'Balanced'}
                   </span>
                 </div>
                 <Slider 
@@ -251,20 +251,20 @@ export default function SettingsPage() {
                   className="py-4"
                 />
                 <div className="flex justify-between text-[10px] text-muted-foreground font-black uppercase tracking-tighter px-1">
-                  <span>Safe & Known</span>
+                  <span>Reliable Favorites</span>
                   <span>Wild & Unknown</span>
                 </div>
               </div>
               <div className="p-6 bg-primary/5 rounded-2xl border-2 border-primary/10 flex items-center justify-between gap-6">
                 <div className="space-y-1">
-                  <Label className="text-base font-bold flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Anti-Filter Bubble</Label>
-                  <p className="text-xs text-muted-foreground">Force at least one completely new category suggestion per day to prevent stagnation.</p>
+                  <Label className="text-base font-bold flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Anti-Stagnation Guard</Label>
+                  <p className="text-xs text-muted-foreground">Force at least one high-diversity suggestion per day to prevent filter bubbles.</p>
                 </div>
                 <Switch defaultChecked />
               </div>
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6">
-              <Button onClick={() => handleMockSave('Discovery')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Refresh Engine Logic</Button>
+              <Button onClick={() => handleMockSave('Discovery')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Refresh Exploration Logic</Button>
             </CardFooter>
           </Card>
         </TabsContent>
@@ -273,15 +273,15 @@ export default function SettingsPage() {
         <TabsContent value="accessibility" className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <Card className="border-2 shadow-sm rounded-3xl">
             <CardHeader>
-              <CardTitle>Inclusion & Visibility</CardTitle>
-              <CardDescription>Ensure SmartLife recommendations and UI adapt to your physical needs.</CardDescription>
+              <CardTitle>Inclusion & Visual Profiling</CardTitle>
+              <CardDescription>Ensure SmartLife adaptively respects your physical and cognitive needs.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 py-6">
               {[
-                { title: 'Low Walking Mode', desc: 'Prioritize locations within 500m of transit or with ramp access.', icon: Accessibility },
-                { title: 'Time-Sensitive Alerts', desc: 'Haptic and visual warnings for activity start times.', icon: Bell },
-                { title: 'High Contrast UI', desc: 'Increase text legibility and button prominence.', icon: Eye },
-                { title: 'Simplified Descriptions', desc: 'Use direct, simple language for all AI explanations.', icon: Info }
+                { title: 'Low Mobility Priority', desc: 'Prioritize locations with ramp access and minimal walking.', icon: Accessibility },
+                { title: 'Time-Critical Alerts', desc: 'Haptic feedback for time-sensitive activity start windows.', icon: Bell },
+                { title: 'High Contrast Mode', desc: 'Increase text weight and button prominence for clarity.', icon: Eye },
+                { title: 'Plain-Language Logic', desc: 'Simplify AI explanations into direct bullet points.', icon: Info }
               ].map((item, i) => (
                 <div key={i} className="flex items-center justify-between p-6 bg-muted/20 rounded-2xl border-2">
                   <div className="flex gap-4 items-center">
@@ -298,7 +298,7 @@ export default function SettingsPage() {
               ))}
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6">
-              <Button onClick={() => handleMockSave('Accessibility')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Save Accessibility Profile</Button>
+              <Button onClick={() => handleMockSave('Accessibility')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Save Inclusive Profile</Button>
             </CardFooter>
           </Card>
         </TabsContent>
@@ -309,33 +309,33 @@ export default function SettingsPage() {
             <CardHeader className="bg-accent/10 border-b pb-8">
               <div className="flex items-center gap-3 text-primary mb-2">
                 <Shield className="h-6 w-6" />
-                <CardTitle>Transparency Promise</CardTitle>
+                <CardTitle>Transparency & Data Promise</CardTitle>
               </div>
               <CardDescription className="text-primary/70 leading-relaxed font-medium">
-                We only use your interaction data to refine your personalized local models. We never sell your data to third parties.
+                We only process data to refine your local experience. We never sell profile clusters to advertisers.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6 pt-8">
               <div className="flex items-center justify-between p-4 border-2 rounded-2xl">
                 <div className="space-y-1">
-                  <Label className="font-bold">Anonymous Telemetry</Label>
-                  <p className="text-xs text-muted-foreground">Share non-identifiable usage patterns to improve global AI models.</p>
+                  <Label className="font-bold">Anonymized Telemetry</Label>
+                  <p className="text-xs text-muted-foreground">Contribute non-identifiable logic patterns to improve global models.</p>
                 </div>
                 <Switch defaultChecked />
               </div>
               <div className="flex items-center justify-between p-4 border-2 rounded-2xl">
                 <div className="space-y-1">
-                  <Label className="font-bold">Local Model Priority</Label>
-                  <p className="text-xs text-muted-foreground">Perform more processing on-device for extreme privacy (may be slower).</p>
+                  <Label className="font-bold">On-Device Logic Priority</Label>
+                  <p className="text-xs text-muted-foreground">Perform more processing locally for extreme privacy (may be slower).</p>
                 </div>
                 <Switch />
               </div>
               <div className="grid grid-cols-2 gap-4 pt-6 border-t">
                 <Button variant="outline" className="h-12 rounded-xl font-bold border-2 gap-2">
-                  <History className="h-4 w-4" /> Clear History
+                  <History className="h-4 w-4" /> Clear Local Cache
                 </Button>
-                <Button variant="outline" className="h-12 rounded-xl font-bold border-2 text-destructive border-destructive/20 hover:bg-destructive/5">
-                  Reset Data
+                <Button variant="outline" className="h-12 rounded-xl font-bold border-2 text-destructive border-destructive/20 hover:bg-destructive/5 gap-2">
+                  <Trash2 className="h-4 w-4" /> Factory Reset AI
                 </Button>
               </div>
             </CardContent>
@@ -346,15 +346,15 @@ export default function SettingsPage() {
         <TabsContent value="notifications" className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <Card className="border-2 shadow-sm rounded-3xl">
             <CardHeader>
-              <CardTitle>Proactive Alerts</CardTitle>
-              <CardDescription>Choose when the assistant is allowed to reach out to you.</CardDescription>
+              <CardTitle>Proactive Logic Engagement</CardTitle>
+              <CardDescription>Determine when the assistant is permitted to offer unsolicited logic.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 py-6">
               {[
-                { title: 'Budget Milestone Alerts', desc: 'Notify when I reach 80% of my daily spending cap.', default: true },
-                { title: 'Smart Gap Discovery', desc: 'Suggest activities when I have a free gap in my calendar.', default: true },
-                { title: 'Weekly Insight Reports', desc: 'Email summaries of my savings and discoveries.', default: false },
-                { title: 'Contextual Prompting', desc: 'Allow AI to ask for feedback immediately after a saved activity.', default: true }
+                { title: 'Budget Threshold Alerts', desc: 'Notify when current activity consumes 80% of daily cap.', default: true },
+                { title: 'Smart Gap Fillers', desc: 'Suggest mini-activities when a calendar gap is detected.', default: true },
+                { title: 'Transparency Reports', desc: 'Weekly summary of how your feedback changed AI logic.', default: false },
+                { title: 'Contextual Queries', desc: 'Allow AI to ask for feedback immediately after a saved event.', default: true }
               ].map((item, i) => (
                 <div key={i} className="flex items-center justify-between p-6 bg-muted/20 rounded-2xl border-2">
                   <div className="space-y-1">
@@ -366,11 +366,22 @@ export default function SettingsPage() {
               ))}
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6">
-              <Button onClick={() => handleMockSave('Notifications')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Save Alert Rules</Button>
+              <Button onClick={() => handleMockSave('Notifications')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Update Alert Engine</Button>
             </CardFooter>
           </Card>
         </TabsContent>
       </Tabs>
+
+      <div className="mt-12 p-6 bg-yellow-50 border-2 border-yellow-100 rounded-3xl flex gap-4 items-start">
+        <AlertCircle className="h-6 w-6 text-yellow-600 shrink-0 mt-1" />
+        <div>
+          <h4 className="font-bold text-yellow-900">User Control Overrides</h4>
+          <p className="text-sm text-yellow-800 leading-relaxed">
+            Settings marked with "Hard Rules" take absolute precedence over the AI recommendation engine. 
+            If your budget is set to ₹500, SmartLife will never present an option costing ₹501, even if it is a 100% preference match.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
