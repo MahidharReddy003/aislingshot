@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { EmailAuthProvider, linkWithCredential, updatePassword } from 'firebase/auth';
 import { useAuth, useUser } from '@/firebase';
@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Shield, Lock, CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Loader2, Lock, CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -27,7 +27,6 @@ export default function SecurityPage() {
 
   const hasPasswordProvider = user?.providerData.some(p => p.providerId === 'password');
 
-  // Simple password strength
   const getStrength = (p: string) => {
     if (!p) return 0;
     let s = 0;
@@ -58,18 +57,16 @@ export default function SecurityPage() {
       if (!user) throw new Error("No authenticated user found.");
 
       if (hasPasswordProvider) {
-        // Just update password
         await updatePassword(user, password);
         toast({ title: 'Success', description: 'Your password has been updated.' });
       } else {
-        // Link with Email provider
         if (!user.email) throw new Error("User email not found for linking.");
         const credential = EmailAuthProvider.credential(user.email, password);
         await linkWithCredential(user, credential);
         toast({ title: 'Success', description: 'You can now log in using email and password.' });
       }
       setSuccess(true);
-      setTimeout(() => router.push('/settings'), 3000);
+      setTimeout(() => router.push('/settings'), 2000);
     } catch (error: any) {
       if (error.code === 'auth/requires-recent-login') {
         toast({ 
@@ -170,7 +167,7 @@ export default function SecurityPage() {
                 <div className="p-4 bg-primary/5 rounded-2xl border-2 border-primary/10 flex gap-3 items-start">
                   <AlertCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    This will link a password to your <strong>{user.email}</strong> account. You'll be able to use either Google or this password to sign in.
+                    This will link a password to your <strong>{user.email}</strong> account.
                   </p>
                 </div>
               )}
@@ -183,7 +180,7 @@ export default function SecurityPage() {
           )}
         </CardContent>
         <CardFooter className="bg-muted/10 border-t p-6 text-center">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black italic">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-black italic text-center w-full">
             SmartLife Security Protocol Active
           </p>
         </CardFooter>

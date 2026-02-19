@@ -5,8 +5,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { 
-  LayoutDashboard, 
-  ShieldCheck, 
   User, 
   Heart, 
   History, 
@@ -22,7 +20,8 @@ import {
   Wallet,
   Settings2,
   Info,
-  Wrench
+  Wrench,
+  ShieldCheck
 } from "lucide-react";
 import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -49,7 +48,6 @@ export default function Navbar() {
   const db = useFirestore();
   const router = useRouter();
 
-  // Fetch profile to ensure Name and Username sync visually in the Navbar
   const profileRef = useMemoFirebase(() => {
     if (!user || !db) return null;
     return doc(db, 'users', user.uid);
@@ -128,7 +126,6 @@ export default function Navbar() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   
-                  {/* EXPERIENCES QUICK NAV */}
                   <DropdownMenuGroup className="md:hidden">
                     <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Core Modules</DropdownMenuLabel>
                     <DropdownMenuItem asChild><Link href="/experiences/recommender"><Sparkles className="mr-2 h-4 w-4" /> Recommender</Link></DropdownMenuItem>
@@ -138,7 +135,6 @@ export default function Navbar() {
                     <DropdownMenuSeparator />
                   </DropdownMenuGroup>
 
-                  {/* SAVED GROUP */}
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger>
                       <Heart className="mr-2 h-4 w-4" />
@@ -162,7 +158,6 @@ export default function Navbar() {
                     </DropdownMenuPortal>
                   </DropdownMenuSub>
 
-                  {/* HISTORY GROUP */}
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger>
                       <History className="mr-2 h-4 w-4" />
@@ -186,7 +181,6 @@ export default function Navbar() {
                     </DropdownMenuPortal>
                   </DropdownMenuSub>
 
-                  {/* SETTINGS GROUP */}
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger>
                       <Settings className="mr-2 h-4 w-4" />
@@ -200,29 +194,12 @@ export default function Navbar() {
                         <DropdownMenuItem asChild><Link href="/settings"><Sparkles className="mr-2 h-4 w-4" />Discovery</Link></DropdownMenuItem>
                         <DropdownMenuItem asChild><Link href="/settings"><Accessibility className="mr-2 h-4 w-4" />Accessibility</Link></DropdownMenuItem>
                         <DropdownMenuItem asChild><Link href="/settings/security"><Lock className="mr-2 h-4 w-4" />Security</Link></DropdownMenuItem>
-                        <DropdownMenuItem asChild><Link href="/settings"><Lock className="mr-2 h-4 w-4" />Privacy</Link></DropdownMenuItem>
-                        <DropdownMenuItem asChild><Link href="/settings"><Bell className="mr-2 h-4 w-4" />Notifications</Link></DropdownMenuItem>
-                      </DropdownMenuSubContent>
-                    </DropdownMenuPortal>
-                  </DropdownMenuSub>
-
-                  {/* HELP GROUP */}
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>
-                      <HelpCircle className="mr-2 h-4 w-4" />
-                      <span>Help</span>
-                    </DropdownMenuSubTrigger>
-                    <DropdownMenuPortal>
-                      <DropdownMenuSubContent>
-                        <DropdownMenuItem asChild><Link href="/help"><Info className="mr-2 h-4 w-4" />How It Works</Link></DropdownMenuItem>
-                        <DropdownMenuItem asChild><Link href="/help"><HelpCircle className="mr-2 h-4 w-4" />FAQ</Link></DropdownMenuItem>
-                        <DropdownMenuItem asChild><Link href="/transparency"><ShieldCheck className="mr-2 h-4 w-4" />Transparency</Link></DropdownMenuItem>
                       </DropdownMenuSubContent>
                     </DropdownMenuPortal>
                   </DropdownMenuSub>
 
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive focus:bg-destructive/5">
+                  <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive focus:bg-destructive/5 cursor-pointer">
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
                   </DropdownMenuItem>

@@ -15,7 +15,6 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -34,11 +33,9 @@ import {
   Info,
   Eye,
   Activity,
-  ArrowRight,
   Camera,
   Calendar,
   Mail,
-  CheckCircle2,
   ShieldCheck,
   History,
   Download,
@@ -49,7 +46,6 @@ import {
 import { useToast } from '@/hooks/use-toast';
 
 const INTERESTS = ['Food', 'Events', 'Shopping', 'Travel', 'Tech', 'Music', 'Outdoors'];
-const HEALTH_TAGS = ['Diabetes', 'Vegan', 'Gluten-Free', 'Knee Pain', 'Asthma', 'Peanut Allergy'];
 
 export default function SettingsPage() {
   const { user } = useUser();
@@ -73,13 +69,11 @@ export default function SettingsPage() {
 
   // Local Settings states
   const [localInterests, setLocalInterests] = useState<string[]>([]);
-  const [localHealth, setLocalHealth] = useState<string[]>([]);
   const [dailyBudget, setDailyBudget] = useState(500);
   const [weeklyBudget, setWeeklyBudget] = useState(3000);
   const [discoveryVal, setDiscoveryVal] = useState(50);
 
   const hasPasswordProvider = user?.providerData.some(p => p.providerId === 'password');
-  const isGoogleUser = user?.providerData.some(p => p.providerId === 'google.com');
 
   useEffect(() => {
     if (profile) {
@@ -88,7 +82,6 @@ export default function SettingsPage() {
       setRole(profile.role || 'Student');
       setLocation(profile.location || '');
       setLocalInterests(profile.interests || []);
-      setLocalHealth(profile.healthConditions || []);
       setDailyBudget(profile.budgetPreference || 500);
       setWeeklyBudget(profile.weeklyBudget || 3000);
       setDiscoveryVal(profile.explorationLevel || 50);
@@ -101,7 +94,7 @@ export default function SettingsPage() {
     
     const updates = {
       name,
-      username: name,
+      username: name, // Synced username
       bio,
       role,
       location,
@@ -162,7 +155,7 @@ export default function SettingsPage() {
         <TabsContent value="profile" className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <Card className="border-2 shadow-sm rounded-3xl">
             <CardHeader className="bg-muted/10">
-              <CardTitle>Identity & Bio</CardTitle>
+              <CardTitle>Identity & Context</CardTitle>
             </CardHeader>
             <CardContent className="pt-8">
               <form onSubmit={handleUpdateProfile} className="space-y-6">
@@ -364,7 +357,7 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between p-6 bg-primary/5 rounded-2xl border-2 border-primary/20">
                   <div className="space-y-1">
                     <Label className="font-bold flex items-center gap-2"><RefreshCcw className="h-4 w-4" /> Force Variety</Label>
-                    <p className="text-xs text-muted-foreground">Always suggest one thing you've never tried before, once a day.</p>
+                    <p className="text-xs text-muted-foreground">Always suggest something new once a day.</p>
                   </div>
                   <Switch defaultChecked />
                 </div>

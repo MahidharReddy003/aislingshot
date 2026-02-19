@@ -28,7 +28,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   
-  // Account Linking States
   const [pendingCredential, setPendingCredential] = useState<AuthCredential | null>(null);
   const [linkingEmail, setLinkingEmail] = useState<string>('');
   const [showLinkingPrompt, setShowLinkingPrompt] = useState(false);
@@ -39,7 +38,6 @@ export default function LoginPage() {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       
-      // If we have a pending Google credential, link it now
       if (pendingCredential) {
         await linkWithCredential(userCredential.user, pendingCredential);
         toast({
