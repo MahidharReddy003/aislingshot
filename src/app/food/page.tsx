@@ -6,10 +6,13 @@ import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Utensils, Star, MapPin, Sparkles, Loader2, Clock, Info, CheckCircle2, XCircle, HelpCircle, DollarSign } from 'lucide-react';
+import { Utensils, Star, MapPin, Sparkles, Loader2, Clock, Info, CheckCircle2, XCircle, HelpCircle, DollarSign, ThumbsUp, ThumbsDown, RefreshCcw } from 'lucide-react';
 import mockData from '@/app/lib/mock-data.json';
 import { useToast } from '@/hooks/use-toast';
 import { getPlaceholderImageUrl } from '@/lib/placeholder-images';
+import { refineExplanationWithFeedback } from '@/ai/flows/refine-explanation-with-feedback-flow';
+import { useUser, useFirestore } from '@/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import {
   Dialog,
   DialogContent,
@@ -20,12 +23,18 @@ import {
 } from "@/components/ui/dialog";
 
 export default function FoodPage() {
+  const { user } = useUser();
+  const db = useFirestore();
   const [loading, setLoading] = useState(false);
   const [recommendation, setRecommendation] = useState<any>(null);
   const { toast } = useToast();
 
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [feedbackApplied, setFeedbackApplied] = useState(false);
+
   const handleAIRecommend = () => {
     setLoading(true);
+    setFeedbackApplied(false);
     setTimeout(() => {
       const option = mockData.food[Math.floor(Math.random() * mockData.food.length)];
       setRecommendation({
@@ -35,6 +44,32 @@ export default function FoodPage() {
       setLoading(false);
       toast({ title: 'AI Suggestion Ready!', description: `Try ${option.name} today.` });
     }, 1500);
+  };
+
+  const handleFeedback = async (type: string) => {
+    if (!recommendation || !user || !db) return;
+    setFeedbackLoading(true);
+    try {
+      await refineExplanationWithFeedback({
+        originalRecommendation: recommendation.name,
+        originalExplanation: recommendation.reason,
+        userFeedback: type as any,
+      });
+
+      await addDoc(collection(db, 'users', user.uid, 'feedback'), {
+        recommendation: recommendation.name,
+        feedback: type,
+        userId: user.uid,
+        createdAt: serverTimestamp()
+      });
+
+      setFeedbackApplied(true);
+      toast({ title: 'Feedback Saved', description: 'The AI will adjust for your next meal.' });
+    } catch (error: any) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setFeedbackLoading(false);
+    }
   };
 
   return (
@@ -110,6 +145,22 @@ export default function FoodPage() {
                             <p className="text-sm font-bold">Safe for Persona</p>
                           </div>
                         </div>
+                      </div>
+                      
+                      <div className="pt-4 border-t space-y-4">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">Rate this logic</p>
+                        {feedbackApplied ? (
+                          <div className="p-4 bg-primary text-primary-foreground rounded-2xl text-center text-xs font-bold animate-in zoom-in">
+                            Feedback captured! Assistant is adapting.
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-4 gap-2">
+                             <Button variant="outline" size="sm" onClick={() => handleFeedback('Relevant')} disabled={feedbackLoading} className="rounded-xl"><ThumbsUp className="h-4 w-4" /></Button>
+                             <Button variant="outline" size="sm" onClick={() => handleFeedback('Not useful')} disabled={feedbackLoading} className="rounded-xl"><ThumbsDown className="h-4 w-4" /></Button>
+                             <Button variant="outline" size="sm" onClick={() => handleFeedback('Too expensive')} disabled={feedbackLoading} className="rounded-xl"><DollarSign className="h-4 w-4" /></Button>
+                             <Button variant="outline" size="sm" onClick={() => handleFeedback('Too repetitive')} disabled={feedbackLoading} className="rounded-xl"><RefreshCcw className="h-4 w-4" /></Button>
+                          </div>
+                        )}
                       </div>
                     </DialogContent>
                   </Dialog>

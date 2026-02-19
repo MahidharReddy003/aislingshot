@@ -4,13 +4,14 @@
 import { useState } from "react";
 import Image from "next/image";
 import { generateExplanation, type GenerateExplanationOutput } from "@/ai/flows/generate-explanation-flow";
+import { refineExplanationWithFeedback, type RefineExplanationWithFeedbackOutput } from "@/ai/flows/refine-explanation-with-feedback-flow";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
-import { doc } from "firebase/firestore";
+import { doc, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
@@ -29,11 +30,13 @@ import {
   Loader2,
   FileText,
   MapPin,
-  Image as ImageIcon,
+  ImageIcon,
   Activity,
   HelpCircle,
   TrendingUp,
-  ShieldCheck
+  ShieldCheck,
+  ChevronRight,
+  MessageSquare
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getPlaceholderImageUrl } from "@/lib/placeholder-images";
@@ -45,6 +48,8 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
+
+type FeedbackType = 'Relevant' | 'Not useful' | 'Too expensive' | 'Too repetitive';
 
 export default function RecommenderPage() {
   const { user } = useUser();
@@ -67,8 +72,13 @@ export default function RecommenderPage() {
   const [accessibility, setAccessibility] = useState(false);
   const [healthAware, setHealthAware] = useState(true);
 
+  // Feedback State
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
+  const [refinedResponse, setRefinedResponse] = useState<RefineExplanationWithFeedbackOutput | null>(null);
+
   const handleRecommend = async () => {
     setLoading(true);
+    setRefinedResponse(null);
     try {
       const output = await generateExplanation({
         userPersona: persona,
@@ -88,6 +98,47 @@ export default function RecommenderPage() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFeedback = async (type: FeedbackType) => {
+    if (!result || !user || !db) return;
+    setFeedbackLoading(true);
+    try {
+      const response = await refineExplanationWithFeedback({
+        originalRecommendation: result.recommendation,
+        originalExplanation: result.explanation,
+        userFeedback: type,
+        userPreferences: {
+          budget: `₹${budget}`,
+          accessibility: accessibility ? ["wheelchair accessible"] : [],
+          preferenceType: selectedPrefs,
+        }
+      });
+
+      setRefinedResponse(response);
+
+      // Save to Firestore
+      await addDoc(collection(db, 'users', user.uid, 'feedback'), {
+        recommendation: result.recommendation,
+        feedback: type,
+        refinedExplanation: response.refinedExplanation,
+        userId: user.uid,
+        createdAt: serverTimestamp()
+      });
+
+      toast({
+        title: "Feedback Recorded",
+        description: "The AI has refined its logic based on your input.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Feedback Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setFeedbackLoading(false);
     }
   };
 
@@ -183,142 +234,206 @@ export default function RecommenderPage() {
           </Card>
         </div>
 
-        <div className="lg:col-span-8">
+        <div className="lg:col-span-8 space-y-8">
           {result ? (
-            <Tabs defaultValue="explain" className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
-              <TabsList className="bg-muted p-1 border-2 rounded-2xl grid grid-cols-3 h-auto">
-                <TabsTrigger value="explain" className="rounded-xl py-3 font-bold gap-2"><Info className="h-4 w-4" /> Explain</TabsTrigger>
-                <TabsTrigger value="compare" className="rounded-xl py-3 font-bold gap-2"><Scale className="h-4 w-4" /> Compare</TabsTrigger>
-                <TabsTrigger value="alternatives" className="rounded-xl py-3 font-bold gap-2"><ListRestart className="h-4 w-4" /> Alternatives</TabsTrigger>
-              </TabsList>
+            <>
+              <Tabs defaultValue="explain" className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+                <TabsList className="bg-muted p-1 border-2 rounded-2xl grid grid-cols-3 h-auto">
+                  <TabsTrigger value="explain" className="rounded-xl py-3 font-bold gap-2"><Info className="h-4 w-4" /> Explain</TabsTrigger>
+                  <TabsTrigger value="compare" className="rounded-xl py-3 font-bold gap-2"><Scale className="h-4 w-4" /> Compare</TabsTrigger>
+                  <TabsTrigger value="alternatives" className="rounded-xl py-3 font-bold gap-2"><ListRestart className="h-4 w-4" /> Alternatives</TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="explain" className="space-y-6">
-                <Card className="border-primary border-2 shadow-xl overflow-hidden rounded-3xl relative">
-                  <div className="relative h-64 w-full bg-muted">
-                    <Image 
-                      src={getPlaceholderImageUrl(result.imageHint || 'hero-abstract')}
-                      alt={result.recommendation}
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <TabsContent value="explain" className="space-y-6">
+                  <Card className="border-primary border-2 shadow-xl overflow-hidden rounded-3xl relative">
+                    <div className="relative h-64 w-full bg-muted">
+                      <Image 
+                        src={getPlaceholderImageUrl(result.imageHint || 'hero-abstract')}
+                        alt={result.recommendation}
+                        fill
+                        className="object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                      
+                      <div className="absolute top-6 right-8">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button size="icon" className="h-16 w-16 rounded-full shadow-2xl bg-primary hover:scale-110 transition-transform flex flex-col items-center justify-center p-0">
+                              <Sparkles className="h-8 w-8" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="rounded-3xl border-2 sm:max-w-[500px]">
+                            <DialogHeader>
+                              <DialogTitle className="text-2xl font-black flex items-center gap-2">
+                                <Sparkles className="text-primary" /> AI Reasoning Breakdown
+                              </DialogTitle>
+                              <DialogDescription className="text-base font-medium text-foreground italic py-6 leading-relaxed">
+                                {result.explanation}
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid grid-cols-2 gap-4 mt-2">
+                               <div className="p-4 rounded-2xl bg-muted/50 border space-y-1">
+                                  <p className="text-[10px] font-black uppercase text-muted-foreground">Persona Context</p>
+                                  <p className="font-bold text-sm">{persona}</p>
+                               </div>
+                               <div className="p-4 rounded-2xl bg-muted/50 border space-y-1">
+                                  <p className="text-[10px] font-black uppercase text-muted-foreground">Health Guard</p>
+                                  <p className="font-bold text-sm">{healthAware ? "Active" : "Disabled"}</p>
+                               </div>
+                               <div className="p-4 rounded-2xl bg-muted/50 border col-span-2 flex items-center justify-between">
+                                  <div className="space-y-1">
+                                     <p className="text-[10px] font-black uppercase text-muted-foreground">Match Confidence</p>
+                                     <p className="font-bold text-sm">High Reliability</p>
+                                  </div>
+                                  <ShieldCheck className="h-6 w-6 text-green-500" />
+                               </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+
+                      <div className="absolute bottom-6 left-8 text-white">
+                        <Badge variant="outline" className="text-white border-white/30 font-bold uppercase text-[10px] mb-1">AI Curated Choice</Badge>
+                        <h2 className="text-3xl font-black tracking-tight">{result.recommendation}</h2>
+                      </div>
+                    </div>
                     
-                    {/* LOGIC ICON TRIGGER */}
-                    <div className="absolute top-6 right-8">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button size="icon" className="h-16 w-16 rounded-full shadow-2xl bg-primary hover:scale-110 transition-transform flex flex-col items-center justify-center p-0">
-                            <Sparkles className="h-8 w-8" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="rounded-3xl border-2 sm:max-w-[500px]">
-                          <DialogHeader>
-                            <DialogTitle className="text-2xl font-black flex items-center gap-2">
-                              <Sparkles className="text-primary" /> AI Reasoning Breakdown
-                            </DialogTitle>
-                            <DialogDescription className="text-base font-medium text-foreground italic py-6 leading-relaxed">
-                              {result.explanation}
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="grid grid-cols-2 gap-4 mt-2">
-                             <div className="p-4 rounded-2xl bg-muted/50 border space-y-1">
-                                <p className="text-[10px] font-black uppercase text-muted-foreground">Persona Context</p>
-                                <p className="font-bold text-sm">{persona}</p>
-                             </div>
-                             <div className="p-4 rounded-2xl bg-muted/50 border space-y-1">
-                                <p className="text-[10px] font-black uppercase text-muted-foreground">Health Guard</p>
-                                <p className="font-bold text-sm">{healthAware ? "Active" : "Disabled"}</p>
-                             </div>
-                             <div className="p-4 rounded-2xl bg-muted/50 border col-span-2 flex items-center justify-between">
-                                <div className="space-y-1">
-                                   <p className="text-[10px] font-black uppercase text-muted-foreground">Match Confidence</p>
-                                   <p className="font-bold text-sm">High Reliability</p>
-                                </div>
-                                <ShieldCheck className="h-6 w-6 text-green-500" />
-                             </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
+                    <CardContent className="p-8">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div className="p-4 rounded-2xl bg-muted/30 border-2 text-center">
+                          <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest mb-1">Est. Cost</p>
+                          <p className="text-lg font-bold">₹{result.costEstimate}</p>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-muted/30 border-2 text-center">
+                          <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest mb-1">Time</p>
+                          <p className="text-lg font-bold">{result.timeEstimate}</p>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-muted/30 border-2 text-center">
+                          <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest mb-1">Diversity</p>
+                          <p className="text-lg font-bold">{result.diversityScore}%</p>
+                        </div>
+                        <div className="p-4 rounded-2xl bg-primary text-primary-foreground border-2 border-primary text-center">
+                          <p className="text-[10px] uppercase font-black opacity-70 tracking-widest mb-1">Match</p>
+                          <p className="text-lg font-bold">98%</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-center p-5 bg-accent/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-primary border border-accent/20 animate-pulse">
+                        <Sparkles className="h-4 w-4 mr-2" /> Click the large logic icon above to see exactly why we made this choice
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
 
-                    <div className="absolute bottom-6 left-8 text-white">
-                      <Badge variant="outline" className="text-white border-white/30 font-bold uppercase text-[10px] mb-1">AI Curated Choice</Badge>
-                      <h2 className="text-3xl font-black tracking-tight">{result.recommendation}</h2>
+                <TabsContent value="compare">
+                  <Card className="border-2 rounded-3xl p-8 space-y-8 shadow-sm">
+                    <div>
+                      <CardTitle className="mb-2 text-2xl font-black">Constraint Scorecard</CardTitle>
+                      <CardDescription className="text-base">Visualizing how this recommendation balances your specific parameters.</CardDescription>
                     </div>
+                    <div className="space-y-8">
+                      <div className="space-y-3">
+                        <div className="flex justify-between text-xs font-black uppercase tracking-widest items-center">
+                          <span className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-green-500" /> Budget Alignment</span>
+                          <span className="text-primary">95%</span>
+                        </div>
+                        <div className="h-3 w-full bg-muted rounded-full overflow-hidden border">
+                          <div className="h-full bg-green-500 w-[95%] transition-all duration-1000" />
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex justify-between text-xs font-black uppercase tracking-widest items-center">
+                          <span className="flex items-center gap-2"><Activity className="h-4 w-4 text-blue-500" /> Health Priority Match</span>
+                          <span className="text-primary">100%</span>
+                        </div>
+                        <div className="h-3 w-full bg-muted rounded-full overflow-hidden border">
+                          <div className="h-full bg-blue-500 w-[100%] transition-all duration-1000 shadow-sm" />
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex justify-between text-xs font-black uppercase tracking-widest items-center">
+                          <span className="flex items-center gap-2"><TrendingUp className="h-4 w-4 text-purple-500" /> Interest Relevance</span>
+                          <span className="text-primary">88%</span>
+                        </div>
+                        <div className="h-3 w-full bg-muted rounded-full overflow-hidden border">
+                          <div className="h-full bg-purple-500 w-[88%] transition-all duration-1000 shadow-sm" />
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="alternatives" className="space-y-4">
+                  <div className="p-12 text-center text-muted-foreground border-4 border-dashed rounded-[3rem] bg-muted/5 flex flex-col items-center justify-center">
+                    <div className="p-4 rounded-full bg-muted mb-4 opacity-50"><RefreshCcw className="h-8 w-8" /></div>
+                    <p className="italic font-medium max-w-sm">The primary choice was prioritized to satisfy all active health, budget, and persona constraints simultaneously.</p>
                   </div>
-                  
-                  <CardContent className="p-8">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                      <div className="p-4 rounded-2xl bg-muted/30 border-2 text-center">
-                        <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest mb-1">Est. Cost</p>
-                        <p className="text-lg font-bold">₹{result.costEstimate}</p>
+                </TabsContent>
+              </Tabs>
+
+              {/* FEEDBACK SECTION */}
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <Card className="border-2 rounded-[2.5rem] overflow-hidden bg-muted/10">
+                  <CardHeader className="text-center">
+                    <CardTitle className="text-xl font-black">Help the AI learn</CardTitle>
+                    <CardDescription>Your feedback directly refines the assistant's decision-making logic.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {refinedResponse ? (
+                      <div className="bg-primary text-primary-foreground p-8 rounded-[2rem] space-y-4 animate-in zoom-in duration-500">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-xl bg-white/10"><Sparkles className="h-5 w-5" /></div>
+                          <h4 className="font-bold">AI Adaptation Insight</h4>
+                        </div>
+                        <p className="text-sm italic leading-relaxed opacity-90">"{refinedResponse.refinedExplanation}"</p>
+                        <div className="pt-4 border-t border-white/10">
+                          <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-3">Actionable Improvements</p>
+                          <div className="space-y-2">
+                            {refinedResponse.actionableInsights.map((insight, idx) => (
+                              <div key={idx} className="flex gap-2 text-xs font-medium">
+                                <ChevronRight className="h-3 w-3 shrink-0 mt-0.5 text-accent" />
+                                {insight}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <Button 
+                          variant="secondary" 
+                          size="sm" 
+                          className="w-full mt-4 font-bold"
+                          onClick={() => setRefinedResponse(null)}
+                        >
+                          Provide More Feedback
+                        </Button>
                       </div>
-                      <div className="p-4 rounded-2xl bg-muted/30 border-2 text-center">
-                        <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest mb-1">Time</p>
-                        <p className="text-lg font-bold">{result.timeEstimate}</p>
+                    ) : (
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        {[
+                          { type: 'Relevant', icon: ThumbsUp, color: 'hover:bg-green-50 hover:border-green-200' },
+                          { type: 'Not useful', icon: ThumbsDown, color: 'hover:bg-red-50 hover:border-red-200' },
+                          { type: 'Too expensive', icon: DollarSign, color: 'hover:bg-orange-50 hover:border-orange-200' },
+                          { type: 'Too repetitive', icon: RefreshCcw, color: 'hover:bg-blue-50 hover:border-blue-200' }
+                        ].map((btn) => (
+                          <Button
+                            key={btn.type}
+                            variant="outline"
+                            className={cn(
+                              "h-auto flex-col gap-3 py-6 rounded-2xl border-2 transition-all",
+                              btn.color
+                            )}
+                            disabled={feedbackLoading}
+                            onClick={() => handleFeedback(btn.type as FeedbackType)}
+                          >
+                            {feedbackLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <btn.icon className="h-6 w-6" />}
+                            <span className="text-[10px] font-black uppercase tracking-tighter">{btn.type}</span>
+                          </Button>
+                        ))}
                       </div>
-                      <div className="p-4 rounded-2xl bg-muted/30 border-2 text-center">
-                        <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest mb-1">Diversity</p>
-                        <p className="text-lg font-bold">{result.diversityScore}%</p>
-                      </div>
-                      <div className="p-4 rounded-2xl bg-primary text-primary-foreground border-2 border-primary text-center">
-                        <p className="text-[10px] uppercase font-black opacity-70 tracking-widest mb-1">Match</p>
-                        <p className="text-lg font-bold">98%</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-center p-5 bg-accent/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-primary border border-accent/20 animate-pulse">
-                      <Sparkles className="h-4 w-4 mr-2" /> Click the large logic icon above to see exactly why we made this choice
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
-              </TabsContent>
-
-              <TabsContent value="compare">
-                <Card className="border-2 rounded-3xl p-8 space-y-8 shadow-sm">
-                  <div>
-                    <CardTitle className="mb-2 text-2xl font-black">Constraint Scorecard</CardTitle>
-                    <CardDescription className="text-base">Visualizing how this recommendation balances your specific parameters.</CardDescription>
-                  </div>
-                  <div className="space-y-8">
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-xs font-black uppercase tracking-widest items-center">
-                        <span className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-green-500" /> Budget Alignment</span>
-                        <span className="text-primary">95%</span>
-                      </div>
-                      <div className="h-3 w-full bg-muted rounded-full overflow-hidden border">
-                        <div className="h-full bg-green-500 w-[95%] transition-all duration-1000" />
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-xs font-black uppercase tracking-widest items-center">
-                        <span className="flex items-center gap-2"><Activity className="h-4 w-4 text-blue-500" /> Health Priority Match</span>
-                        <span className="text-primary">100%</span>
-                      </div>
-                      <div className="h-3 w-full bg-muted rounded-full overflow-hidden border">
-                        <div className="h-full bg-blue-500 w-[100%] transition-all duration-1000 shadow-sm" />
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-xs font-black uppercase tracking-widest items-center">
-                        <span className="flex items-center gap-2"><TrendingUp className="h-4 w-4 text-purple-500" /> Interest Relevance</span>
-                        <span className="text-primary">88%</span>
-                      </div>
-                      <div className="h-3 w-full bg-muted rounded-full overflow-hidden border">
-                        <div className="h-full bg-purple-500 w-[88%] transition-all duration-1000 shadow-sm" />
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="alternatives" className="space-y-4">
-                <div className="p-12 text-center text-muted-foreground border-4 border-dashed rounded-[3rem] bg-muted/5 flex flex-col items-center justify-center">
-                  <div className="p-4 rounded-full bg-muted mb-4 opacity-50"><RefreshCcw className="h-8 w-8" /></div>
-                  <p className="italic font-medium max-w-sm">The primary choice was prioritized to satisfy all active health, budget, and persona constraints simultaneously.</p>
-                </div>
-              </TabsContent>
-            </Tabs>
+              </div>
+            </>
           ) : (
             <div className="h-full min-h-[500px] border-4 border-dashed rounded-[3rem] flex flex-col items-center justify-center text-muted-foreground p-12 text-center opacity-40">
               <div className="p-6 rounded-full bg-muted mb-6"><Target className="h-16 w-16" /></div>
