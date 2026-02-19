@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -34,15 +35,16 @@ export default function PlanMyDayPage() {
   const { data: profile, isLoading: isProfileLoading } = useDoc(profileRef);
   const { toast } = useToast();
 
+  // INTERCONNECTED DATA: Initialize with profile values
   const [budget, setBudget] = useState(0);
   const [time, setTime] = useState(120);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
 
-  // Sync local budget with profile budgetPreference on load
   useEffect(() => {
-    if (profile && profile.budgetPreference !== undefined) {
-      setBudget(profile.budgetPreference);
+    if (profile) {
+      if (profile.budgetPreference !== undefined) setBudget(profile.budgetPreference);
+      if (profile.availableTime !== undefined) setTime(profile.availableTime * 60); // Assuming profile.availableTime is in hours
     }
   }, [profile]);
 
