@@ -4,7 +4,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Info, LayoutDashboard, PlayCircle, ShieldCheck, Speech } from "lucide-react";
+import { LayoutDashboard, PlayCircle, ShieldCheck, Speech, User } from "lucide-react";
+import { useUser } from "@/firebase";
 
 const navItems = [
   { name: "Experiences", href: "/experiences/recommender", icon: LayoutDashboard },
@@ -15,6 +16,7 @@ const navItems = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { user } = useUser();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -25,6 +27,17 @@ export default function Navbar() {
               <span className="text-xl font-bold tracking-tight text-primary">TransparencyAI</span>
             </Link>
             <nav className="hidden md:flex items-center space-x-6">
+              {user && (
+                <Link
+                  href="/dashboard"
+                  className={cn(
+                    "text-sm font-medium transition-colors hover:text-primary",
+                    pathname.startsWith("/dashboard") ? "text-primary" : "text-muted-foreground"
+                  )}
+                >
+                  Dashboard
+                </Link>
+              )}
               {navItems.map((item) => (
                 <Link
                   key={item.href}
@@ -40,12 +53,32 @@ export default function Navbar() {
             </nav>
           </div>
           <div className="flex items-center space-x-4">
-            <Link
-              href="/demo"
-              className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
-            >
-              Try Demo
-            </Link>
+            {user ? (
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+              >
+                <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center">
+                  <User className="h-4 w-4 text-primary" />
+                </div>
+                <span className="hidden sm:inline">{user.displayName || user.email?.split('@')[0]}</span>
+              </Link>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/login"
+                  className="text-sm font-medium text-muted-foreground hover:text-primary px-3 py-2"
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/signup"
+                  className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
+                >
+                  Try Demo
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>
