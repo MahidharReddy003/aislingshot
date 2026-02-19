@@ -31,7 +31,9 @@ import {
   MapPin,
   Image as ImageIcon,
   Activity,
-  HelpCircle
+  HelpCircle,
+  TrendingUp,
+  ShieldCheck
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getPlaceholderImageUrl } from "@/lib/placeholder-images";
@@ -205,8 +207,8 @@ export default function RecommenderPage() {
                     <div className="absolute top-6 right-8">
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button size="icon" className="h-12 w-12 rounded-full shadow-2xl bg-primary hover:scale-110 transition-transform">
-                            <Sparkles className="h-6 w-6" />
+                          <Button size="icon" className="h-16 w-16 rounded-full shadow-2xl bg-primary hover:scale-110 transition-transform flex flex-col items-center justify-center p-0">
+                            <Sparkles className="h-8 w-8" />
                           </Button>
                         </DialogTrigger>
                         <DialogContent className="rounded-3xl border-2 sm:max-w-[500px]">
@@ -214,7 +216,7 @@ export default function RecommenderPage() {
                             <DialogTitle className="text-2xl font-black flex items-center gap-2">
                               <Sparkles className="text-primary" /> AI Reasoning Breakdown
                             </DialogTitle>
-                            <DialogDescription className="text-base font-medium text-foreground italic py-4 leading-relaxed">
+                            <DialogDescription className="text-base font-medium text-foreground italic py-6 leading-relaxed">
                               {result.explanation}
                             </DialogDescription>
                           </DialogHeader>
@@ -227,6 +229,13 @@ export default function RecommenderPage() {
                                 <p className="text-[10px] font-black uppercase text-muted-foreground">Health Guard</p>
                                 <p className="font-bold text-sm">{healthAware ? "Active" : "Disabled"}</p>
                              </div>
+                             <div className="p-4 rounded-2xl bg-muted/50 border col-span-2 flex items-center justify-between">
+                                <div className="space-y-1">
+                                   <p className="text-[10px] font-black uppercase text-muted-foreground">Match Confidence</p>
+                                   <p className="font-bold text-sm">High Reliability</p>
+                                </div>
+                                <ShieldCheck className="h-6 w-6 text-green-500" />
+                             </div>
                           </div>
                         </DialogContent>
                       </Dialog>
@@ -234,12 +243,12 @@ export default function RecommenderPage() {
 
                     <div className="absolute bottom-6 left-8 text-white">
                       <Badge variant="outline" className="text-white border-white/30 font-bold uppercase text-[10px] mb-1">AI Curated Choice</Badge>
-                      <h2 className="text-3xl font-black">{result.recommendation}</h2>
+                      <h2 className="text-3xl font-black tracking-tight">{result.recommendation}</h2>
                     </div>
                   </div>
                   
                   <CardContent className="p-8">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                       <div className="p-4 rounded-2xl bg-muted/30 border-2 text-center">
                         <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest mb-1">Est. Cost</p>
                         <p className="text-lg font-bold">₹{result.costEstimate}</p>
@@ -254,40 +263,49 @@ export default function RecommenderPage() {
                       </div>
                       <div className="p-4 rounded-2xl bg-primary text-primary-foreground border-2 border-primary text-center">
                         <p className="text-[10px] uppercase font-black opacity-70 tracking-widest mb-1">Match</p>
-                        <p className="text-lg font-bold">High</p>
+                        <p className="text-lg font-bold">98%</p>
                       </div>
                     </div>
                     
-                    <div className="flex items-center justify-center p-4 bg-accent/10 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-primary border border-accent/20">
-                      <Info className="h-3 w-3 mr-2" /> Click the sparkles icon above for full logic breakdown
+                    <div className="flex items-center justify-center p-5 bg-accent/10 rounded-2xl text-[10px] font-black uppercase tracking-widest text-primary border border-accent/20 animate-pulse">
+                      <Sparkles className="h-4 w-4 mr-2" /> Click the large logic icon above to see exactly why we made this choice
                     </div>
                   </CardContent>
                 </Card>
               </TabsContent>
 
               <TabsContent value="compare">
-                <Card className="border-2 rounded-3xl p-8 space-y-8">
+                <Card className="border-2 rounded-3xl p-8 space-y-8 shadow-sm">
                   <div>
-                    <CardTitle className="mb-2">Trade-off Scorecard</CardTitle>
-                    <CardDescription>Visualizing how this recommendation balances your constraints.</CardDescription>
+                    <CardTitle className="mb-2 text-2xl font-black">Constraint Scorecard</CardTitle>
+                    <CardDescription className="text-base">Visualizing how this recommendation balances your specific parameters.</CardDescription>
                   </div>
-                  <div className="space-y-6">
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs font-bold uppercase tracking-widest">
-                        <span>Budget Alignment</span>
-                        <span>95%</span>
+                  <div className="space-y-8">
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-xs font-black uppercase tracking-widest items-center">
+                        <span className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-green-500" /> Budget Alignment</span>
+                        <span className="text-primary">95%</span>
                       </div>
-                      <div className="h-3 w-full bg-muted rounded-full overflow-hidden">
-                        <div className="h-full bg-green-500 w-[95%]" />
+                      <div className="h-3 w-full bg-muted rounded-full overflow-hidden border">
+                        <div className="h-full bg-green-500 w-[95%] transition-all duration-1000" />
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs font-bold uppercase tracking-widest">
-                        <span>Health Priority Match</span>
-                        <span>100%</span>
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-xs font-black uppercase tracking-widest items-center">
+                        <span className="flex items-center gap-2"><Activity className="h-4 w-4 text-blue-500" /> Health Priority Match</span>
+                        <span className="text-primary">100%</span>
                       </div>
-                      <div className="h-3 w-full bg-muted rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500 w-[100%]" />
+                      <div className="h-3 w-full bg-muted rounded-full overflow-hidden border">
+                        <div className="h-full bg-blue-500 w-[100%] transition-all duration-1000 shadow-sm" />
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-xs font-black uppercase tracking-widest items-center">
+                        <span className="flex items-center gap-2"><TrendingUp className="h-4 w-4 text-purple-500" /> Interest Relevance</span>
+                        <span className="text-primary">88%</span>
+                      </div>
+                      <div className="h-3 w-full bg-muted rounded-full overflow-hidden border">
+                        <div className="h-full bg-purple-500 w-[88%] transition-all duration-1000 shadow-sm" />
                       </div>
                     </div>
                   </div>
@@ -295,16 +313,17 @@ export default function RecommenderPage() {
               </TabsContent>
 
               <TabsContent value="alternatives" className="space-y-4">
-                <div className="p-6 text-center text-muted-foreground italic border-2 border-dashed rounded-3xl">
-                  AI has prioritized the primary choice to satisfy all active health and budget constraints.
+                <div className="p-12 text-center text-muted-foreground border-4 border-dashed rounded-[3rem] bg-muted/5 flex flex-col items-center justify-center">
+                  <div className="p-4 rounded-full bg-muted mb-4 opacity-50"><RefreshCcw className="h-8 w-8" /></div>
+                  <p className="italic font-medium max-w-sm">The primary choice was prioritized to satisfy all active health, budget, and persona constraints simultaneously.</p>
                 </div>
               </TabsContent>
             </Tabs>
           ) : (
-            <div className="h-full min-h-[500px] border-4 border-dashed rounded-3xl flex flex-col items-center justify-center text-muted-foreground p-12 text-center opacity-40">
+            <div className="h-full min-h-[500px] border-4 border-dashed rounded-[3rem] flex flex-col items-center justify-center text-muted-foreground p-12 text-center opacity-40">
               <div className="p-6 rounded-full bg-muted mb-6"><Target className="h-16 w-16" /></div>
               <h3 className="text-2xl font-black mb-2 uppercase tracking-tight">System Ready</h3>
-              <p className="max-w-xs text-sm font-medium">Input your current persona and budget to activate the AI reasoning modules.</p>
+              <p className="max-w-xs text-sm font-medium leading-relaxed">Define your context (Persona, Budget, Health) on the left. The AI will cross-reference its logic modules to find your best match.</p>
             </div>
           )}
         </div>

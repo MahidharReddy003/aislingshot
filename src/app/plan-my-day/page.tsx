@@ -15,6 +15,14 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Clock, DollarSign, Sparkles, Loader2, Target, CheckCircle, FileText, Share2, Activity } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getPlaceholderImageUrl } from '@/lib/placeholder-images';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 export default function PlanMyDayPage() {
   const { user } = useUser();
@@ -103,7 +111,6 @@ export default function PlanMyDayPage() {
                 <Input id="time" type="number" value={time} onChange={e => setTime(parseInt(e.target.value) || 0)} className="h-11 border-2" />
               </div>
 
-              {/* HEALTH INDICATOR */}
               {profile?.healthConditions && profile.healthConditions.length > 0 && (
                 <div className="p-3 bg-primary/5 rounded-xl border border-primary/10">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-primary flex items-center gap-1 mb-1">
@@ -134,14 +141,24 @@ export default function PlanMyDayPage() {
                 <CardHeader className="p-8">
                   <h3 className="text-2xl font-black mb-2 tracking-tight">Today's Itinerary</h3>
                   <p className="text-primary-foreground/80 italic leading-relaxed">"{result.summary}"</p>
+                  <div className="flex items-center gap-4 mt-4">
+                    <div className="flex flex-col">
+                       <span className="text-[10px] uppercase opacity-60 font-black">Total Cost</span>
+                       <span className="text-xl font-black">₹{result.totalCost}</span>
+                    </div>
+                     <div className="flex flex-col">
+                       <span className="text-[10px] uppercase opacity-60 font-black">Activities</span>
+                       <span className="text-xl font-black">{result.activities.length}</span>
+                    </div>
+                  </div>
                 </CardHeader>
               </Card>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {result.activities.map((act: any, idx: number) => (
-                  <Card key={idx} className="border-2 rounded-[2rem] overflow-hidden hover:border-primary/50 transition-all group shadow-sm">
+                  <Card key={idx} className="border-2 rounded-[2.5rem] overflow-hidden hover:border-primary/50 transition-all group shadow-sm">
                     <CardContent className="p-0 flex flex-col md:flex-row">
-                      <div className="relative w-full md:w-56 h-48 md:h-auto shrink-0 bg-muted">
+                      <div className="relative w-full md:w-64 h-56 md:h-auto shrink-0 bg-muted">
                         <Image 
                           src={getPlaceholderImageUrl(act.imageHint || 'hero-abstract')} 
                           alt={act.title} 
@@ -155,27 +172,44 @@ export default function PlanMyDayPage() {
                         </div>
                       </div>
                       <div className="flex-1 p-8">
-                        <div className="flex justify-between items-start mb-3">
+                        <div className="flex justify-between items-start mb-4">
                           <div className="flex gap-2">
                             <Badge variant="secondary" className="font-bold uppercase text-[10px] tracking-widest">{act.cost === 0 ? 'Free' : `₹${act.cost}`}</Badge>
                             <Badge variant="outline" className="font-bold uppercase text-[10px] tracking-widest">{act.durationMinutes} min</Badge>
                           </div>
+                          
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button size="icon" variant="outline" className="h-12 w-12 rounded-full border-2 hover:bg-primary hover:text-primary-foreground transition-all">
+                                <Sparkles className="h-5 w-5" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="rounded-3xl border-2 sm:max-w-[450px]">
+                              <DialogHeader>
+                                <DialogTitle className="text-2xl font-black flex items-center gap-2">
+                                  <Sparkles className="text-primary" /> AI Choice Analysis
+                                </DialogTitle>
+                                <DialogDescription className="text-base font-medium text-foreground py-6 leading-relaxed italic">
+                                  {act.reason}
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="p-4 rounded-2xl bg-muted/50 border space-y-2">
+                                <p className="text-[10px] font-black uppercase text-muted-foreground">Activity Summary</p>
+                                <p className="text-sm font-bold">{act.title}</p>
+                                <p className="text-xs text-muted-foreground leading-relaxed">{act.description}</p>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
                         </div>
                         <h3 className="text-2xl font-black mb-2 group-hover:text-primary transition-colors">{act.title}</h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed mb-6">{act.description}</p>
+                        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">{act.description}</p>
                         
-                        <Accordion type="single" collapsible>
-                          <AccordionItem value="logic" className="border-none">
-                            <AccordionTrigger className="text-[10px] font-black uppercase tracking-widest text-primary bg-primary/5 px-4 py-2.5 rounded-xl hover:no-underline border border-primary/10">
-                              <div className="flex items-center gap-2">
-                                <Target className="h-4 w-4" /> AI Choice Analysis
-                              </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="pt-4 px-4 italic text-sm text-foreground leading-relaxed border-l-2 border-primary/20 ml-2 mt-2">
-                              {act.reason}
-                            </AccordionContent>
-                          </AccordionItem>
-                        </Accordion>
+                        <div className="mt-6 pt-4 border-t flex justify-between items-center">
+                           <span className="text-[10px] font-black text-primary uppercase tracking-widest">Selected for: {profile.role}</span>
+                           <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground">
+                              <Clock className="h-3 w-3" /> Step {idx + 1}
+                           </div>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

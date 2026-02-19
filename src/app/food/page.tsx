@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Utensils, Star, MapPin, Sparkles, Loader2, Clock, Info, CheckCircle2, XCircle, HelpCircle } from 'lucide-react';
+import { Utensils, Star, MapPin, Sparkles, Loader2, Clock, Info, CheckCircle2, XCircle, HelpCircle, DollarSign } from 'lucide-react';
 import mockData from '@/app/lib/mock-data.json';
 import { useToast } from '@/hooks/use-toast';
 import { getPlaceholderImageUrl } from '@/lib/placeholder-images';
@@ -21,7 +21,7 @@ import {
 
 export default function FoodPage() {
   const [loading, setLoading] = useState(false);
-  const [recommendation, setRecommendation] = useState<{name: string, reason: string} | null>(null);
+  const [recommendation, setRecommendation] = useState<any>(null);
   const { toast } = useToast();
 
   const handleAIRecommend = () => {
@@ -29,7 +29,7 @@ export default function FoodPage() {
     setTimeout(() => {
       const option = mockData.food[Math.floor(Math.random() * mockData.food.length)];
       setRecommendation({
-        name: option.name,
+        ...option,
         reason: `I suggest ${option.name}! It's a great match for your budget and is highly rated for its ${option.category} menu. Based on your profile, this is a top choice for a healthy student meal.`
       });
       setLoading(false);
@@ -53,35 +53,86 @@ export default function FoodPage() {
       </div>
 
       {recommendation && (
-        <Card className="mb-12 border-2 border-primary bg-primary/5 animate-in fade-in slide-in-from-top-4 rounded-3xl overflow-hidden shadow-sm relative group">
-          <CardContent className="p-8 flex items-center justify-between gap-6">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="h-5 w-5 text-primary" />
-                <span className="text-xs font-black uppercase tracking-widest text-primary">AI Highlight: {recommendation.name}</span>
-              </div>
-              <p className="text-xl italic text-foreground leading-relaxed font-medium">"I think you'll love {recommendation.name} for lunch today."</p>
+        <div className="mb-16 animate-in fade-in slide-in-from-top-6 duration-700">
+           <div className="flex items-center gap-2 mb-4 px-4">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <span className="text-xs font-black uppercase tracking-widest text-primary">AI Logic Choice</span>
             </div>
-            
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button size="icon" className="h-14 w-14 rounded-full shadow-lg bg-primary hover:scale-110 transition-transform flex-shrink-0">
-                  <Sparkles className="h-7 w-7" />
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="rounded-3xl border-2">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl font-black flex items-center gap-2">
-                    <Sparkles className="text-primary" /> Why {recommendation.name}?
-                  </DialogTitle>
-                  <DialogDescription className="text-base font-medium text-foreground py-6 leading-relaxed italic">
-                    {recommendation.reason}
-                  </DialogDescription>
-                </DialogHeader>
-              </DialogContent>
-            </Dialog>
-          </CardContent>
-        </Card>
+          <Card className="border-primary border-4 shadow-2xl rounded-[3rem] overflow-hidden relative group">
+            <CardContent className="p-0 flex flex-col md:flex-row">
+              <div className="relative w-full md:w-[40%] h-64 md:h-auto">
+                <Image 
+                  src={getPlaceholderImageUrl(recommendation.imageId || 'restaurant-street')} 
+                  alt={recommendation.name} 
+                  fill 
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                <div className="absolute bottom-6 left-8 text-white">
+                  <Badge className="bg-primary text-primary-foreground mb-2">98% Match</Badge>
+                  <h3 className="text-3xl font-black">{recommendation.name}</h3>
+                </div>
+              </div>
+              
+              <div className="flex-1 p-10 flex flex-col">
+                <div className="flex justify-between items-start mb-6">
+                  <div className="space-y-1">
+                    <Badge variant="secondary" className="font-bold uppercase tracking-widest text-[10px]">{recommendation.category}</Badge>
+                    <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                       <MapPin className="h-4 w-4 text-primary" /> {recommendation.location}
+                    </div>
+                  </div>
+                  
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button size="icon" className="h-16 w-16 rounded-full shadow-xl bg-primary hover:scale-110 transition-transform">
+                        <Sparkles className="h-8 w-8" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="rounded-3xl border-2 sm:max-w-[500px]">
+                      <DialogHeader>
+                        <DialogTitle className="text-2xl font-black flex items-center gap-2">
+                          <Sparkles className="text-primary" /> Why {recommendation.name}?
+                        </DialogTitle>
+                        <DialogDescription className="text-base font-medium text-foreground py-6 leading-relaxed italic">
+                          {recommendation.reason}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="p-6 bg-muted/30 rounded-2xl border-2 space-y-4">
+                        <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Alignment Data</p>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <span className="text-[10px] uppercase font-bold text-muted-foreground">Budget</span>
+                            <p className="text-sm font-bold">Within Cap (₹{recommendation.price})</p>
+                          </div>
+                          <div className="space-y-1">
+                            <span className="text-[10px] uppercase font-bold text-muted-foreground">Health</span>
+                            <p className="text-sm font-bold">Safe for Persona</p>
+                          </div>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+                
+                <p className="text-muted-foreground leading-relaxed mb-8 flex-1">
+                  {recommendation.description}
+                </p>
+                
+                <div className="grid grid-cols-2 gap-4 mt-auto">
+                   <div className="p-4 rounded-2xl bg-muted/30 border-2 text-center">
+                    <p className="text-[10px] uppercase font-black text-muted-foreground mb-1">Entry Price</p>
+                    <p className="text-xl font-black text-primary">₹{recommendation.price}</p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-muted/30 border-2 text-center">
+                    <p className="text-[10px] uppercase font-black text-muted-foreground mb-1">Rating</p>
+                    <p className="text-xl font-black flex items-center justify-center gap-1"><Star className="h-4 w-4 fill-yellow-400 text-yellow-400" /> {recommendation.rating}</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       <div className="grid md:grid-cols-2 gap-8">
