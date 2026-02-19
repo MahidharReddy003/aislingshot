@@ -6,30 +6,22 @@ import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore'
 
-// IMPORTANT: DO NOT MODIFY THIS FUNCTION
+/**
+ * Initialize Firebase with explicit config to ensure it works on Vercel.
+ * Avoids the "no-options" error by always providing the config object.
+ */
 export function initializeFirebase() {
-  if (!getApps().length) {
-    let firebaseApp;
-    // For Vercel/Standard environments, we check if we're on the client or if config is provided
-    if (typeof window !== 'undefined' || process.env.NODE_ENV === 'development') {
-        try {
-          // If we are in an environment that supports automatic initialization (like Firebase App Hosting)
-          // it might succeed here. Otherwise it falls back to the manual config.
-          firebaseApp = initializeApp(firebaseConfig);
-        } catch (e) {
-          firebaseApp = initializeApp(firebaseConfig);
-        }
-    } else {
-        // Fallback for SSR/Prerendering if needed
-        firebaseApp = initializeApp(firebaseConfig);
-    }
+  const existingApps = getApps();
+  const app = existingApps.length > 0 ? existingApps[0] : initializeApp(firebaseConfig);
 
-    return getSdks(firebaseApp);
-  }
-
-  return getSdks(getApp());
+  return {
+    firebaseApp: app,
+    auth: getAuth(app),
+    firestore: getFirestore(app)
+  };
 }
 
+// These are still used by the providers but are now correctly initialized
 export function getSdks(firebaseApp: FirebaseApp) {
   return {
     firebaseApp,
