@@ -76,7 +76,7 @@ export default function SettingsPage() {
     setSaving(true);
     setTimeout(() => {
       setSaving(false);
-      toast({ title: 'Changes Saved', description: 'Your preferences have been updated locally.' });
+      toast({ title: 'Changes Saved', description: 'Your preferences have been updated successfully.' });
     }, 800);
   };
 
@@ -86,13 +86,13 @@ export default function SettingsPage() {
     <div className="container max-w-5xl mx-auto py-12 px-4">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Settings & Control</h1>
-        <p className="text-muted-foreground">Manage your persona, privacy, and how the AI interacts with your life.</p>
+        <p className="text-muted-foreground">Manage your SmartLife persona, privacy, and how the AI interacts with your life.</p>
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
         <TabsList className="bg-muted p-1 border grid grid-cols-4 md:grid-cols-7 h-auto">
           <TabsTrigger value="profile" className="gap-2 py-2"><User className="h-4 w-4" /> <span className="hidden md:inline">Profile</span></TabsTrigger>
-          <TabsTrigger value="preferences" className="gap-2 py-2"><Settings2 className="h-4 w-4" /> <span className="hidden md:inline">Prefs</span></TabsTrigger>
+          <TabsTrigger value="preferences" className="gap-2 py-2"><Settings2 className="h-4 w-4" /> <span className="hidden md:inline">Preferences</span></TabsTrigger>
           <TabsTrigger value="budget" className="gap-2 py-2"><Wallet className="h-4 w-4" /> <span className="hidden md:inline">Budget</span></TabsTrigger>
           <TabsTrigger value="discovery" className="gap-2 py-2"><Sparkles className="h-4 w-4" /> <span className="hidden md:inline">Discovery</span></TabsTrigger>
           <TabsTrigger value="accessibility" className="gap-2 py-2"><Accessibility className="h-4 w-4" /> <span className="hidden md:inline">Access</span></TabsTrigger>
@@ -104,18 +104,18 @@ export default function SettingsPage() {
           <Card className="border-2 shadow-sm">
             <CardHeader>
               <CardTitle>Public Profile</CardTitle>
-              <CardDescription>How your assistant identifies you and your primary role.</CardDescription>
+              <CardDescription>How your AI assistant identifies you and your primary role.</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleUpdateProfile} className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Full Name</Label>
-                    <Input id="name" name="name" defaultValue={profile?.name} />
+                    <Input id="name" name="name" defaultValue={profile?.name} placeholder="Enter your name" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="location">Default Location</Label>
-                    <Input id="location" name="location" defaultValue={profile?.location} />
+                    <Input id="location" name="location" defaultValue={profile?.location} placeholder="e.g., Campus North" />
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -129,7 +129,7 @@ export default function SettingsPage() {
                   </Button>
                   <Button type="submit" disabled={saving}>
                     {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Save Changes
+                    Save Profile
                   </Button>
                 </div>
               </form>
@@ -141,7 +141,7 @@ export default function SettingsPage() {
           <Card className="border-2 shadow-sm">
             <CardHeader>
               <CardTitle>Interests & Personality</CardTitle>
-              <CardDescription>Fine-tune what categories the AI prioritizes.</CardDescription>
+              <CardDescription>Fine-tune what categories the AI priorities and how it communicates.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-3">
@@ -162,8 +162,12 @@ export default function SettingsPage() {
                   <Button variant={profile?.aiBehavior === 'formal' ? 'default' : 'outline'} size="sm">Formal</Button>
                   <Button variant="outline" size="sm">Concise</Button>
                 </div>
+                <p className="text-xs text-muted-foreground">"Friendly" uses emojis and warm language. "Concise" focuses on direct logic.</p>
               </div>
-              <Button onClick={handleMockSave} disabled={saving} className="w-full">Save Preferences</Button>
+              <div className="pt-4 flex gap-4">
+                <Button onClick={handleMockSave} disabled={saving} className="flex-1">Save Preferences</Button>
+                <Button variant="outline" onClick={() => toast({ title: 'Preferences Reset' })}>Reset to Default</Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -172,7 +176,7 @@ export default function SettingsPage() {
           <Card className="border-2 shadow-sm">
             <CardHeader>
               <CardTitle>Budget Rules</CardTitle>
-              <CardDescription>Set spending limits and how strictly they are enforced.</CardDescription>
+              <CardDescription>Set spending limits and how strictly they are enforced by the AI.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
               <div className="space-y-4">
@@ -197,7 +201,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between p-4 bg-muted/30 rounded-xl border">
                 <div className="space-y-0.5">
                   <Label>Weekly Roll-over</Label>
-                  <p className="text-xs text-muted-foreground">Unspent daily budget adds to your weekend allowance.</p>
+                  <p className="text-xs text-muted-foreground">Unspent daily budget adds to your weekend allowance automatically.</p>
                 </div>
                 <Switch />
               </div>
@@ -210,7 +214,7 @@ export default function SettingsPage() {
           <Card className="border-2 shadow-sm">
             <CardHeader>
               <CardTitle>Discovery & Variety</CardTitle>
-              <CardDescription>Control the balance between familiar favorites and new territory.</CardDescription>
+              <CardDescription>Control the balance between familiar favorites and new territory to prevent filter bubbles.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
               <div className="space-y-4">
@@ -232,7 +236,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between p-4 bg-primary/5 rounded-xl border border-primary/20">
                 <div className="space-y-0.5">
                   <Label className="flex items-center gap-2"><Sparkles className="h-3 w-3 text-primary" /> Anti-Filter Bubble</Label>
-                  <p className="text-xs text-muted-foreground">Force the AI to suggest at least one radical discovery daily.</p>
+                  <p className="text-xs text-muted-foreground">Force the AI to suggest at least one "radical discovery" every day.</p>
                 </div>
                 <Switch defaultChecked />
               </div>
@@ -245,31 +249,31 @@ export default function SettingsPage() {
           <Card className="border-2 shadow-sm">
             <CardHeader>
               <CardTitle>Accessibility Standards</CardTitle>
-              <CardDescription>Tailor the platform UI and recommendations for specific needs.</CardDescription>
+              <CardDescription>Tailor the SmartLife UI and recommendations for specific physical or cognitive needs.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between p-2">
                 <div className="space-y-0.5">
                   <Label>Low Walking Mode</Label>
-                  <p className="text-xs text-muted-foreground">Prioritize locations with minimal travel or ramps.</p>
+                  <p className="text-xs text-muted-foreground">Prioritize locations with minimal travel or full ramp access.</p>
                 </div>
                 <Switch />
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between p-2">
                 <div className="space-y-0.5">
                   <Label>Time-Sensitive Alerts</Label>
-                  <p className="text-xs text-muted-foreground">Audible alerts for nearing event start times.</p>
+                  <p className="text-xs text-muted-foreground">Audible and haptic alerts for nearing event start times.</p>
                 </div>
                 <Switch defaultChecked />
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between p-2">
                 <div className="space-y-0.5">
                   <Label>High Contrast UI</Label>
-                  <p className="text-xs text-muted-foreground">Increase legibility across all experience screens.</p>
+                  <p className="text-xs text-muted-foreground">Increase legibility across all recommendation screens.</p>
                 </div>
                 <Switch />
               </div>
-              <Button onClick={handleMockSave} disabled={saving} className="w-full">Save Accessibility</Button>
+              <Button onClick={handleMockSave} disabled={saving} className="w-full">Save Accessibility Settings</Button>
             </CardContent>
           </Card>
         </TabsContent>
@@ -278,27 +282,29 @@ export default function SettingsPage() {
           <Card className="border-2 shadow-sm">
             <CardHeader>
               <CardTitle>Privacy & Data Ownership</CardTitle>
-              <CardDescription>You are in full control of how your data is used.</CardDescription>
+              <CardDescription>You are in full control of how your personal data is utilized by SmartLife.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="p-4 bg-accent/10 border border-accent/20 rounded-xl space-y-2">
                 <div className="flex items-center gap-2 font-bold text-sm">
                   <Shield className="h-4 w-4 text-primary" />
-                  Transparency Promise
+                  SmartLife Transparency Promise
                 </div>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  We only use your data to improve your personal AI model. We never sell your preferences to third-party advertisers. All history can be cleared instantly.
+                  We only use your interaction data to refine your personal AI model. We never sell your preferences to third-party advertisers. All data is encrypted at rest.
                 </p>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-4 pt-2">
                 <div className="flex items-center justify-between">
                   <Label>Anonymous Telemetry</Label>
                   <Switch defaultChecked />
                 </div>
+                <p className="text-[10px] text-muted-foreground -mt-3">Help us improve the global model by sharing non-identifiable usage patterns.</p>
                 <div className="flex items-center justify-between">
-                  <Label>Local Cache Only</Label>
+                  <Label>Local Cache Priority</Label>
                   <Switch />
                 </div>
+                <p className="text-[10px] text-muted-foreground -mt-3">Keep more processing on your device. May slightly slow down recommendation generation.</p>
               </div>
               <div className="grid grid-cols-2 gap-4 pt-4 border-t">
                 <Button variant="outline" className="gap-2"><History className="h-4 w-4" /> Clear History</Button>
@@ -312,31 +318,31 @@ export default function SettingsPage() {
           <Card className="border-2 shadow-sm">
             <CardHeader>
               <CardTitle>Smart Alerts</CardTitle>
-              <CardDescription>Control when the assistant reaches out to you.</CardDescription>
+              <CardDescription>Control how and when the AI assistant proactively reaches out to you.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between p-2">
                 <div className="space-y-0.5">
-                  <Label>Budget Alerts</Label>
+                  <Label>Budget Threshold Alerts</Label>
                   <p className="text-xs text-muted-foreground">Notify when I reach 80% of my daily limit.</p>
                 </div>
                 <Switch defaultChecked />
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between p-2">
                 <div className="space-y-0.5">
-                  <Label>Discovery Pings</Label>
-                  <p className="text-xs text-muted-foreground">Suggest new activities when I have free time.</p>
+                  <Label>Proactive Discovery Pings</Label>
+                  <p className="text-xs text-muted-foreground">Suggest new activities during identified free gaps in my schedule.</p>
                 </div>
                 <Switch defaultChecked />
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between p-2">
                 <div className="space-y-0.5">
                   <Label>Weekly Trust Reports</Label>
-                  <p className="text-xs text-muted-foreground">Email summary of my savings and discoveries.</p>
+                  <p className="text-xs text-muted-foreground">Email summary of my savings and new brand discoveries.</p>
                 </div>
                 <Switch />
               </div>
-              <Button onClick={handleMockSave} disabled={saving} className="w-full">Save Notification Rules</Button>
+              <Button onClick={handleMockSave} disabled={saving} className="w-full">Save Alert Preferences</Button>
             </CardContent>
           </Card>
         </TabsContent>
