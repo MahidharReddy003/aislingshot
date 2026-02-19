@@ -22,7 +22,8 @@ import {
   Target,
   ArrowRight,
   Scale,
-  ListRestart
+  ListRestart,
+  Loader2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -34,7 +35,7 @@ export default function RecommenderPage() {
   // Input states
   const [persona, setPersona] = useState("Student");
   const [budget, setBudget] = useState(150);
-  const [pref, setPref] = useState("Healthy, Vegetarian");
+  const [selectedPrefs, setSelectedPrefs] = useState<string[]>(["Healthy"]);
   const [accessibility, setAccessibility] = useState(false);
 
   const handleRecommend = async () => {
@@ -42,7 +43,7 @@ export default function RecommenderPage() {
     try {
       const output = await generateExplanation({
         userPersona: persona,
-        preferences: pref,
+        preferences: selectedPrefs.join(", "),
         budget: budget,
         time: "Lunchtime",
         accessibility: accessibility ? "Wheelchair Accessible" : "None",
@@ -65,6 +66,23 @@ export default function RecommenderPage() {
       title: "Feedback Recorded",
       description: `We've noted that this was ${type.toLowerCase()}. Logic updated.`,
     });
+  };
+
+  const togglePref = (p: string) => {
+    setSelectedPrefs(prev => 
+      prev.includes(p) ? prev.filter(i => i !== p) : [...prev, p]
+    );
+  };
+
+  const handleSwapChoice = (alt: any) => {
+    if (!result) return;
+    setResult({
+      ...result,
+      recommendation: alt.name,
+      costEstimate: alt.cost,
+      explanation: `Swapped to alternative: ${alt.reason}`
+    });
+    toast({ title: "Choice Swapped", description: `You are now viewing ${alt.name}` });
   };
 
   return (
@@ -121,14 +139,11 @@ export default function RecommenderPage() {
                       key={p} 
                       className={cn(
                         "flex items-center space-x-2 border-2 rounded-xl p-3 cursor-pointer transition-colors",
-                        pref.includes(p) ? "bg-primary/5 border-primary" : "hover:bg-muted"
+                        selectedPrefs.includes(p) ? "bg-primary/5 border-primary" : "hover:bg-muted"
                       )}
-                      onClick={() => {
-                        if (pref.includes(p)) setPref(prev => prev.replace(p, "").replace(", ", ""));
-                        else setPref(prev => prev + (prev ? ", " : "") + p);
-                      }}
+                      onClick={() => togglePref(p)}
                     >
-                      <div className={cn("h-3 w-3 rounded-full border-2", pref.includes(p) ? "bg-primary border-primary" : "border-muted-foreground")} />
+                      <div className={cn("h-3 w-3 rounded-full border-2", selectedPrefs.includes(p) ? "bg-primary border-primary" : "border-muted-foreground")} />
                       <span className="text-xs font-bold">{p}</span>
                     </div>
                   ))}
@@ -151,7 +166,7 @@ export default function RecommenderPage() {
                 onClick={handleRecommend}
                 disabled={loading}
               >
-                {loading ? <RefreshCcw className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                 Generate Suggestion
               </Button>
             </CardContent>
@@ -178,7 +193,7 @@ export default function RecommenderPage() {
                     </div>
                     <div className="flex flex-col items-end">
                       <span className="text-[10px] font-bold uppercase opacity-70">Diversity Score</span>
-                      <span className="text-2xl font-black">{result.diversityScore}%</span>
+                      <span className="text-2xl font-black">{result.diversityScore || 85}%</span>
                     </div>
                   </div>
                   <CardContent className="p-8 pt-10">
@@ -248,7 +263,7 @@ export default function RecommenderPage() {
                       <div className="w-full bg-muted h-3 rounded-full overflow-hidden">
                         <div className="bg-blue-500 h-full w-[85%]"></div>
                       </div>
-                      <p className="text-[10px] text-muted-foreground italic">"Strongly aligns with your '{pref}' focus."</p>
+                      <p className="text-[10px] text-muted-foreground italic">"Strongly aligns with your '{selectedPrefs.join(", ")}' focus."</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -258,7 +273,7 @@ export default function RecommenderPage() {
               <TabsContent value="alternatives" className="space-y-4">
                 {[
                   { name: "Option Alpha", cost: result.costEstimate + 20, reason: "Higher quality, but closer to budget cap." },
-                  { name: "Option Beta", cost: result.costEstimate - 40, reason: "Extreme budget choice, slightly further away." },
+                  { name: "Option Beta", cost: Math.max(0, result.costEstimate - 40), reason: "Extreme budget choice, slightly further away." },
                   { name: "Option Gamma", cost: result.costEstimate, reason: "Similar value, different atmosphere." }
                 ].map((alt, i) => (
                   <Card key={i} className="border-2 hover:border-primary/50 transition-colors cursor-pointer group">
@@ -269,7 +284,14 @@ export default function RecommenderPage() {
                       </div>
                       <div className="flex flex-col items-end gap-2">
                         <span className="text-sm font-bold text-primary">₹{alt.cost}</span>
-                        <Button variant="ghost" size="sm" className="h-8 rounded-lg text-[10px] font-bold uppercase tracking-widest">Swap Choice <ArrowRight className="ml-1 h-3 w-3" /></Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-8 rounded-lg text-[10px] font-bold uppercase tracking-widest"
+                          onClick={() => handleSwapChoice(alt)}
+                        >
+                          Swap Choice <ArrowRight className="ml-1 h-3 w-3" />
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>

@@ -1,10 +1,9 @@
-
 'use client';
 
 import { useState } from 'react';
 import { planDay } from '@/ai/flows/plan-day-flow';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { doc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +28,7 @@ export default function PlanMyDayPage() {
   const [budget, setBudget] = useState(200);
   const [time, setTime] = useState(120);
   const [loading, setLoading] = useState(false);
+  const [savingPlan, setSavingPlan] = useState(false);
   const [result, setResult] = useState<any>(null);
 
   const handlePlan = async () => {
@@ -52,6 +52,24 @@ export default function PlanMyDayPage() {
     }
   };
 
+  const handleSavePlan = async () => {
+    if (!user || !db || !result) return;
+    setSavingPlan(true);
+    try {
+      const plansRef = collection(db, 'users', user.uid, 'plans');
+      await addDoc(plansRef, {
+        planData: JSON.stringify(result),
+        userId: user.uid,
+        createdAt: serverTimestamp()
+      });
+      toast({ title: 'Plan Saved', description: 'This day plan has been added to your library.' });
+    } catch (error: any) {
+      toast({ title: 'Save Failed', description: error.message, variant: 'destructive' });
+    } finally {
+      setSavingPlan(false);
+    }
+  };
+
   return (
     <div className="container max-w-5xl mx-auto py-12 px-4">
       <div className="mb-10 text-center">
@@ -72,20 +90,20 @@ export default function PlanMyDayPage() {
                   <Label htmlFor="budget">Budget (₹)</Label>
                   <span className="font-bold">₹{budget}</span>
                 </div>
-                <Input id="budget" type="number" value={budget} onChange={e => setBudget(parseInt(e.target.value))} />
+                <Input id="budget" type="number" value={budget} onChange={e => setBudget(parseInt(e.target.value) || 0)} />
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <Label htmlFor="time">Available Time (min)</Label>
                   <span className="font-bold">{time} min</span>
                 </div>
-                <Input id="time" type="number" value={time} onChange={e => setTime(parseInt(e.target.value))} />
+                <Input id="time" type="number" value={time} onChange={e => setTime(parseInt(e.target.value) || 0)} />
               </div>
               <Button onClick={handlePlan} className="w-full h-12 gap-2" disabled={loading || !profile}>
                 {loading ? <Loader2 className="animate-spin h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
                 Generate Plan
               </Button>
-              {!profile && <p className="text-[10px] text-red-500 text-center italic">Please complete profile setup first.</p>}
+              {!profile && !isLoading && <p className="text-[10px] text-red-500 text-center italic">Please complete profile setup first.</p>}
             </CardContent>
           </Card>
         </div>
@@ -130,8 +148,14 @@ export default function PlanMyDayPage() {
                   </Card>
                 ))}
               </div>
-              <Button variant="outline" className="w-full gap-2 border-2">
-                <CheckCircle className="h-4 w-4" /> Save This Plan
+              <Button 
+                variant="outline" 
+                className="w-full gap-2 border-2 h-12 font-bold" 
+                onClick={handleSavePlan}
+                disabled={savingPlan}
+              >
+                {savingPlan ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+                Save This Plan
               </Button>
             </div>
           ) : (

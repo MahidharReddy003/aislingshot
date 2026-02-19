@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
@@ -48,8 +48,16 @@ export default function SettingsPage() {
   const { data: profile, isLoading } = useDoc(userDocRef);
 
   const [saving, setSaving] = useState(false);
-  const [budgetVal, setBudgetVal] = useState(profile?.budgetPreference || 500);
+  const [localInterests, setLocalInterests] = useState<string[]>([]);
+  const [budgetVal, setBudgetVal] = useState(500);
   const [discoveryVal, setDiscoveryVal] = useState(50);
+
+  useEffect(() => {
+    if (profile) {
+      setLocalInterests(profile.interests || []);
+      setBudgetVal(profile.budgetPreference || 500);
+    }
+  }, [profile]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,9 +70,25 @@ export default function SettingsPage() {
         location: formData.get('location'),
         updatedAt: serverTimestamp()
       });
-      toast({ title: 'Settings Updated', description: 'Your profile changes have been saved.' });
+      toast({ title: 'Identity Updated', description: 'Your profile changes have been saved.' });
     } catch (error: any) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveSettings = async (updates: any, sectionName: string) => {
+    if (!userDocRef) return;
+    setSaving(true);
+    try {
+      await updateDoc(userDocRef, {
+        ...updates,
+        updatedAt: serverTimestamp()
+      });
+      toast({ title: 'Settings Saved', description: `${sectionName} preferences updated successfully.` });
+    } catch (error: any) {
+      toast({ title: 'Save Failed', description: error.message, variant: 'destructive' });
     } finally {
       setSaving(false);
     }
@@ -76,15 +100,7 @@ export default function SettingsPage() {
     router.replace('/login');
   };
 
-  const handleMockSave = (section: string) => {
-    setSaving(true);
-    setTimeout(() => {
-      setSaving(false);
-      toast({ title: 'Changes Saved', description: `${section} preferences have been updated successfully.` });
-    }, 800);
-  };
-
-  if (isLoading || !profile) return <div className="flex items-center justify-center h-screen"><Loader2 className="animate-spin text-primary" /></div>;
+  if (isLoading || !profile) return <div className="flex items-center justify-center h-screen"><Loader2 className="animate-spin text-primary h-8 w-8" /></div>;
 
   return (
     <div className="container max-w-5xl mx-auto py-12 px-4">
@@ -154,7 +170,14 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {INTERESTS.map(item => (
                     <div key={item} className="flex items-center space-x-3 p-4 border-2 rounded-2xl hover:bg-muted/20 transition-colors">
-                      <Checkbox id={`check-${item}`} defaultChecked={profile?.interests?.includes(item)} />
+                      <Checkbox 
+                        id={`check-${item}`} 
+                        checked={localInterests.includes(item)} 
+                        onCheckedChange={(checked) => {
+                          if (checked) setLocalInterests(prev => [...prev, item]);
+                          else setLocalInterests(prev => prev.filter(i => i !== item));
+                        }}
+                      />
                       <label htmlFor={`check-${item}`} className="text-sm font-bold leading-none cursor-pointer">{item}</label>
                     </div>
                   ))}
@@ -168,7 +191,7 @@ export default function SettingsPage() {
                       key={style}
                       variant={profile?.aiBehavior === style.toLowerCase() ? 'default' : 'outline'} 
                       className="rounded-2xl px-8 h-12 border-2 font-bold"
-                      onClick={() => handleMockSave(`AI Tone: ${style}`)}
+                      onClick={() => handleSaveSettings({ aiBehavior: style.toLowerCase() }, 'AI Tone')}
                     >
                       {style}
                     </Button>
@@ -180,7 +203,14 @@ export default function SettingsPage() {
               </div>
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6">
-              <Button onClick={() => handleMockSave('Preferences')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Apply Interest Matrix</Button>
+              <Button 
+                onClick={() => handleSaveSettings({ interests: localInterests }, 'Preferences')} 
+                disabled={saving} 
+                className="w-full h-12 rounded-xl font-bold"
+              >
+                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Apply Interest Matrix
+              </Button>
             </CardFooter>
           </Card>
         </TabsContent>
@@ -224,7 +254,14 @@ export default function SettingsPage() {
               </div>
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6">
-              <Button onClick={() => handleMockSave('Budget')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Lock Budget Rules</Button>
+              <Button 
+                onClick={() => handleSaveSettings({ budgetPreference: budgetVal }, 'Budget')} 
+                disabled={saving} 
+                className="w-full h-12 rounded-xl font-bold"
+              >
+                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Lock Budget Rules
+              </Button>
             </CardFooter>
           </Card>
         </TabsContent>
@@ -265,7 +302,7 @@ export default function SettingsPage() {
               </div>
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6">
-              <Button onClick={() => handleMockSave('Discovery')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Refresh Exploration Logic</Button>
+              <Button onClick={() => handleSaveSettings({ explorationLevel: discoveryVal }, 'Discovery')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Refresh Exploration Logic</Button>
             </CardFooter>
           </Card>
         </TabsContent>
@@ -299,7 +336,7 @@ export default function SettingsPage() {
               ))}
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6">
-              <Button onClick={() => handleMockSave('Accessibility')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Save Inclusive Profile</Button>
+              <Button onClick={() => handleSaveSettings({}, 'Accessibility')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Save Inclusive Profile</Button>
             </CardFooter>
           </Card>
         </TabsContent>
@@ -367,7 +404,7 @@ export default function SettingsPage() {
               ))}
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6">
-              <Button onClick={() => handleMockSave('Notifications')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Update Alert Engine</Button>
+              <Button onClick={() => handleSaveSettings({}, 'Notifications')} disabled={saving} className="w-full h-12 rounded-xl font-bold">Update Alert Engine</Button>
             </CardFooter>
           </Card>
         </TabsContent>
