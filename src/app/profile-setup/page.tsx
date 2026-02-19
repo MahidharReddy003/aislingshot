@@ -85,10 +85,6 @@ export default function ProfileSetupPage() {
     setFormData(prev => ({ ...prev, name: val, username: val }));
   };
 
-  const handleUsernameSync = (val: string) => {
-    setFormData(prev => ({ ...prev, username: val, name: val }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !db) return;
@@ -138,15 +134,10 @@ export default function ProfileSetupPage() {
         </CardHeader>
         <CardContent className="pt-10">
           <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="font-bold">Full Name</Label>
-                <Input id="name" value={formData.name} onChange={e => handleNameSync(e.target.value)} required className="h-12 border-2" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="username" className="font-bold">Username</Label>
-                <Input id="username" value={formData.username} onChange={e => handleUsernameSync(e.target.value)} required className="h-12 border-2" />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="name" className="font-bold">Full Name</Label>
+              <Input id="name" value={formData.name} onChange={e => handleNameSync(e.target.value)} required placeholder="Enter your full name" className="h-12 border-2" />
+              <p className="text-[10px] text-muted-foreground italic">This name will be used across your entire profile and AI assistant.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-6">

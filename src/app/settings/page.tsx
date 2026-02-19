@@ -57,7 +57,6 @@ export default function SettingsPage() {
 
   // Identity State
   const [name, setName] = useState('');
-  const [username, setUsername] = useState('');
   const [location, setLocation] = useState('');
 
   // Other settings state
@@ -72,7 +71,6 @@ export default function SettingsPage() {
   useEffect(() => {
     if (profile) {
       setName(profile.name || '');
-      setUsername(profile.username || profile.name || '');
       setLocation(profile.location || '');
       setLocalInterests(profile.interests || []);
       setLocalHealth(profile.healthConditions || []);
@@ -83,12 +81,6 @@ export default function SettingsPage() {
 
   const handleNameChange = (val: string) => {
     setName(val);
-    setUsername(val); // Sync username with name for consistency
-  };
-
-  const handleUsernameChange = (val: string) => {
-    setUsername(val);
-    setName(val); // Sync name with username for consistency
   };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -97,7 +89,7 @@ export default function SettingsPage() {
     
     const updates = {
       name,
-      username,
+      username: name, // Sync username with name internally
       location,
       updatedAt: serverTimestamp()
     };
@@ -181,11 +173,7 @@ export default function SettingsPage() {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="name" className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Full Name</Label>
-                    <Input id="name" value={name} onChange={e => handleNameChange(e.target.value)} placeholder="Enter your name" className="h-12 border-2" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="username" className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Username (Synced)</Label>
-                    <Input id="username" value={username} onChange={e => handleUsernameChange(e.target.value)} placeholder="Enter username" className="h-12 border-2" />
+                    <Input id="name" value={name} onChange={e => handleNameChange(e.target.value)} placeholder="Enter your full name" className="h-12 border-2" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="location" className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Search Location</Label>
