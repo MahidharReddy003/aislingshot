@@ -1,11 +1,76 @@
 
 {
   "food": [
-    { "id": "1", "name": "Spicy Canteen", "price": 150, "location": "Campus North", "rating": 4.2, "category": "Indian" },
-    { "id": "2", "name": "Healthy Greens", "price": 250, "location": "City Center", "rating": 4.5, "category": "Salads" },
-    { "id": "3", "name": "Burger Hub", "price": 180, "location": "Market Square", "rating": 3.9, "category": "Fast Food" },
-    { "id": "4", "name": "Pasta Palace", "price": 300, "location": "East Wing", "rating": 4.6, "category": "Italian" },
-    { "id": "5", "name": "Momos Corner", "price": 80, "location": "Near Metro", "rating": 4.8, "category": "Street Food" }
+    { 
+      "id": "1", 
+      "name": "Spicy Canteen", 
+      "price": 150, 
+      "location": "Campus North", 
+      "rating": 4.2, 
+      "category": "Indian",
+      "menu": [
+        { "item": "Paneer Butter Masala", "price": 140 },
+        { "item": "Dal Tadka", "price": 100 },
+        { "item": "Tandoori Roti (2)", "price": 30 },
+        { "item": "Vegetable Biryani", "price": 150 }
+      ]
+    },
+    { 
+      "id": "2", 
+      "name": "Healthy Greens", 
+      "price": 250, 
+      "location": "City Center", 
+      "rating": 4.5, 
+      "category": "Salads",
+      "menu": [
+        { "item": "Quinoa Avocado Bowl", "price": 220 },
+        { "item": "Greek Salad", "price": 180 },
+        { "item": "Fruit Smoothie", "price": 120 },
+        { "item": "Grilled Tofu Salad", "price": 200 }
+      ]
+    },
+    { 
+      "id": "3", 
+      "name": "Burger Hub", 
+      "price": 180, 
+      "location": "Market Square", 
+      "rating": 3.9, 
+      "category": "Fast Food",
+      "menu": [
+        { "item": "Classic Veg Burger", "price": 120 },
+        { "item": "Cheese Fries", "price": 90 },
+        { "item": "Peri Peri Wings", "price": 160 },
+        { "item": "Cold Coffee", "price": 80 }
+      ]
+    },
+    { 
+      "id": "4", 
+      "name": "Pasta Palace", 
+      "price": 300, 
+      "location": "East Wing", 
+      "rating": 4.6, 
+      "category": "Italian",
+      "menu": [
+        { "item": "Penne Alfredo", "price": 280 },
+        { "item": "Spaghetti Arrabbiata", "price": 260 },
+        { "item": "Garlic Bread with Cheese", "price": 120 },
+        { "item": "Tiramisu", "price": 150 }
+      ]
+    },
+    { 
+      "id": "5", 
+      "name": "Momos Corner", 
+      "price": 80, 
+      "location": "Near Metro", 
+      "rating": 4.8, 
+      "category": "Street Food",
+      "menu": [
+        { "item": "Steamed Veg Momos (8pcs)", "price": 80 },
+        { "item": "Fried Paneer Momos (8pcs)", "price": 120 },
+        { "item": "Thukpa", "price": 100 },
+        { "item": "Iced Lemon Tea", "price": 50 }
+      ]
+    }
   ],
   "events": [
     { "id": "1", "name": "AI Tech Workshop", "cost": 0, "time": "14:00", "distance": "1.2 km", "category": "Education" },
