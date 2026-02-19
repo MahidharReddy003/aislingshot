@@ -48,6 +48,7 @@ export default function LoginPage() {
       
       router.push('/dashboard');
     } catch (error: any) {
+      console.error("Login error:", error);
       toast({
         title: 'Login Failed',
         description: error.message || 'Invalid email or password.',
@@ -65,9 +66,10 @@ export default function LoginPage() {
       await signInWithPopup(auth, provider);
       router.push('/dashboard');
     } catch (error: any) {
+      console.error("Google login error:", error);
       if (error.code === 'auth/account-exists-with-different-credential') {
         const credential = GoogleAuthProvider.credentialFromError(error);
-        const emailUsed = error.customData.email;
+        const emailUsed = error.customData?.email || "";
         
         setPendingCredential(credential);
         setLinkingEmail(emailUsed);
@@ -77,6 +79,12 @@ export default function LoginPage() {
         toast({
           title: 'Existing Account Found',
           description: 'Please enter your password to link your Google account.',
+        });
+      } else if (error.code === 'auth/unauthorized-domain') {
+        toast({
+          title: 'Unauthorized Domain',
+          description: 'This domain is not authorized in Firebase Console. Please add your Vercel URL to Authorized Domains.',
+          variant: 'destructive',
         });
       } else {
         toast({
