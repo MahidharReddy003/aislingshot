@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { doc, serverTimestamp } from 'firebase/firestore';
+import { updateProfile, signOut } from 'firebase/auth';
 import { useUser, useFirestore, useDoc, useMemoFirebase, updateDocumentNonBlocking, useAuth } from '@/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,7 +37,6 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { signOut } from 'firebase/auth';
 
 const INTERESTS = ['Food', 'Events', 'Shopping', 'Travel', 'Tech', 'Music', 'Outdoors'];
 const HEALTH_TAGS = ['Diabetes', 'Vegan', 'Gluten-Free', 'Knee Pain', 'Asthma', 'Peanut Allergy'];
@@ -55,6 +55,12 @@ export default function SettingsPage() {
 
   const { data: profile, isLoading } = useDoc(userDocRef);
 
+  // Identity State
+  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
+  const [location, setLocation] = useState('');
+
+  // Other settings state
   const [localInterests, setLocalInterests] = useState<string[]>([]);
   const [localHealth, setLocalHealth] = useState<string[]>([]);
   const [budgetVal, setBudgetVal] = useState(500);
@@ -65,6 +71,9 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (profile) {
+      setName(profile.name || '');
+      setUsername(profile.username || profile.name || '');
+      setLocation(profile.location || '');
       setLocalInterests(profile.interests || []);
       setLocalHealth(profile.healthConditions || []);
       setBudgetVal(profile.budgetPreference || 500);
@@ -72,19 +81,38 @@ export default function SettingsPage() {
     }
   }, [profile]);
 
-  const handleUpdateProfile = (e: React.FormEvent) => {
+  const handleNameChange = (val: string) => {
+    setName(val);
+    setUsername(val); // Sync username with name
+  };
+
+  const handleUsernameChange = (val: string) => {
+    setUsername(val);
+    setName(val); // Sync name with username
+  };
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userDocRef) return;
+    if (!userDocRef || !user) return;
     
-    const formData = new FormData(e.currentTarget as HTMLFormElement);
     const updates = {
-      name: formData.get('name'),
-      location: formData.get('location'),
+      name,
+      username,
+      location,
       updatedAt: serverTimestamp()
     };
 
+    // Update Firestore
     updateDocumentNonBlocking(userDocRef, updates);
-    toast({ title: 'Identity Updated', description: 'Your profile changes have been applied.' });
+    
+    // Update Firebase Auth Display Name
+    try {
+      await updateProfile(user, { displayName: name });
+    } catch (err) {
+      console.error("Auth profile update failed", err);
+    }
+
+    toast({ title: 'Identity Updated', description: 'Your profile and display name have been synchronized.' });
   };
 
   const handleSaveSettings = (updates: any, sectionName: string) => {
@@ -153,16 +181,20 @@ export default function SettingsPage() {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="name" className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Full Name</Label>
-                    <Input id="name" name="name" defaultValue={profile?.name} placeholder="Enter your name" className="h-12 border-2" />
+                    <Input id="name" value={name} onChange={e => handleNameChange(e.target.value)} placeholder="Enter your name" className="h-12 border-2" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="username" className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Username (Synced)</Label>
+                    <Input id="username" value={username} onChange={e => handleUsernameChange(e.target.value)} placeholder="Enter username" className="h-12 border-2" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="location" className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Search Location</Label>
-                    <Input id="location" name="location" defaultValue={profile?.location} placeholder="e.g., Campus North" className="h-12 border-2" />
+                    <Input id="location" value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g., Campus North" className="h-12 border-2" />
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Email (Authenticated)</Label>
-                  <Input value={user?.email || ''} disabled className="bg-muted h-12 border-2 opacity-60 cursor-not-allowed" />
+                  <div className="space-y-2">
+                    <Label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Email (Authenticated)</Label>
+                    <Input value={user?.email || ''} disabled className="bg-muted h-12 border-2 opacity-60 cursor-not-allowed" />
+                  </div>
                 </div>
                 <div className="pt-6 border-t flex justify-between items-center">
                   <Button type="button" variant="ghost" onClick={handleLogout} className="text-destructive hover:bg-destructive/5 gap-2 px-6 h-12">

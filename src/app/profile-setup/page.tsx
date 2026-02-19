@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { updateProfile } from 'firebase/auth';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,7 @@ export default function ProfileSetupPage() {
 
   const [formData, setFormData] = useState({
     name: '',
+    username: '',
     age: 20,
     location: '',
     budgetPreference: 500,
@@ -55,6 +57,7 @@ export default function ProfileSetupPage() {
     if (existingProfile) {
       setFormData({
         name: existingProfile.name || '',
+        username: existingProfile.username || existingProfile.name || '',
         age: existingProfile.age || 20,
         location: existingProfile.location || '',
         budgetPreference: existingProfile.budgetPreference || 500,
@@ -70,9 +73,21 @@ export default function ProfileSetupPage() {
         router.replace('/dashboard');
       }
     } else {
-      setFormData(prev => ({ ...prev, name: user.displayName || '' }));
+      setFormData(prev => ({ 
+        ...prev, 
+        name: user.displayName || '',
+        username: user.displayName || ''
+      }));
     }
   }, [user, isUserLoading, existingProfile, isProfileLoading, router]);
+
+  const handleNameSync = (val: string) => {
+    setFormData(prev => ({ ...prev, name: val, username: val }));
+  };
+
+  const handleUsernameSync = (val: string) => {
+    setFormData(prev => ({ ...prev, username: val, name: val }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,6 +95,9 @@ export default function ProfileSetupPage() {
     setLoading(true);
 
     try {
+      // Sync auth profile name
+      await updateProfile(user, { displayName: formData.name });
+
       await setDoc(doc(db, 'users', user.uid), {
         ...formData,
         id: user.uid,
@@ -123,17 +141,23 @@ export default function ProfileSetupPage() {
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="name" className="font-bold">Full Name</Label>
-                <Input id="name" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required className="h-12 border-2" />
+                <Input id="name" value={formData.name} onChange={e => handleNameSync(e.target.value)} required className="h-12 border-2" />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="username" className="font-bold">Username</Label>
+                <Input id="username" value={formData.username} onChange={e => handleUsernameSync(e.target.value)} required className="h-12 border-2" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="age" className="font-bold">Age</Label>
                 <Input id="age" type="number" value={formData.age} onChange={e => setFormData({ ...formData, age: parseInt(e.target.value) })} required className="h-12 border-2" />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="location" className="font-bold">Default Search Area (e.g., Campus North)</Label>
-              <Input id="location" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} required className="h-12 border-2" />
+              <div className="space-y-2">
+                <Label htmlFor="location" className="font-bold">Search Area</Label>
+                <Input id="location" value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} required className="h-12 border-2" />
+              </div>
             </div>
 
             {/* HEALTH SECTION */}
@@ -156,7 +180,6 @@ export default function ProfileSetupPage() {
                   </div>
                 ))}
               </div>
-              <p className="text-[10px] text-muted-foreground italic">AI will automatically filter recommendations based on these conditions.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-6">
@@ -177,29 +200,10 @@ export default function ProfileSetupPage() {
                 <Select value={formData.aiBehavior} onValueChange={v => setFormData({ ...formData, aiBehavior: v })}>
                   <SelectTrigger className="h-12 border-2"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="friendly">Friendly (Contextual)</SelectItem>
-                    <SelectItem value="formal">Formal (Direct)</SelectItem>
+                    <SelectItem value="friendly">Friendly</SelectItem>
+                    <SelectItem value="formal">Formal</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <Label className="font-bold">Areas of Interest</Label>
-              <div className="grid grid-cols-3 gap-3 border-2 p-4 rounded-2xl bg-muted/10">
-                {INTERESTS.map(interest => (
-                  <div key={interest} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={interest}
-                      checked={formData.interests.includes(interest)}
-                      onCheckedChange={(checked) => {
-                        if (checked) setFormData({ ...formData, interests: [...formData.interests, interest] });
-                        else setFormData({ ...formData, interests: formData.interests.filter(i => i !== interest) });
-                      }}
-                    />
-                    <label htmlFor={interest} className="text-sm font-semibold leading-none cursor-pointer">{interest}</label>
-                  </div>
-                ))}
               </div>
             </div>
 
