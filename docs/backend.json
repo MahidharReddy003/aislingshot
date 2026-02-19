@@ -1,0 +1,599 @@
+{
+  "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Represents a user's profile information within the application. This entity links to Firebase Authentication for identity but does not store credentials directly.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserProfile entity."
+        },
+        "firebaseAuthUid": {
+          "type": "string",
+          "description": "Unique identifier provided by Firebase Authentication for the user. This establishes the link to the external authentication system. (Relationship: Firebase Auth 1:1 UserProfile)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The user's display name."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address, used for communication and identification. Must be unique.",
+          "format": "email"
+        },
+        "persona": {
+          "type": "string",
+          "description": "The user's selected persona, influencing the types of recommendations and content presented (e.g., 'Student', 'Traveler', 'Creator', 'General user')."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user profile was first created in the system.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating the last time the user profile's information was updated.",
+          "format": "date-time"
+        },
+        "lastLoginAt": {
+          "type": "string",
+          "description": "Timestamp of the user's last successful login to the application.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "firebaseAuthUid",
+        "name",
+        "email",
+        "persona",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "UserPreference": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserPreference",
+      "type": "object",
+      "description": "Stores detailed preferences and settings for a specific user, influencing recommendation algorithms and application behavior.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserPreference entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile this preference set belongs to. (Relationship: UserProfile 1:1 UserPreference)"
+        },
+        "foodInterests": {
+          "type": "array",
+          "description": "A list of food-related interests or dietary preferences chosen by the user (e.g., 'Vegetarian', 'Vegan', 'Italian', 'Spicy').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "travelInterests": {
+          "type": "array",
+          "description": "A list of travel-related interests specified by the user (e.g., 'Adventure', 'Relaxation', 'Cultural', 'City Breaks').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "contentInterests": {
+          "type": "array",
+          "description": "A list of content or media-related interests selected by the user (e.g., 'Movies', 'Books', 'Tech News', 'Music').",
+          "items": {
+            "type": "string"
+          }
+        },
+        "discoveryLevel": {
+          "type": "number",
+          "description": "A numerical value (e.g., 0-100) indicating the user's preference for familiar vs. discovery-oriented (exploratory) recommendations. Higher values mean more discovery."
+        },
+        "forceVarietyDaily": {
+          "type": "boolean",
+          "description": "A boolean flag indicating if the system should explicitly ensure a diverse range of recommendations, potentially by 'forcing' variety at least once per day."
+        },
+        "accessibilityLowWalking": {
+          "type": "boolean",
+          "description": "Accessibility preference: true if the user prefers recommendations for locations or activities that require minimal walking."
+        },
+        "accessibilityTimeSensitive": {
+          "type": "boolean",
+          "description": "Accessibility preference: true if the user's schedule is time-sensitive and requires recommendations with strict timeframes or minimal travel."
+        },
+        "simplifiedUiMode": {
+          "type": "boolean",
+          "description": "Display preference: true if the user prefers a simplified user interface with fewer distractions."
+        },
+        "receiveBudgetAlerts": {
+          "type": "boolean",
+          "description": "Notification preference: true if the user wishes to receive alerts related to their budget usage or spending."
+        },
+        "receiveDiscoverySuggestions": {
+          "type": "boolean",
+          "description": "Notification preference: true if the user wishes to receive proactive suggestions for new discoveries based on their preferences."
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating the last time these user preferences were updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "foodInterests",
+        "travelInterests",
+        "contentInterests",
+        "discoveryLevel",
+        "forceVarietyDaily",
+        "accessibilityLowWalking",
+        "accessibilityTimeSensitive",
+        "simplifiedUiMode",
+        "receiveBudgetAlerts",
+        "receiveDiscoverySuggestions",
+        "updatedAt"
+      ]
+    },
+    "BudgetRule": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "BudgetRule",
+      "type": "object",
+      "description": "Defines budget constraints and rules set by a user, which are considered when generating recommendations.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the BudgetRule entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile this budget rule belongs to. (Relationship: UserProfile 1:N BudgetRule)"
+        },
+        "budgetType": {
+          "type": "string",
+          "description": "The periodicity of the budget (e.g., 'daily', 'weekly', 'monthly')."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The maximum budget amount for the specified period."
+        },
+        "currency": {
+          "type": "string",
+          "description": "The ISO 4217 currency code for the budget amount (e.g., 'INR', 'USD', 'EUR')."
+        },
+        "isHardCap": {
+          "type": "boolean",
+          "description": "True if the budget is a strict, non-negotiable hard cap; false if it's a flexible soft guideline."
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating the last time this budget rule was updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "budgetType",
+        "amount",
+        "currency",
+        "isHardCap",
+        "updatedAt"
+      ]
+    },
+    "Recommendation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Recommendation",
+      "type": "object",
+      "description": "Represents a single AI-generated recommendation provided to a user, including its details, explanation, and metadata.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Recommendation entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who received this recommendation. (Relationship: UserProfile 1:N Recommendation)"
+        },
+        "experienceType": {
+          "type": "string",
+          "description": "The specific type of AI experience or module that generated this recommendation (e.g., 'recommender', 'assistant', 'planner', 'creator-tools')."
+        },
+        "queryInput": {
+          "type": "string",
+          "description": "A JSON string representing the specific user input parameters, preferences, and constraints that were used to generate this recommendation. Useful for replaying context."
+        },
+        "outputTitle": {
+          "type": "string",
+          "description": "The main title or name of the recommended item or experience (e.g., 'Biryani House Restaurant', 'Weekend Trip to Goa')."
+        },
+        "outputDescription": {
+          "type": "string",
+          "description": "A brief, descriptive summary of the recommended item or experience."
+        },
+        "costEstimate": {
+          "type": "number",
+          "description": "An estimated cost associated with engaging with the recommendation (e.g., price of a meal, trip cost)."
+        },
+        "timeEstimate": {
+          "type": "number",
+          "description": "An estimated time commitment or duration required for the recommendation (e.g., in minutes, hours, or days)."
+        },
+        "diversityScore": {
+          "type": "number",
+          "description": "A numerical score (e.g., 0-100) indicating how novel or diverse this recommendation is compared to the user's recent choices, aiming to prevent filter bubbles."
+        },
+        "explanation": {
+          "type": "string",
+          "description": "A detailed, human-readable explanation generated by the AI reasoning core, clarifying why this specific recommendation was provided."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when this recommendation was generated and presented to the user.",
+          "format": "date-time"
+        },
+        "isSaved": {
+          "type": "boolean",
+          "description": "A boolean flag indicating whether the user has saved this specific recommendation."
+        },
+        "feedbackReceived": {
+          "type": "boolean",
+          "description": "A boolean flag indicating whether the user has provided any feedback for this recommendation."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "experienceType",
+        "queryInput",
+        "outputTitle",
+        "outputDescription",
+        "costEstimate",
+        "timeEstimate",
+        "diversityScore",
+        "explanation",
+        "createdAt",
+        "isSaved",
+        "feedbackReceived"
+      ]
+    },
+    "Feedback": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Feedback",
+      "type": "object",
+      "description": "Stores explicit user feedback provided for a specific recommendation, used to refine future AI outputs.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Feedback entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who provided this feedback. (Relationship: UserProfile 1:N Feedback)"
+        },
+        "recommendationId": {
+          "type": "string",
+          "description": "Reference to the Recommendation entity that this feedback pertains to. (Relationship: Recommendation 1:N Feedback)"
+        },
+        "type": {
+          "type": "string",
+          "description": "The category of feedback provided by the user (e.g., 'relevant', 'notUseful', 'tooExpensive', 'tooRepetitive')."
+        },
+        "comment": {
+          "type": "string",
+          "description": "An optional free-text comment or additional details provided by the user alongside the feedback type."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when this feedback was provided by the user.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "recommendationId",
+        "type",
+        "createdAt"
+      ]
+    },
+    "SavedItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "SavedItem",
+      "type": "object",
+      "description": "Represents an item or recommendation that a user has explicitly saved or favorited for later access.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the SavedItem entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who saved this item. (Relationship: UserProfile 1:N SavedItem)"
+        },
+        "recommendationId": {
+          "type": "string",
+          "description": "Optional reference to the original Recommendation entity if this saved item originated from a recommendation. (Relationship: Recommendation 1:N SavedItem)"
+        },
+        "itemType": {
+          "type": "string",
+          "description": "The general category or type of the saved item (e.g., 'restaurant', 'event', 'product', 'destination', 'media')."
+        },
+        "itemName": {
+          "type": "string",
+          "description": "The name or title of the saved item."
+        },
+        "itemDescription": {
+          "type": "string",
+          "description": "A brief descriptive summary of the saved item."
+        },
+        "itemDetails": {
+          "type": "string",
+          "description": "A JSON string containing additional, flexible details about the saved item that are not captured by other fields (e.g., '{\"location\": \"Paris\", \"rating\": 4.5, \"image_url\": \"...\"}')."
+        },
+        "collectionIds": {
+          "type": "array",
+          "description": "An array of IDs referencing the Collections to which this saved item belongs. (Relationship: Collection N:N SavedItem)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "savedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the item was saved by the user.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "itemType",
+        "itemName",
+        "itemDescription",
+        "savedAt"
+      ]
+    },
+    "Collection": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Collection",
+      "type": "object",
+      "description": "Allows users to group and organize their saved items into custom, user-defined collections.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Collection entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who owns this collection. (Relationship: UserProfile 1:N Collection)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The user-defined name of the collection (e.g., 'My Next Trip Ideas', 'Favorite Cafes in Bengaluru')."
+        },
+        "description": {
+          "type": "string",
+          "description": "An optional descriptive text for the collection."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when this collection was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating the last time this collection's properties were updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "name",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ActivityLog": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ActivityLog",
+      "type": "object",
+      "description": "Records significant user activities and system interactions for purposes like dashboard insights, user history, and auditing.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ActivityLog entry."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile associated with this activity. (Relationship: UserProfile 1:N ActivityLog)"
+        },
+        "activityType": {
+          "type": "string",
+          "description": "The category or type of activity recorded (e.g., 'recommendation_generated', 'feedback_given', 'item_saved', 'setting_changed', 'login', 'logout')."
+        },
+        "details": {
+          "type": "string",
+          "description": "A JSON string storing additional, event-specific details about the activity (e.g., '{\"recommendationId\": \"rec123\", \"feedbackType\": \"relevant\"}' or '{\"setting\": \"discoveryLevel\", \"oldValue\": 50, \"newValue\": 75}')."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the activity occurred.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "activityType",
+        "createdAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores a user's profile information. The document ID (`userId`) must match the Firebase Authentication UID (`firebaseAuthUid`). Securable by `request.auth.uid == resource.data.firebaseAuthUid`.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique Firebase Authentication UID of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/preferences/current",
+        "definition": {
+          "entityName": "UserPreference",
+          "schema": {
+            "$ref": "#/backend/entities/UserPreference"
+          },
+          "description": "Stores a user's detailed preferences and settings. The document ID is fixed as 'current'. Includes denormalized 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique Firebase Authentication UID of the user who owns these preferences."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/budgetRules/{budgetRuleId}",
+        "definition": {
+          "entityName": "BudgetRule",
+          "schema": {
+            "$ref": "#/backend/entities/BudgetRule"
+          },
+          "description": "Stores individual budget rules set by a user (e.g., daily, weekly). Includes denormalized 'userId' for authorization independence. Supports secure listing for all user's budget rules.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique Firebase Authentication UID of the user who owns this budget rule."
+            },
+            {
+              "name": "budgetRuleId",
+              "description": "The unique identifier for a specific budget rule."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/recommendations/{recommendationId}",
+        "definition": {
+          "entityName": "Recommendation",
+          "schema": {
+            "$ref": "#/backend/entities/Recommendation"
+          },
+          "description": "Stores AI-generated recommendations provided to a user. Includes denormalized 'userId' for authorization independence. Supports secure listing for user history.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique Firebase Authentication UID of the user who received this recommendation."
+            },
+            {
+              "name": "recommendationId",
+              "description": "The unique identifier for a specific recommendation."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/feedback/{feedbackId}",
+        "definition": {
+          "entityName": "Feedback",
+          "schema": {
+            "$ref": "#/backend/entities/Feedback"
+          },
+          "description": "Stores explicit user feedback for specific recommendations. Includes denormalized 'userId' and 'recommendationId' for authorization independence and context. Supports secure listing for user's past feedback.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique Firebase Authentication UID of the user who provided this feedback."
+            },
+            {
+              "name": "feedbackId",
+              "description": "The unique identifier for a specific feedback entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/savedItems/{savedItemId}",
+        "definition": {
+          "entityName": "SavedItem",
+          "schema": {
+            "$ref": "#/backend/entities/SavedItem"
+          },
+          "description": "Stores items explicitly saved or favorited by a user. Includes denormalized 'userId' for authorization independence. Supports secure listing for user's favorites.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique Firebase Authentication UID of the user who saved this item."
+            },
+            {
+              "name": "savedItemId",
+              "description": "The unique identifier for a specific saved item."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/collections/{collectionId}",
+        "definition": {
+          "entityName": "Collection",
+          "schema": {
+            "$ref": "#/backend/entities/Collection"
+          },
+          "description": "Allows users to group their saved items into custom collections. Includes denormalized 'userId' for authorization independence. Supports secure listing for user's collections.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique Firebase Authentication UID of the user who owns this collection."
+            },
+            {
+              "name": "collectionId",
+              "description": "The unique identifier for a specific collection."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/activityLogs/{activityLogId}",
+        "definition": {
+          "entityName": "ActivityLog",
+          "schema": {
+            "$ref": "#/backend/entities/ActivityLog"
+          },
+          "description": "Records significant user activities and system interactions. Includes denormalized 'userId' for authorization independence. Supports secure listing for user activity history.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique Firebase Authentication UID of the user associated with this activity."
+            },
+            {
+              "name": "activityLogId",
+              "description": "The unique identifier for a specific activity log entry."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The recommended Firestore data structure prioritizes Authorization Independence and Query-as-Authorization-Primitives (QAPs) by structuring all user-specific data under a `/users/{userId}` root collection. Each user's unique Firebase Authentication UID (`request.auth.uid`) directly maps to their document ID in the `users` collection. All subcollections for a given user, such as `preferences`, `budgetRules`, `recommendations`, `feedback`, `savedItems`, `collections`, and `activityLogs`, are nested directly under their respective user document (`/users/{userId}/...`). This hierarchical path-based ownership is highly secure and debuggable.\n\nAuthorization Independence is achieved by mandating that every document within these user-specific subcollections explicitly includes the `userId` field (which will match the parent `{userId}` wildcard in the path). This denormalization means that Firestore Security Rules can always verify `request.auth.uid == resource.data.userId` or `request.auth.uid == userId` (from the path wildcard) without needing to perform expensive and dependency-creating `get()` operations on parent documents. This enables atomic writes and simplifies rule logic significantly, as each document carries its own authorization context.\n\nQAPs are fully supported because all `list` operations for a user's data are constrained by the `userId` in the path. For example, a query to `/users/{request.auth.uid}/recommendations` will only return recommendations belonging to the authenticated user. The security rules for these paths can directly check `request.auth.uid == userId`, preventing unauthorized access to other users' data. This structural segregation ensures that all documents within a given user's subcollection share the same security posture (only accessible by that user), aligning with the 'Structural Segregation' mandate. There are no shared or public data entities in this design, keeping all core application data strictly private to the user."
+  }
+}
