@@ -1,17 +1,14 @@
-
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, PlayCircle, ShieldCheck, Speech, User } from "lucide-react";
+import { LayoutDashboard, ShieldCheck, User } from "lucide-react";
 import { useUser } from "@/firebase";
 
 const navItems = [
   { name: "Experiences", href: "/experiences/recommender", icon: LayoutDashboard },
   { name: "Transparency", href: "/transparency", icon: ShieldCheck },
-  { name: "Demo", href: "/demo", icon: PlayCircle },
-  { name: "Pitch", href: "/pitch", icon: Speech },
 ];
 
 export default function Navbar() {
@@ -24,7 +21,7 @@ export default function Navbar() {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center space-x-2">
-              <span className="text-xl font-bold tracking-tight text-primary">TransparencyAI</span>
+              <span className="text-xl font-bold tracking-tight text-primary">SmartLife</span>
             </Link>
             <nav className="hidden md:flex items-center space-x-6">
               {user && (
@@ -32,7 +29,7 @@ export default function Navbar() {
                   href="/dashboard"
                   className={cn(
                     "text-sm font-medium transition-colors hover:text-primary",
-                    pathname.startsWith("/dashboard") ? "text-primary" : "text-muted-foreground"
+                    pathname === "/dashboard" ? "text-primary" : "text-muted-foreground"
                   )}
                 >
                   Dashboard
@@ -75,7 +72,7 @@ export default function Navbar() {
                   href="/signup"
                   className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
                 >
-                  Try Demo
+                  Get Started
                 </Link>
               </div>
             )}

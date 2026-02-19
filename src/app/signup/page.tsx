@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -40,18 +39,18 @@ export default function SignupPage() {
       await setDoc(doc(db, 'users', user.uid), {
         id: user.uid,
         email: email,
-        firstName: name.split(' ')[0],
-        lastName: name.split(' ').slice(1).join(' '),
-        persona: persona,
+        name: name,
+        role: persona,
+        hasCompletedSetup: false,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
 
       toast({
         title: 'Account Created',
-        description: `Welcome aboard, ${name}!`,
+        description: `Welcome to SmartLife, ${name}!`,
       });
-      router.push('/experiences/recommender');
+      router.push('/profile-setup');
     } catch (error: any) {
       toast({
         title: 'Signup Failed',
@@ -72,9 +71,9 @@ export default function SignupPage() {
               <Sparkles className="h-8 w-8 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold">Join TransparencyAI</CardTitle>
+          <CardTitle className="text-2xl font-bold">Join SmartLife</CardTitle>
           <CardDescription>
-            Start your journey with explainable, personalized recommendations.
+            Start your journey with personalized, explainable life assistance.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -118,7 +117,7 @@ export default function SignupPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Student">Student</SelectItem>
-                  <SelectItem value="Traveler">Traveler</SelectItem>
+                  <SelectItem value="Professional">Professional</SelectItem>
                   <SelectItem value="Creator">Creator</SelectItem>
                   <SelectItem value="General">General User</SelectItem>
                 </SelectContent>

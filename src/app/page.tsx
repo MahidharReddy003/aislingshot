@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import { Sparkles, Shield, Clock, Smartphone, ArrowRight } from "lucide-react";
 
@@ -10,7 +9,7 @@ export default function Home() {
         <div className="container mx-auto text-center relative z-10">
           <div className="inline-flex items-center rounded-full border bg-primary/5 px-3 py-1 text-sm font-medium text-primary mb-6">
             <span className="flex h-2 w-2 rounded-full bg-primary mr-2" />
-            Hackathon Ready: AI Smart Life Assistant
+            SmartLife: Your AI Personalized Assistant
           </div>
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-primary mb-6">
             Your Life, <br />
@@ -27,10 +26,10 @@ export default function Home() {
               Get Started Free
             </Link>
             <Link
-              href="/login"
+              href="/experiences/recommender"
               className="w-full sm:w-auto inline-flex h-12 items-center justify-center rounded-xl border-2 bg-background px-10 text-base font-semibold shadow-sm hover:bg-accent"
             >
-              Login
+              Explore Experiences
             </Link>
           </div>
         </div>
@@ -68,7 +67,7 @@ export default function Home() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-5xl font-bold mb-8 italic">"Stop searching. Start living."</h2>
           <Link href="/signup" className="inline-flex h-14 items-center justify-center rounded-2xl bg-white text-primary px-12 text-lg font-bold shadow-xl hover:scale-105 transition-transform">
-            Try AI Assistant Now <ArrowRight className="ml-2 h-5 w-5" />
+            Try SmartLife Now <ArrowRight className="ml-2 h-5 w-5" />
           </Link>
         </div>
       </section>

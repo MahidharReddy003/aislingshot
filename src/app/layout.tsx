@@ -6,8 +6,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
-  title: 'TransparencyAI | Explainable Experience Hub',
-  description: 'AI That Recommends — And Explains Why. Transparent, Budget-Aware Personalization.',
+  title: 'SmartLife | AI Experience Hub',
+  description: 'SmartLife: AI That Recommends — And Explains Why. Personalized, Budget-Aware Life Assistant.',
 };
 
 export default function RootLayout({

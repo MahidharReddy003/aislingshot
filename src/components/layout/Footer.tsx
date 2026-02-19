@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 
 export default function Footer() {
@@ -8,10 +7,10 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2">
             <Link href="/" className="text-xl font-bold tracking-tight">
-              TransparencyAI
+              SmartLife
             </Link>
             <p className="mt-4 text-sm text-muted-foreground max-w-xs">
-              Explainable AI Experience Hub. Transparent, budget-aware personalization for the modern consumer.
+              AI Life Assistant. Personalized, budget-aware experiences for your daily life.
             </p>
           </div>
           <div>
@@ -23,17 +22,17 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h3 className="text-sm font-semibold mb-4">Project</h3>
+            <h3 className="text-sm font-semibold mb-4">Resources</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/transparency" className="hover:text-primary transition-colors">Transparency</Link></li>
-              <li><Link href="/pitch" className="hover:text-primary transition-colors">Pitch</Link></li>
-              <li><Link href="/demo" className="hover:text-primary transition-colors">Demo</Link></li>
+              <li><Link href="/transparency" className="hover:text-primary transition-colors">How it Works</Link></li>
+              <li><Link href="/signup" className="hover:text-primary transition-colors">Create Account</Link></li>
+              <li><Link href="/login" className="hover:text-primary transition-colors">Sign In</Link></li>
             </ul>
           </div>
         </div>
         <div className="mt-12 pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-muted-foreground">
-            © 2024 TransparencyAI. Created for "AI in Consumer Experiences" Hackathon.
+            © 2024 SmartLife. Your Personalized AI Assistant.
           </p>
           <div className="flex items-center space-x-4 text-xs font-medium text-muted-foreground">
             <span>Built with Genkit & Firebase</span>
