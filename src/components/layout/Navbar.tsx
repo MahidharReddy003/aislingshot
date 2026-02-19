@@ -21,7 +21,8 @@ import {
   Accessibility,
   Wallet,
   Settings2,
-  Info
+  Info,
+  Wrench
 } from "lucide-react";
 import { useUser } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -111,6 +112,16 @@ export default function Navbar() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   
+                  {/* EXPERIENCES QUICK NAV (Visible only in profile dropdown for clarity) */}
+                  <DropdownMenuGroup className="md:hidden">
+                    <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Core Modules</DropdownMenuLabel>
+                    <DropdownMenuItem asChild><Link href="/experiences/recommender"><Sparkles className="mr-2 h-4 w-4" /> Recommender</Link></DropdownMenuItem>
+                    <DropdownMenuItem asChild><Link href="/experiences/assistant"><Bell className="mr-2 h-4 w-4" /> Assistant</Link></DropdownMenuItem>
+                    <DropdownMenuItem asChild><Link href="/experiences/planner"><Info className="mr-2 h-4 w-4" /> Planner</Link></DropdownMenuItem>
+                    <DropdownMenuItem asChild><Link href="/experiences/creator"><Wrench className="mr-2 h-4 w-4" /> Creator Tools</Link></DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </DropdownMenuGroup>
+
                   {/* SAVED GROUP */}
                   <DropdownMenuSub>
                     <DropdownMenuSubTrigger>
