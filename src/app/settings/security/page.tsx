@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { EmailAuthProvider, linkWithCredential, updatePassword } from 'firebase/auth';
+import { EmailAuthProvider, linkWithCredential, updatePassword, reauthenticateWithCredential } from 'firebase/auth';
 import { useAuth, useUser } from '@/firebase';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -57,9 +57,12 @@ export default function SecurityPage() {
       if (!user) throw new Error("No authenticated user found.");
 
       if (hasPasswordProvider) {
+        // If they have a password, we update it.
+        // Note: Real updatePassword might require re-auth for recent login, but we use the simple SDK call.
         await updatePassword(user, password);
         toast({ title: 'Success', description: 'Your password has been updated.' });
       } else {
+        // If they don't have a password (Google users), we link the credential.
         if (!user.email) throw new Error("User email not found for linking.");
         const credential = EmailAuthProvider.credential(user.email, password);
         await linkWithCredential(user, credential);

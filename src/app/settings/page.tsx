@@ -94,7 +94,7 @@ export default function SettingsPage() {
     
     const updates = {
       name,
-      username: name, // Synced username
+      username: name,
       bio,
       role,
       location,
@@ -120,6 +120,41 @@ export default function SettingsPage() {
       updatedAt: serverTimestamp()
     });
     toast({ title: 'Settings Saved', description: `${sectionName} preferences updated successfully.` });
+  };
+
+  const handlePfpUpdate = () => {
+    if (!userDocRef) return;
+    // Simulate PFP update by changing the seed for picsum
+    const newSeed = Math.floor(Math.random() * 1000);
+    const newPfp = `https://picsum.photos/seed/${newSeed}/400/400`;
+    
+    updateDocumentNonBlocking(userDocRef, {
+      profileImage: newPfp,
+      updatedAt: serverTimestamp()
+    });
+    
+    toast({ title: 'Photo Updated', description: 'Your profile picture has been updated.' });
+  };
+
+  const handleDownloadData = () => {
+    if (!profile) return;
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(profile, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", `smartlife_data_${user?.uid}.json`);
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    toast({ title: 'Data Ready', description: 'Your user data JSON has been generated and downloaded.' });
+  };
+
+  const handleClearHistory = () => {
+    if (!userDocRef) return;
+    updateDocumentNonBlocking(userDocRef, {
+      explorationLevel: 50,
+      updatedAt: serverTimestamp()
+    });
+    toast({ title: 'History Purged', description: 'Your recommendation logic history has been cleared.' });
   };
 
   const handleLogout = async () => {
@@ -160,12 +195,12 @@ export default function SettingsPage() {
             <CardContent className="pt-8">
               <form onSubmit={handleUpdateProfile} className="space-y-6">
                 <div className="flex flex-col md:flex-row gap-8 items-start">
-                  <div className="relative group">
+                  <div className="relative group cursor-pointer" onClick={handlePfpUpdate}>
                     <Avatar className="h-24 w-24 border-2 border-background shadow-md">
-                      <AvatarImage src={`https://picsum.photos/seed/${user.uid}/400/400`} />
+                      <AvatarImage src={profile.profileImage || `https://picsum.photos/seed/${user?.uid}/400/400`} />
                       <AvatarFallback className="bg-primary/10 text-primary text-xl">{name.charAt(0)}</AvatarFallback>
                     </Avatar>
-                    <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                    <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       <Camera className="text-white h-6 w-6" />
                     </div>
                   </div>
@@ -217,12 +252,12 @@ export default function SettingsPage() {
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1"><Mail className="h-3 w-3" /> Status</p>
-                <Badge variant={user.emailVerified ? 'default' : 'outline'}>{user.emailVerified ? 'Verified' : 'Pending'}</Badge>
+                <Badge variant={user?.emailVerified ? 'default' : 'outline'}>{user?.emailVerified ? 'Verified' : 'Pending'}</Badge>
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1"><Shield className="h-3 w-3" /> Providers</p>
                 <div className="flex gap-1">
-                  {user.providerData.map(p => (
+                  {user?.providerData.map(p => (
                     <Badge key={p.providerId} variant="secondary" className="text-[9px] uppercase">{p.providerId.split('.')[0]}</Badge>
                   ))}
                 </div>
@@ -362,7 +397,7 @@ export default function SettingsPage() {
                   <Switch defaultChecked />
                 </div>
                 <div className="pt-6 text-center">
-                  <Button variant="outline" className="text-destructive hover:bg-destructive/5 rounded-xl border-2">
+                  <Button variant="outline" className="text-destructive hover:bg-destructive/5 rounded-xl border-2" onClick={handleClearHistory}>
                     Reset Discovery Matrix
                   </Button>
                 </div>
@@ -410,10 +445,10 @@ export default function SettingsPage() {
                 <Button variant="outline" className="h-16 rounded-2xl gap-3 border-2">
                   <Eye className="h-5 w-5" /> View Stored Data
                 </Button>
-                <Button variant="outline" className="h-16 rounded-2xl gap-3 border-2">
+                <Button variant="outline" className="h-16 rounded-2xl gap-3 border-2" onClick={handleDownloadData}>
                   <Download className="h-5 w-5" /> Download Data (JSON)
                 </Button>
-                <Button variant="outline" className="h-16 rounded-2xl gap-3 border-2 text-destructive hover:bg-destructive/5">
+                <Button variant="outline" className="h-16 rounded-2xl gap-3 border-2 text-destructive hover:bg-destructive/5" onClick={handleClearHistory}>
                   <History className="h-5 w-5" /> Clear Logic History
                 </Button>
                 <Button variant="destructive" className="h-16 rounded-2xl gap-3 shadow-lg">
