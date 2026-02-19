@@ -1,0 +1,29 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-abstract",
+      "description": "Clean abstract technological background",
+      "imageUrl": "https://picsum.photos/seed/tech-abstract/1200/800",
+      "imageHint": "abstract technology"
+    },
+    {
+      "id": "persona-student",
+      "description": "Student at a modern campus",
+      "imageUrl": "https://picsum.photos/seed/student-campus/400/400",
+      "imageHint": "student campus"
+    },
+    {
+      "id": "persona-traveler",
+      "description": "Traveler with a backpack in a city",
+      "imageUrl": "https://picsum.photos/seed/traveler-city/400/400",
+      "imageHint": "traveler city"
+    },
+    {
+      "id": "persona-creator",
+      "description": "Creator working at a desk with digital tools",
+      "imageUrl": "https://picsum.photos/seed/creator-workspace/400/400",
+      "imageHint": "creator workspace"
+    }
+  ]
+}
