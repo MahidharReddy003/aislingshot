@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Utensils, Star, MapPin, Sparkles, Loader2, Clock, Info, CheckCircle2, XCircle } from 'lucide-react';
+import { Utensils, Star, MapPin, Sparkles, Loader2, Clock, Info, CheckCircle2, XCircle, HelpCircle } from 'lucide-react';
 import mockData from '@/app/lib/mock-data.json';
 import { useToast } from '@/hooks/use-toast';
 import { getPlaceholderImageUrl } from '@/lib/placeholder-images';
@@ -21,14 +21,17 @@ import {
 
 export default function FoodPage() {
   const [loading, setLoading] = useState(false);
-  const [recommendation, setRecommendation] = useState<string | null>(null);
+  const [recommendation, setRecommendation] = useState<{name: string, reason: string} | null>(null);
   const { toast } = useToast();
 
   const handleAIRecommend = () => {
     setLoading(true);
     setTimeout(() => {
       const option = mockData.food[Math.floor(Math.random() * mockData.food.length)];
-      setRecommendation(`I suggest ${option.name}! It's a great match for your budget and is highly rated for its ${option.category} menu.`);
+      setRecommendation({
+        name: option.name,
+        reason: `I suggest ${option.name}! It's a great match for your budget and is highly rated for its ${option.category} menu. Based on your profile, this is a top choice for a healthy student meal.`
+      });
       setLoading(false);
       toast({ title: 'AI Suggestion Ready!', description: `Try ${option.name} today.` });
     }, 1500);
@@ -50,14 +53,33 @@ export default function FoodPage() {
       </div>
 
       {recommendation && (
-        <Card className="mb-12 border-2 border-primary bg-primary/5 animate-in fade-in slide-in-from-top-4 rounded-3xl overflow-hidden shadow-sm relative">
-          <div className="absolute top-0 right-0 p-4 opacity-5"><Sparkles className="h-24 w-24" /></div>
-          <CardContent className="p-8">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="h-5 w-5 text-primary" />
-              <span className="text-xs font-black uppercase tracking-widest text-primary">Contextual AI Insight</span>
+        <Card className="mb-12 border-2 border-primary bg-primary/5 animate-in fade-in slide-in-from-top-4 rounded-3xl overflow-hidden shadow-sm relative group">
+          <CardContent className="p-8 flex items-center justify-between gap-6">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="h-5 w-5 text-primary" />
+                <span className="text-xs font-black uppercase tracking-widest text-primary">AI Highlight: {recommendation.name}</span>
+              </div>
+              <p className="text-xl italic text-foreground leading-relaxed font-medium">"I think you'll love {recommendation.name} for lunch today."</p>
             </div>
-            <p className="text-xl italic text-foreground leading-relaxed font-medium">"{recommendation}"</p>
+            
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button size="icon" className="h-14 w-14 rounded-full shadow-lg bg-primary hover:scale-110 transition-transform flex-shrink-0">
+                  <Sparkles className="h-7 w-7" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="rounded-3xl border-2">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-black flex items-center gap-2">
+                    <Sparkles className="text-primary" /> Why {recommendation.name}?
+                  </DialogTitle>
+                  <DialogDescription className="text-base font-medium text-foreground py-6 leading-relaxed italic">
+                    {recommendation.reason}
+                  </DialogDescription>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
           </CardContent>
         </Card>
       )}

@@ -30,10 +30,19 @@ import {
   FileText,
   MapPin,
   Image as ImageIcon,
-  Activity
+  Activity,
+  HelpCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getPlaceholderImageUrl } from "@/lib/placeholder-images";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 export default function RecommenderPage() {
   const { user } = useUser();
@@ -125,7 +134,6 @@ export default function RecommenderPage() {
                 <Slider value={[budget]} max={1000} step={50} onValueChange={(val) => setBudget(val[0])} />
               </div>
 
-              {/* HEALTH TOGGLE */}
               {profile?.healthConditions && profile.healthConditions.length > 0 && (
                 <div className="flex items-center justify-between p-4 bg-primary/5 rounded-2xl border-2 border-primary/20">
                   <div className="space-y-0.5">
@@ -183,7 +191,7 @@ export default function RecommenderPage() {
               </TabsList>
 
               <TabsContent value="explain" className="space-y-6">
-                <Card className="border-primary border-2 shadow-xl overflow-hidden rounded-3xl">
+                <Card className="border-primary border-2 shadow-xl overflow-hidden rounded-3xl relative">
                   <div className="relative h-64 w-full bg-muted">
                     <Image 
                       src={getPlaceholderImageUrl(result.imageHint || 'hero-abstract')}
@@ -192,6 +200,38 @@ export default function RecommenderPage() {
                       className="object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    
+                    {/* LOGIC ICON TRIGGER */}
+                    <div className="absolute top-6 right-8">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button size="icon" className="h-12 w-12 rounded-full shadow-2xl bg-primary hover:scale-110 transition-transform">
+                            <Sparkles className="h-6 w-6" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="rounded-3xl border-2 sm:max-w-[500px]">
+                          <DialogHeader>
+                            <DialogTitle className="text-2xl font-black flex items-center gap-2">
+                              <Sparkles className="text-primary" /> AI Reasoning Breakdown
+                            </DialogTitle>
+                            <DialogDescription className="text-base font-medium text-foreground italic py-4 leading-relaxed">
+                              {result.explanation}
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="grid grid-cols-2 gap-4 mt-2">
+                             <div className="p-4 rounded-2xl bg-muted/50 border space-y-1">
+                                <p className="text-[10px] font-black uppercase text-muted-foreground">Persona Context</p>
+                                <p className="font-bold text-sm">{persona}</p>
+                             </div>
+                             <div className="p-4 rounded-2xl bg-muted/50 border space-y-1">
+                                <p className="text-[10px] font-black uppercase text-muted-foreground">Health Guard</p>
+                                <p className="font-bold text-sm">{healthAware ? "Active" : "Disabled"}</p>
+                             </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+
                     <div className="absolute bottom-6 left-8 text-white">
                       <Badge variant="outline" className="text-white border-white/30 font-bold uppercase text-[10px] mb-1">AI Curated Choice</Badge>
                       <h2 className="text-3xl font-black">{result.recommendation}</h2>
@@ -199,32 +239,27 @@ export default function RecommenderPage() {
                   </div>
                   
                   <CardContent className="p-8">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                      <div className="p-4 rounded-2xl bg-muted/30 border-2">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                      <div className="p-4 rounded-2xl bg-muted/30 border-2 text-center">
                         <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest mb-1">Est. Cost</p>
                         <p className="text-lg font-bold">₹{result.costEstimate}</p>
                       </div>
-                      <div className="p-4 rounded-2xl bg-muted/30 border-2">
+                      <div className="p-4 rounded-2xl bg-muted/30 border-2 text-center">
                         <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest mb-1">Time</p>
                         <p className="text-lg font-bold">{result.timeEstimate}</p>
                       </div>
-                      <div className="p-4 rounded-2xl bg-muted/30 border-2">
+                      <div className="p-4 rounded-2xl bg-muted/30 border-2 text-center">
                         <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest mb-1">Diversity</p>
                         <p className="text-lg font-bold">{result.diversityScore}%</p>
                       </div>
-                      <div className="p-4 rounded-2xl bg-primary text-primary-foreground border-2 border-primary">
+                      <div className="p-4 rounded-2xl bg-primary text-primary-foreground border-2 border-primary text-center">
                         <p className="text-[10px] uppercase font-black opacity-70 tracking-widest mb-1">Match</p>
                         <p className="text-lg font-bold">High</p>
                       </div>
                     </div>
-
-                    <div className="bg-accent/10 p-6 rounded-2xl border-2 border-accent/20 space-y-4">
-                      <h4 className="font-black text-xs uppercase flex items-center gap-2 text-primary tracking-widest">
-                        <Sparkles className="h-4 w-4" /> Reasoning Logic
-                      </h4>
-                      <p className="text-foreground leading-relaxed italic">
-                        {result.explanation}
-                      </p>
+                    
+                    <div className="flex items-center justify-center p-4 bg-accent/10 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-primary border border-accent/20">
+                      <Info className="h-3 w-3 mr-2" /> Click the sparkles icon above for full logic breakdown
                     </div>
                   </CardContent>
                 </Card>
