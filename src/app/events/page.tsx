@@ -32,7 +32,7 @@ export default function EventsPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
               <div className="absolute bottom-4 left-6 flex items-center gap-3">
-                <Badge className="bg-blue-500/90 text-white">
+                <Badge className="bg-blue-500/90 text-white border-none px-4 py-1.5 font-black uppercase text-[10px] tracking-widest">
                   Trending
                 </Badge>
                 <div className="flex items-center gap-1 text-sm font-black text-white bg-black/40 backdrop-blur-md px-3 py-1 rounded-full">
@@ -48,7 +48,7 @@ export default function EventsPage() {
                   <Clock className="h-3 w-3" /> {event.time}
                 </span>
               </div>
-              <CardTitle className="text-3xl font-black mt-2">{event.name}</CardTitle>
+              <CardTitle className="text-3xl font-black mt-2 leading-tight">{event.name}</CardTitle>
               <div className="flex items-center gap-1 font-bold text-muted-foreground text-xs mt-3">
                 <MapPin className="h-3 w-3 text-primary" /> {event.distance} from you
               </div>
