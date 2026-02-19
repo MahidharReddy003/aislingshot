@@ -39,7 +39,11 @@ import {
   Calendar,
   Mail,
   CheckCircle2,
-  ShieldCheck
+  ShieldCheck,
+  History,
+  Download,
+  Trash2,
+  RefreshCcw
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -66,10 +70,11 @@ export default function SettingsPage() {
   const [role, setRole] = useState('Student');
   const [location, setLocation] = useState('');
 
-  // Other settings state
+  // Local Settings states
   const [localInterests, setLocalInterests] = useState<string[]>([]);
   const [localHealth, setLocalHealth] = useState<string[]>([]);
-  const [budgetVal, setBudgetVal] = useState(500);
+  const [dailyBudget, setDailyBudget] = useState(500);
+  const [weeklyBudget, setWeeklyBudget] = useState(3000);
   const [discoveryVal, setDiscoveryVal] = useState(50);
 
   const hasPasswordProvider = user?.providerData.some(p => p.providerId === 'password');
@@ -83,7 +88,8 @@ export default function SettingsPage() {
       setLocation(profile.location || '');
       setLocalInterests(profile.interests || []);
       setLocalHealth(profile.healthConditions || []);
-      setBudgetVal(profile.budgetPreference || 500);
+      setDailyBudget(profile.budgetPreference || 500);
+      setWeeklyBudget(profile.weeklyBudget || 3000);
       setDiscoveryVal(profile.explorationLevel || 50);
     }
   }, [profile]);
@@ -94,7 +100,7 @@ export default function SettingsPage() {
     
     const updates = {
       name,
-      username: name, // Synced username
+      username: name,
       bio,
       role,
       location,
@@ -136,438 +142,353 @@ export default function SettingsPage() {
   return (
     <div className="container max-w-5xl mx-auto py-12 px-4">
       <div className="mb-10">
-        <h1 className="text-4xl font-black tracking-tight text-primary">SmartLife Control Center</h1>
-        <p className="text-muted-foreground mt-2 text-lg">Manage your persona, privacy, and AI constraints with full transparency.</p>
+        <h1 className="text-4xl font-black tracking-tight text-primary">Control Center</h1>
+        <p className="text-muted-foreground mt-2 text-lg">Manage your persona, privacy, and AI constraints.</p>
       </div>
-
-      {isGoogleUser && !hasPasswordProvider && (
-        <Alert className="mb-8 border-2 border-primary/20 bg-primary/5">
-          <Shield className="h-4 w-4 text-primary" />
-          <AlertTitle className="font-bold">Account Security</AlertTitle>
-          <AlertDescription className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <span>Secure your account by setting a password. This allows you to log in with your email even if Google is unavailable.</span>
-            <Button asChild size="sm" className="font-bold shrink-0">
-              <Link href="/settings/security">
-                Set Password <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
 
       <Tabs defaultValue="profile" className="space-y-8">
         <TabsList className="bg-muted p-1 border grid grid-cols-4 md:grid-cols-8 h-auto gap-1 rounded-2xl shadow-inner">
-          <TabsTrigger value="profile" className="rounded-xl data-[state=active]:shadow-md gap-2 py-3"><User className="h-4 w-4" /> <span className="hidden md:inline">Profile</span></TabsTrigger>
-          <TabsTrigger value="preferences" className="rounded-xl data-[state=active]:shadow-md gap-2 py-3"><Settings2 className="h-4 w-4" /> <span className="hidden md:inline">Interests</span></TabsTrigger>
-          <TabsTrigger value="budget" className="rounded-xl data-[state=active]:shadow-md gap-2 py-3"><Wallet className="h-4 w-4" /> <span className="hidden md:inline">Budget</span></TabsTrigger>
-          <TabsTrigger value="discovery" className="rounded-xl data-[state=active]:shadow-md gap-2 py-3"><Sparkles className="h-4 w-4" /> <span className="hidden md:inline">Discovery</span></TabsTrigger>
-          <TabsTrigger value="accessibility" className="rounded-xl data-[state=active]:shadow-md gap-2 py-3"><Accessibility className="h-4 w-4" /> <span className="hidden md:inline">Access</span></TabsTrigger>
-          <TabsTrigger value="security" className="rounded-xl data-[state=active]:shadow-md gap-2 py-3"><Lock className="h-4 w-4" /> <span className="hidden md:inline">Security</span></TabsTrigger>
-          <TabsTrigger value="privacy" className="rounded-xl data-[state=active]:shadow-md gap-2 py-3"><Shield className="h-4 w-4" /> <span className="hidden md:inline">Privacy</span></TabsTrigger>
-          <TabsTrigger value="notifications" className="rounded-xl data-[state=active]:shadow-md gap-2 py-3"><Bell className="h-4 w-4" /> <span className="hidden md:inline">Alerts</span></TabsTrigger>
+          <TabsTrigger value="profile" className="rounded-xl py-3 gap-2"><User className="h-4 w-4" /> <span className="hidden lg:inline">Profile</span></TabsTrigger>
+          <TabsTrigger value="preferences" className="rounded-xl py-3 gap-2"><Settings2 className="h-4 w-4" /> <span className="hidden lg:inline">Preferences</span></TabsTrigger>
+          <TabsTrigger value="budget" className="rounded-xl py-3 gap-2"><Wallet className="h-4 w-4" /> <span className="hidden lg:inline">Budget</span></TabsTrigger>
+          <TabsTrigger value="discovery" className="rounded-xl py-3 gap-2"><Sparkles className="h-4 w-4" /> <span className="hidden lg:inline">Discovery</span></TabsTrigger>
+          <TabsTrigger value="accessibility" className="rounded-xl py-3 gap-2"><Accessibility className="h-4 w-4" /> <span className="hidden lg:inline">Access</span></TabsTrigger>
+          <TabsTrigger value="privacy" className="rounded-xl py-3 gap-2"><Shield className="h-4 w-4" /> <span className="hidden lg:inline">Privacy</span></TabsTrigger>
+          <TabsTrigger value="notifications" className="rounded-xl py-3 gap-2"><Bell className="h-4 w-4" /> <span className="hidden lg:inline">Alerts</span></TabsTrigger>
+          <TabsTrigger value="security" className="rounded-xl py-3 gap-2"><Lock className="h-4 w-4" /> <span className="hidden lg:inline">Security</span></TabsTrigger>
         </TabsList>
 
-        <TabsContent value="profile" className="space-y-8">
-          <Card className="border-2 shadow-sm rounded-3xl overflow-hidden">
-            <CardHeader className="bg-muted/20 pb-8">
-              <CardTitle>Identity & Context</CardTitle>
-              <CardDescription>How the SmartLife assistant identifies your daily environment.</CardDescription>
+        <TabsContent value="profile" className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <Card className="border-2 shadow-sm rounded-3xl">
+            <CardHeader className="bg-muted/10">
+              <CardTitle>Identity & Bio</CardTitle>
             </CardHeader>
             <CardContent className="pt-8">
-              <form onSubmit={handleUpdateProfile} className="space-y-8">
+              <form onSubmit={handleUpdateProfile} className="space-y-6">
                 <div className="flex flex-col md:flex-row gap-8 items-start">
                   <div className="relative group">
-                    <Avatar className="h-32 w-32 border-4 border-background shadow-xl">
-                      <AvatarImage src={profile.profileImage || `https://picsum.photos/seed/${user.uid}/400/400`} />
-                      <AvatarFallback className="bg-primary/10 text-primary text-2xl font-black">{name.charAt(0)}</AvatarFallback>
+                    <Avatar className="h-24 w-24 border-2 border-background shadow-md">
+                      <AvatarImage src={`https://picsum.photos/seed/${user.uid}/400/400`} />
+                      <AvatarFallback className="bg-primary/10 text-primary text-xl">{name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                      <Camera className="text-white h-8 w-8" />
+                      <Camera className="text-white h-6 w-6" />
                     </div>
                   </div>
                   
                   <div className="flex-1 w-full space-y-6">
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <Label htmlFor="name" className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Full Name</Label>
-                        <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder="Enter your full name" className="h-12 border-2" />
+                        <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Full Name</Label>
+                        <Input value={name} onChange={e => setName(e.target.value)} className="h-12 border-2" />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="username" className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Username (Synced)</Label>
-                        <Input id="username" value={name ? `@${name.toLowerCase().replace(/\s+/g, '')}` : ''} disabled className="h-12 border-2 bg-muted/30 opacity-70" />
+                        <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Location</Label>
+                        <Input value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g., Campus North" className="h-12 border-2" />
                       </div>
                     </div>
-
                     <div className="space-y-2">
-                      <Label htmlFor="bio" className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Short Bio</Label>
-                      <Textarea 
-                        id="bio" 
-                        value={bio} 
-                        onChange={e => setBio(e.target.value)} 
-                        placeholder="Tell us a bit about yourself..." 
-                        className="min-h-[100px] border-2 resize-none" 
-                      />
+                      <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Bio</Label>
+                      <Textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="Tell the AI about your day..." className="min-h-[100px] border-2 resize-none" />
                     </div>
-
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="role" className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Primary Role</Label>
-                        <Select value={role} onValueChange={setRole}>
-                          <SelectTrigger className="h-12 border-2"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Student">Student</SelectItem>
-                            <SelectItem value="Professional">Professional</SelectItem>
-                            <SelectItem value="Traveler">Traveler</SelectItem>
-                            <SelectItem value="Creator">Creator</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="location" className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Search Location</Label>
-                        <Input id="location" value={location} onChange={e => setLocation(e.target.value)} placeholder="e.g., Campus North" className="h-12 border-2" />
-                      </div>
+                    <div className="space-y-2">
+                      <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Your Primary Role</Label>
+                      <Select value={role} onValueChange={setRole}>
+                        <SelectTrigger className="h-12 border-2"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Student">Student</SelectItem>
+                          <SelectItem value="Traveler">Traveler</SelectItem>
+                          <SelectItem value="Creator">Creator</SelectItem>
+                          <SelectItem value="Professional">Professional</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </div>
-
-                <div className="pt-6 border-t flex justify-between items-center">
-                  <Button type="button" variant="ghost" onClick={handleLogout} className="text-destructive hover:bg-destructive/5 gap-2 px-6 h-12">
-                    <LogOut className="h-4 w-4" /> Sign Out
-                  </Button>
-                  <Button type="submit" className="h-12 px-10 font-bold rounded-xl shadow-lg">
-                    Update Profile
-                  </Button>
+                <div className="flex justify-end gap-3 pt-4 border-t">
+                   <Button type="submit" className="h-12 px-10 font-bold rounded-xl shadow-lg">Save Profile</Button>
                 </div>
               </form>
             </CardContent>
           </Card>
 
-          <Card className="border-2 shadow-sm rounded-3xl overflow-hidden">
-            <CardHeader className="bg-muted/10 border-b">
-              <CardTitle className="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4" /> Account Intelligence
-              </CardTitle>
+          <Card className="border-2 shadow-sm rounded-3xl">
+            <CardHeader className="bg-muted/10">
+              <CardTitle className="text-sm font-bold uppercase tracking-widest">Account Intelligence</CardTitle>
             </CardHeader>
-            <CardContent className="pt-8">
-              <div className="grid sm:grid-cols-3 gap-8">
-                <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
-                    <Calendar className="h-3 w-3" /> Member Since
-                  </p>
-                  <p className="text-sm font-bold">
-                    {profile.createdAt ? new Date(profile.createdAt).toLocaleDateString() : 'N/A'}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
-                    <Mail className="h-3 w-3" /> Verification
-                  </p>
-                  <div className="flex items-center gap-1.5">
-                    {user.emailVerified ? (
-                      <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none px-2 h-5">
-                        <CheckCircle2 className="h-3 w-3 mr-1" /> Verified
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-orange-600 border-orange-200 h-5">
-                        Pending
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1">
-                    <Shield className="h-3 w-3" /> Linked Providers
-                  </p>
-                  <div className="flex gap-2">
-                    {user.providerData.map(p => (
-                      <Badge key={p.providerId} variant="secondary" className="text-[9px] uppercase font-bold tracking-tight h-5">
-                        {p.providerId.replace('.com', '')}
-                      </Badge>
-                    ))}
-                  </div>
+            <CardContent className="pt-8 grid sm:grid-cols-3 gap-8">
+              <div className="space-y-1">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1"><Calendar className="h-3 w-3" /> Member Since</p>
+                <p className="text-sm font-bold">{profile.createdAt ? new Date(profile.createdAt).toLocaleDateString() : 'N/A'}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1"><Mail className="h-3 w-3" /> Status</p>
+                <Badge variant={user.emailVerified ? 'default' : 'outline'}>{user.emailVerified ? 'Verified' : 'Pending'}</Badge>
+              </div>
+              <div className="space-y-1">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1"><Shield className="h-3 w-3" /> Providers</p>
+                <div className="flex gap-1">
+                  {user.providerData.map(p => (
+                    <Badge key={p.providerId} variant="secondary" className="text-[9px] uppercase">{p.providerId.split('.')[0]}</Badge>
+                  ))}
                 </div>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="preferences" className="space-y-4">
+        <TabsContent value="preferences" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <Card className="border-2 shadow-sm rounded-3xl">
             <CardHeader>
-              <CardTitle>Interests & AI Behavior</CardTitle>
-              <CardDescription>Refine the thematic priority and tone of your SmartLife assistant.</CardDescription>
+              <CardTitle>Interests & Behavioral Matrix</CardTitle>
+              <CardDescription>How the AI prioritizes categories and styles.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-10 py-6">
+            <CardContent className="space-y-8">
               <div className="space-y-4">
-                <Label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Thematic Focus</Label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">General Interests</Label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {INTERESTS.map(item => (
-                    <div key={item} className="flex items-center space-x-3 p-4 border-2 rounded-2xl hover:bg-muted/20 transition-colors">
+                    <div key={item} className="flex items-center space-x-3 p-3 border-2 rounded-xl hover:bg-muted/30 transition-colors">
                       <Checkbox 
-                        id={`check-${item}`} 
+                        id={`int-${item}`} 
                         checked={localInterests.includes(item)} 
-                        onCheckedChange={(checked) => {
-                          if (checked) setLocalInterests(prev => [...prev, item]);
+                        onCheckedChange={(c) => {
+                          if (c) setLocalInterests(prev => [...prev, item]);
                           else setLocalInterests(prev => prev.filter(i => i !== item));
                         }}
                       />
-                      <label htmlFor={`check-${item}`} className="text-sm font-bold leading-none cursor-pointer">{item}</label>
+                      <label htmlFor={`int-${item}`} className="text-sm font-medium cursor-pointer">{item}</label>
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="space-y-4 pt-6 border-t">
-                <Label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Assistant Response Tone</Label>
-                <div className="flex flex-wrap gap-3">
-                  {['Friendly', 'Formal', 'Concise'].map(style => (
-                    <Button 
-                      key={style}
-                      variant={profile?.aiBehavior === style.toLowerCase() ? 'default' : 'outline'} 
-                      className="rounded-2xl px-8 h-12 border-2 font-bold"
-                      onClick={() => handleSaveSettings({ aiBehavior: style.toLowerCase() }, 'AI Tone')}
-                    >
-                      {style}
-                    </Button>
-                  ))}
+              
+              <div className="grid md:grid-cols-2 gap-8 pt-6 border-t">
+                <div className="space-y-4">
+                  <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Food Style</Label>
+                  <Select defaultValue="balanced">
+                    <SelectTrigger className="h-11 border-2"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="healthy">Healthy & Organic</SelectItem>
+                      <SelectItem value="balanced">Balanced</SelectItem>
+                      <SelectItem value="budget">Budget Fast Food</SelectItem>
+                      <SelectItem value="gourmet">Gourmet Explorer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-4">
+                  <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Travel Style</Label>
+                  <Select defaultValue="local">
+                    <SelectTrigger className="h-11 border-2"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="urban">Urban Walking</SelectItem>
+                      <SelectItem value="local">Hidden Gems</SelectItem>
+                      <SelectItem value="leisure">Leisurely & Relaxed</SelectItem>
+                      <SelectItem value="adventure">High Adventure</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="bg-muted/10 border-t p-6">
-              <Button 
-                onClick={() => handleSaveSettings({ interests: localInterests }, 'Preferences')} 
-                className="w-full h-12 rounded-xl font-bold"
-              >
-                Apply Interest Matrix
-              </Button>
+            <CardFooter className="bg-muted/10 p-6 flex justify-end">
+              <Button onClick={() => handleSaveSettings({ interests: localInterests }, 'Interests')} className="font-bold">Save Preferences</Button>
             </CardFooter>
           </Card>
         </TabsContent>
 
-        <TabsContent value="security" className="space-y-4">
+        <TabsContent value="budget" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <Card className="border-2 shadow-sm rounded-3xl">
             <CardHeader>
-              <CardTitle>Security & Access</CardTitle>
-              <CardDescription>Manage how you access your SmartLife account.</CardDescription>
+              <CardTitle>Spending Controls</CardTitle>
+              <CardDescription>Strict rules the AI must follow when planning.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6 pt-6">
+            <CardContent className="space-y-10">
+              <div className="space-y-6">
+                <div className="flex justify-between items-end">
+                  <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Daily Spending Cap</Label>
+                  <span className="text-xl font-black">₹{dailyBudget}</span>
+                </div>
+                <Slider value={[dailyBudget]} max={2000} step={50} onValueChange={(val) => setDailyBudget(val[0])} />
+              </div>
+              <div className="space-y-6 pt-6 border-t">
+                <div className="flex justify-between items-end">
+                  <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Weekly Spending Cap</Label>
+                  <span className="text-xl font-black">₹{weeklyBudget}</span>
+                </div>
+                <Slider value={[weeklyBudget]} max={10000} step={100} onValueChange={(val) => setWeeklyBudget(val[0])} />
+              </div>
+              <div className="grid sm:grid-cols-2 gap-6 pt-6 border-t">
+                <div className="flex items-center justify-between p-4 border-2 rounded-2xl">
+                  <div className="space-y-1">
+                    <Label className="font-bold">Hard Limit Toggle</Label>
+                    <p className="text-[10px] text-muted-foreground">Reject any plans over budget.</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-4 border-2 rounded-2xl">
+                  <div className="space-y-1">
+                    <Label className="font-bold">Alert Threshold</Label>
+                    <p className="text-[10px] text-muted-foreground">Notify at 80% usage.</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="bg-muted/10 p-6 flex justify-end">
+              <Button onClick={() => handleSaveSettings({ budgetPreference: dailyBudget, weeklyBudget }, 'Budget Rules')} className="font-bold">Apply Budget Rules</Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="discovery" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <Card className="border-2 shadow-sm rounded-3xl">
+            <CardHeader>
+              <CardTitle>Exploration Engine</CardTitle>
+              <CardDescription>Balance routine comfort against novelty.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-10">
+              <div className="space-y-8">
+                <div className="flex justify-between items-end">
+                  <div className="space-y-1">
+                    <Label className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Personalization Bias</Label>
+                    <p className="text-xs text-muted-foreground">
+                      {discoveryVal < 30 ? 'Prioritize Familiarity' : discoveryVal > 70 ? 'High Discovery' : 'Balanced Logic'}
+                    </p>
+                  </div>
+                  <span className="text-2xl font-black text-primary">{discoveryVal}%</span>
+                </div>
+                <Slider value={[discoveryVal]} max={100} step={10} onValueChange={(val) => setDiscoveryVal(val[0])} />
+              </div>
+              <div className="space-y-4 pt-6 border-t">
+                <div className="flex items-center justify-between p-6 bg-primary/5 rounded-2xl border-2 border-primary/20">
+                  <div className="space-y-1">
+                    <Label className="font-bold flex items-center gap-2"><RefreshCcw className="h-4 w-4" /> Force Variety</Label>
+                    <p className="text-xs text-muted-foreground">Always suggest one thing you've never tried before, once a day.</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="pt-6 text-center">
+                  <Button variant="outline" className="text-destructive hover:bg-destructive/5 rounded-xl border-2">
+                    Reset Discovery Matrix
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="accessibility" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <Card className="border-2 shadow-sm rounded-3xl">
+            <CardHeader>
+              <CardTitle>Inclusion & UI Preferences</CardTitle>
+              <CardDescription>Customize the interface and recommendation mobility.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {[
+                { id: 'walking', title: 'Reduce Walking', desc: 'Prioritize locations with minimal travel distance.', icon: Accessibility },
+                { id: 'time', title: 'Reduce Time-Sensitive', desc: 'Hide options with strict timing or limited duration.', icon: Clock },
+                { id: 'contrast', title: 'High Contrast Mode', desc: 'Increase text weight and visibility.', icon: Eye },
+                { id: 'simplified', title: 'Simplified UI', desc: 'Minimize animations and extra metadata.', icon: Info },
+              ].map(item => (
+                <div key={item.id} className="flex items-center justify-between p-5 border-2 rounded-2xl hover:bg-muted/10 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-xl bg-muted border"><item.icon className="h-5 w-5 text-primary" /></div>
+                    <div className="space-y-1">
+                      <Label className="font-bold">{item.title}</Label>
+                      <p className="text-[10px] text-muted-foreground">{item.desc}</p>
+                    </div>
+                  </div>
+                  <Switch />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="privacy" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <Card className="border-2 shadow-sm rounded-3xl">
+            <CardHeader>
+              <CardTitle>Data Sovereignty</CardTitle>
+              <CardDescription>Manage your history and export your stored patterns.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Button variant="outline" className="h-16 rounded-2xl gap-3 border-2">
+                  <Eye className="h-5 w-5" /> View Stored Data
+                </Button>
+                <Button variant="outline" className="h-16 rounded-2xl gap-3 border-2">
+                  <Download className="h-5 w-5" /> Download Data (JSON)
+                </Button>
+                <Button variant="outline" className="h-16 rounded-2xl gap-3 border-2 text-destructive hover:bg-destructive/5">
+                  <History className="h-5 w-5" /> Clear Logic History
+                </Button>
+                <Button variant="destructive" className="h-16 rounded-2xl gap-3 shadow-lg">
+                  <Trash2 className="h-5 w-5" /> Delete Account Forever
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="notifications" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <Card className="border-2 shadow-sm rounded-3xl">
+            <CardHeader>
+              <CardTitle>Engagement Channels</CardTitle>
+              <CardDescription>Choose how you want to be notified.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {[
+                { title: 'Email Summaries', desc: 'Weekly digest of savings and plans.' },
+                { title: 'Recommendation Alerts', desc: 'Instant pings for relevant events.' },
+                { title: 'Budget Thresholds', desc: 'Alerts when nearing your spending caps.' },
+                { title: 'Event Reminders', desc: 'Notifications for saved events.' },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center justify-between p-5 border-2 rounded-2xl">
+                  <div className="space-y-1">
+                    <Label className="font-bold">{item.title}</Label>
+                    <p className="text-[10px] text-muted-foreground">{item.desc}</p>
+                  </div>
+                  <Switch defaultChecked={i % 2 === 0} />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="security" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <Card className="border-2 shadow-sm rounded-3xl">
+            <CardHeader>
+              <CardTitle>Authentication & Sessions</CardTitle>
+              <CardDescription>Manage your password and linked providers.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
               <div className="flex items-center justify-between p-6 bg-muted/20 rounded-2xl border-2">
                 <div className="flex gap-4 items-center">
                   <div className="p-3 rounded-xl bg-background border-2">
                     <Lock className="h-5 w-5 text-primary" />
                   </div>
                   <div className="space-y-0.5">
-                    <Label className="text-base font-bold">Password Protection</Label>
+                    <Label className="text-base font-bold">Password Management</Label>
                     <p className="text-xs text-muted-foreground">
-                      {hasPasswordProvider 
-                        ? "You have a password set for this account." 
-                        : "You are currently only using social login."}
+                      {hasPasswordProvider ? "Password protection active." : "Set a password for email login."}
                     </p>
                   </div>
                 </div>
-                <Button asChild variant="outline" className="font-bold rounded-xl h-11">
-                  <Link href="/settings/security">
-                    {hasPasswordProvider ? "Update Password" : "Set Password"}
-                  </Link>
+                <Button asChild variant="outline" className="font-bold rounded-xl h-11 border-2">
+                  <Link href="/settings/security">{hasPasswordProvider ? "Update" : "Set Password"}</Link>
                 </Button>
               </div>
-
-              <div className="p-6 bg-muted/20 rounded-2xl border-2 space-y-4">
-                <h4 className="font-bold flex items-center gap-2"><Shield className="h-4 w-4" /> Connected Accounts</h4>
-                <div className="space-y-3">
-                  {user?.providerData.map((provider) => (
-                    <div key={provider.providerId} className="flex items-center justify-between py-2 border-b last:border-none">
-                      <div className="flex items-center gap-3">
-                        {provider.providerId === 'google.com' ? (
-                          <svg className="h-4 w-4" viewBox="0 0 24 24">
-                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.26.81-.58z" fill="#FBBC05"/>
-                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                          </svg>
-                        ) : (
-                          <Lock className="h-4 w-4" />
-                        )}
-                        <span className="text-sm font-medium capitalize">
-                          {provider.providerId.replace('.com', '')} Account
-                        </span>
-                      </div>
-                      <Badge variant="secondary" className="text-[10px] font-bold">Active</Badge>
-                    </div>
-                  ))}
-                </div>
+              <div className="pt-6 text-center">
+                <Button variant="ghost" className="text-muted-foreground hover:bg-muted/50 rounded-xl h-12">
+                  Logout from All Sessions
+                </Button>
               </div>
             </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="budget" className="space-y-4">
-          <Card className="border-2 shadow-sm rounded-3xl">
-            <CardHeader>
-              <CardTitle>Budget Hard-Rules</CardTitle>
-              <CardDescription>Define the non-negotiable financial constraints the AI must respect.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-10 py-6">
-              <div className="space-y-6">
-                <div className="flex justify-between items-end">
-                  <Label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Maximum Daily Spend</Label>
-                  <span className="text-2xl font-black text-primary">₹{budgetVal}</span>
-                </div>
-                <Slider 
-                  value={[budgetVal]} 
-                  max={2000} 
-                  step={50} 
-                  onValueChange={(val) => setBudgetVal(val[0])} 
-                  className="py-4"
-                />
-              </div>
-            </CardContent>
-            <CardFooter className="bg-muted/10 border-t p-6">
-              <Button 
-                onClick={() => handleSaveSettings({ budgetPreference: budgetVal }, 'Budget')} 
-                className="w-full h-12 rounded-xl font-bold"
-              >
-                Lock Budget Rules
+            <CardFooter className="flex justify-center border-t p-6">
+              <Button onClick={handleLogout} variant="ghost" className="text-destructive font-bold gap-2">
+                <LogOut className="h-4 w-4" /> Final Sign Out
               </Button>
             </CardFooter>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="discovery" className="space-y-4">
-          <Card className="border-2 shadow-sm rounded-3xl">
-            <CardHeader>
-              <CardTitle>Discovery & Filter Bubble Control</CardTitle>
-              <CardDescription>Balance known comfort against the novelty of unexplored territory.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-10 py-6">
-              <div className="space-y-6">
-                <div className="flex justify-between items-end">
-                  <Label className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Exploration Bias</Label>
-                  <span className="text-lg font-black text-primary uppercase">
-                    {discoveryVal < 30 ? 'Conservative' : discoveryVal > 70 ? 'High Discovery' : 'Balanced'}
-                  </span>
-                </div>
-                <Slider 
-                  value={[discoveryVal]} 
-                  max={100} 
-                  step={10} 
-                  onValueChange={(val) => setDiscoveryVal(val[0])} 
-                  className="py-4"
-                />
-              </div>
-            </CardContent>
-            <CardFooter className="bg-muted/10 border-t p-6">
-              <Button onClick={() => handleSaveSettings({ explorationLevel: discoveryVal }, 'Discovery')} className="w-full h-12 rounded-xl font-bold">Refresh Exploration Logic</Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="accessibility" className="space-y-4">
-          <Card className="border-2 shadow-sm rounded-3xl">
-            <CardHeader>
-              <CardTitle>Inclusion & Health Profile</CardTitle>
-              <CardDescription>Manage dietary needs and health conditions for precise AI filtering.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-8 py-6">
-              <div className="space-y-4">
-                <Label className="font-bold flex items-center gap-2">
-                  <Activity className="h-4 w-4 text-primary" /> Health & Dietary Constraints
-                </Label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 border-2 p-6 rounded-2xl bg-muted/20">
-                  {HEALTH_TAGS.map(tag => (
-                    <div key={tag} className="flex items-center space-x-2">
-                      <Checkbox 
-                        id={`set-health-${tag}`} 
-                        checked={localHealth.includes(tag)} 
-                        onCheckedChange={(checked) => {
-                          if (checked) setLocalHealth(prev => [...prev, tag]);
-                          else setLocalHealth(prev => prev.filter(h => h !== tag));
-                        }}
-                      />
-                      <label htmlFor={`set-health-${tag}`} className="text-sm font-bold leading-none cursor-pointer">{tag}</label>
-                    </div>
-                  ))}
-                </div>
-                <Button 
-                  size="sm"
-                  onClick={() => handleSaveSettings({ healthConditions: localHealth }, 'Health Constraints')}
-                  className="rounded-xl"
-                >
-                  Save Health Matrix
-                </Button>
-              </div>
-
-              <div className="pt-6 border-t space-y-4">
-                {[
-                  { key: 'lowMobility', title: 'Low Mobility Priority', desc: 'Prioritize locations with ramp access and minimal walking.', icon: Accessibility },
-                  { key: 'highContrast', title: 'High Contrast Mode', desc: 'Increase text weight and button prominence for clarity.', icon: Eye },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center justify-between p-6 bg-muted/20 rounded-2xl border-2">
-                    <div className="flex gap-4 items-center">
-                      <div className="p-3 rounded-xl bg-background border-2">
-                        <item.icon className="h-5 w-5 text-primary" />
-                      </div>
-                      <div className="space-y-0.5">
-                        <Label className="text-base font-bold">{item.title}</Label>
-                        <p className="text-xs text-muted-foreground">{item.desc}</p>
-                      </div>
-                    </div>
-                    <Switch 
-                      checked={profile[item.key as keyof typeof profile] as boolean} 
-                      onCheckedChange={(c) => handleSaveSettings({ [item.key]: c }, item.title)} 
-                    />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="privacy" className="space-y-4">
-          <Card className="border-2 shadow-sm rounded-3xl">
-            <CardHeader className="bg-accent/10 border-b pb-8">
-              <div className="flex items-center gap-3 text-primary mb-2">
-                <Shield className="h-6 w-6" />
-                <CardTitle>Transparency & Data Promise</CardTitle>
-              </div>
-              <CardDescription className="text-primary/70 leading-relaxed font-medium">
-                We only process data to refine your local experience. We never sell profile clusters to advertisers.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6 pt-8">
-              <div className="flex items-center justify-between p-4 border-2 rounded-2xl">
-                <div className="space-y-1">
-                  <Label className="font-bold">Anonymized Telemetry</Label>
-                  <p className="text-xs text-muted-foreground">Contribute non-identifiable logic patterns to improve global models.</p>
-                </div>
-                <Switch checked={profile?.telemetry} onCheckedChange={(c) => handleSaveSettings({ telemetry: c }, 'Telemetry')} />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="notifications" className="space-y-4">
-          <Card className="border-2 shadow-sm rounded-3xl">
-            <CardHeader>
-              <CardTitle>Proactive Logic Engagement</CardTitle>
-              <CardDescription>Determine when the assistant is permitted to offer unsolicited logic.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 py-6">
-              {[
-                { key: 'budgetAlerts', title: 'Budget Threshold Alerts', desc: 'Notify when current activity consumes 80% of daily cap.' },
-                { key: 'smartGaps', title: 'Smart Gap Fillers', desc: 'Suggest mini-activities when a calendar gap is detected.' },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between p-6 bg-muted/20 rounded-2xl border-2">
-                  <div className="space-y-1">
-                    <Label className="text-base font-bold">{item.title}</Label>
-                    <p className="text-xs text-muted-foreground">{item.desc}</p>
-                  </div>
-                  <Switch 
-                    checked={profile[item.key as keyof typeof profile] as boolean} 
-                    onCheckedChange={(c) => handleSaveSettings({ [item.key]: c }, item.title)} 
-                  />
-                </div>
-              ))}
-            </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
